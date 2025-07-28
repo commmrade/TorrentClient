@@ -17,17 +17,14 @@ SessionManager::SessionManager(QObject *parent)
             lt::alert_category::error |
             lt::alert_category::storage);
 
-        sess_params.settings.set_int(lt::settings_pack::download_rate_limit, 1 * 1024 * 1024); // Limti download speed
-        // sess_params.settings.set_int(lt::settings_pack::upload_rate_limit, 100 * 1024); // Limit upload speed
+        // sess_params.settings.set_int(lt::settings_pack::download_rate_limit, 1 * 1024 * 1024); // Limti download speed
     } else {
         sess_params = std::move(lt::read_session_params(sessionFileContents));
     }
-
     m_session = std::make_unique<lt::session>(std::move(sess_params));
-    connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    // Fetch alerts every 100 ms
-    m_alertTimer.start(100);
 
+    connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
+    m_alertTimer.start(100);
     connect(&m_resumeDataTimer, &QTimer::timeout, this, [this] {
         for (auto& torrent : m_torrentHandles) {
             if (torrent.need_save_resume_data() && torrent.is_valid()) {
@@ -36,21 +33,15 @@ SessionManager::SessionManager(QObject *parent)
         }
     });
     m_resumeDataTimer.start(2000);
-
-    // Load states
-    // ...
-    //
     loadResumes();
 }
 
 SessionManager::~SessionManager()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
-    // QFile file{sessionFilePath};
 
-    std::ofstream file{sessionFilePath.toStdString()};
-    file.setf(std::ios_base::skipws);
-    if (file.is_open()) {
+    QFile file{sessionFilePath};
+    if (file.open(QIODevice::WriteOnly)) {
         auto sessionData = lt::write_session_params_buf(m_session->session_state());
         if (!sessionData.empty()) {
             file.write(sessionData.data(), sessionData.size());
@@ -65,7 +56,8 @@ void SessionManager::addTorrentByFilename(QStringView filepath)
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
     lt::add_torrent_params params{};
 
-    writeTorrentFile(*torrent_info);
+    writeTorrentFile(torrent_info);
+
     params.ti = std::move(torrent_info);
     addTorrent(std::move(params));
 }
@@ -102,12 +94,12 @@ void SessionManager::eventLoop()
         }
         if (auto* metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
             // Need to backup the torrent file for a download that was started via magnet uri (.torrent already has all necessary metadata)
-            writeTorrentFile(*metadataReceivedAlert->handle.torrent_file());
+            writeTorrentFile(metadataReceivedAlert->handle.torrent_file());
         }
         if (auto* resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert)) {
             if (resumeDataAlert->handle.torrent_file()) {
                 auto resumeDataBuf = lt::write_resume_data_buf(resumeDataAlert->params);
-                saveResumeData(*resumeDataAlert->handle.torrent_file(), resumeDataBuf);
+                saveResumeData(resumeDataAlert->handle.torrent_file(), resumeDataBuf);
             }
         }
     }
@@ -122,7 +114,6 @@ void SessionManager::loadResumes()
     QDir dir{stateDirPath};
     auto entries = dir.entryList(QDir::Filter::Files);
     for (auto& entry : entries) {
-        qDebug() << "Entry" << entry;
         QFile file{stateDirPath + QDir::separator() + entry};
         if (file.open(QIODevice::ReadOnly)) {
             auto buffer = file.readAll();
@@ -137,12 +128,7 @@ void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     auto appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsSaveDir = appDataPath + QDir::separator() + "torrents";
-
-    // Make sure name always exists, if not generate random
-    auto torrentSaveDir = torrentsSaveDir + QDir::separator() + QString{params.name.empty() ? params.ti->name().c_str() : params.name.c_str()};
-    QDir().mkdir(torrentSaveDir);
-    params.save_path = torrentSaveDir.toStdString();
-    qDebug() << "Path" << torrentSaveDir;
+    params.save_path = torrentsSaveDir.toStdString();
     // TODO: Make it async later
     auto torrent_handle = m_session->add_torrent(params);
     // m_torrentHandles.append(torrent_handle);

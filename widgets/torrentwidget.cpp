@@ -16,7 +16,6 @@ TorrentWidget::~TorrentWidget()
 
 void TorrentWidget::on_pushButton_clicked()
 {
-
     m_sessionManager.addTorrentByMagnet(ui->lineEdit->text());
     qDebug() << "Torrent added";
 }

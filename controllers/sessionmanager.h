@@ -38,20 +38,23 @@ signals:
 
 inline std::vector<char> readFile(const char *filename)
 {
-    std::ifstream file(filename, std::ios_base::binary);
-    file.unsetf(std::ios_base::skipws);
-    return {std::istream_iterator<char>{file}, std::istream_iterator<char>{}};
+    QFile file{filename};
+    if (file.open(QIODevice::ReadOnly)) {
+        auto bytes = file.readAll();
+        return std::vector<char>{bytes.begin(), bytes.end()};
+    }
+    return {};
 }
 
-inline void writeTorrentFile(const lt::torrent_info& ti) {
+inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto stateDirPath = basePath + QDir::separator() + "torrents";
 
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti.info_hashes().get_best().to_string()).c_str()} + ".torrent";
+    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".torrent";
     QFile file{stateFilePath};
 
     if (file.open(QIODevice::WriteOnly)) {
-        lt::create_torrent ci{ti};
+        lt::create_torrent ci{*ti};
         auto buf = ci.generate_buf();
         file.write(buf.data(), buf.size());
 
@@ -60,10 +63,10 @@ inline void writeTorrentFile(const lt::torrent_info& ti) {
     }
 }
 
-inline void saveResumeData(const lt::torrent_info& ti, const std::vector<char> buf) {
+inline void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto stateDirPath = basePath + QDir::separator() + "state";
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti.info_hashes().get_best().to_string()).c_str()} + ".fastresume";
+    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".fastresume";
     QFile file{stateFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         file.write(buf.data(), buf.size());
