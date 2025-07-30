@@ -191,7 +191,10 @@ bool TorrentsTableModel::updateTorrent(const Torrent &torrent)
 
     auto rowChanged = std::distance(m_torrents.begin(), torrentIterator);
     *torrentIterator = torrent;
-    emit dataChanged(this->index(rowChanged, 0), this->index(rowChanged, columnCount()));
+
+    auto leftUp = index(rowChanged, 0);
+    auto rightBottom = index(rowChanged, columnCount() - 1);
+    emit dataChanged(leftUp, rightBottom);
     return true;
 }
 
@@ -216,10 +219,15 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
         return torrent.id == id;
     });
     if (torrentIterator == m_torrents.end()) {
-        spdlog::warn("Such torrent does not exist, id: {}", id);
+        spdlog::warn("Such torrent does not exist here, id: {}", id);
         return false;
     }
+
+    auto rowIndex = std::distance(m_torrents.begin(), torrentIterator);
+    beginRemoveRows(QModelIndex{}, rowIndex, rowIndex);
     m_torrents.remove(std::distance(m_torrents.begin(), torrentIterator));
+    endRemoveRows();
+
     return true;
 }
 

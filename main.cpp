@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("TorrentClient");
 
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkdir(basePath);
     QDir().mkdir(basePath + QDir::separator() + "torrents"); // Directory for downloads by default
     QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
     QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?

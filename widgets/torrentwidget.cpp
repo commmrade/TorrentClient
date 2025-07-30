@@ -2,6 +2,7 @@
 #include "ui_torrentwidget.h"
 #include <QFileDialog>
 #include <QTableWidgetItem>
+#include <QMenu>
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -12,7 +13,6 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
-        qDebug() << "got EMIT";
         m_tableModel.addTorrent(torrent);
     });
     connect(&m_sessionManager, &SessionManager::torrentUpdated, this, [this](const Torrent& torrent) {
@@ -20,6 +20,43 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     });
     connect(&m_sessionManager, &SessionManager::torrentFinished, this, [this](const std::uint32_t id, const lt::torrent_status& status) {
         m_tableModel.finishTorrent(id, status);
+    });
+    connect(&m_sessionManager, &SessionManager::torrentDeleted, this, [this](const std::uint32_t id) {
+        m_tableModel.removeTorrent(id);
+    });
+
+    // Context Menu Stuff
+    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableView, &QTableView::customContextMenuRequested, this, [this](const QPoint& pos) {
+        qDebug() << "menu requwsted";
+        auto index = ui->tableView->indexAt(pos);
+
+        auto torrentId = m_tableModel.index(index.row(), 0).data().toUInt();
+        auto torrentStatus = m_tableModel.index(index.row(), 4).data().toString();
+        bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
+        qDebug() << "Paused" << isPaused;
+        QMenu* menu = new QMenu(this);
+        if (isPaused) {
+            QAction* resumeAction = new QAction("Resume", this);
+            connect(resumeAction, &QAction::triggered, this, [this, torrentId] {
+                m_sessionManager.resumeTorrent(torrentId);
+            });
+            menu->addAction(resumeAction);
+        } else {
+            QAction* pauseAction = new QAction("Pause", this);
+            connect(pauseAction, &QAction::triggered, this, [this, torrentId] {
+                m_sessionManager.pauseTorrent(torrentId);
+            });
+            menu->addAction(pauseAction);
+        }
+        QAction* deleteAction = new QAction("Delete", this);
+        connect(deleteAction, &QAction::triggered, this, [this, torrentId] {
+            bool removeWithContents = true;
+            m_sessionManager.removeTorrent(torrentId, removeWithContents);
+        });
+        menu->addAction(deleteAction);
+
+        menu->popup(ui->tableView->viewport()->mapToGlobal(pos));
     });
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal

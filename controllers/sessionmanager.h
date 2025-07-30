@@ -18,7 +18,7 @@ class SessionManager : public QObject
 
     std::unique_ptr<lt::session> m_session;
     // QList<lt::torrent_handle> m_torrentHandles;
-    QHash<QString, lt::torrent_handle> m_torrentHandles;
+    QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
 
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
@@ -28,6 +28,11 @@ public:
 
     void addTorrentByFilename(QStringView filepath);
     void addTorrentByMagnet(QString magnetURI);
+
+    bool isTorrentPaused(const std::uint32_t) const;
+    void pauseTorrent(const std::uint32_t id);
+    void resumeTorrent(const std::uint32_t id);
+    void removeTorrent(const std::uint32_t id, bool removeWithContents);
 
     void loadResumes();
 private:
@@ -47,6 +52,7 @@ signals:
     void torrentAdded(const Torrent& torrent);
     void torrentUpdated(const Torrent& torrent);
     void torrentFinished(const std::uint32_t id, const lt::torrent_status& status);
+    void torrentDeleted(const std::uint32_t id);
 };
 
 inline std::vector<char> readFile(const char *filename)

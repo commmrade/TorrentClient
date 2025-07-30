@@ -82,9 +82,11 @@ void SessionManager::eventLoop()
 
 void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
 {
-    auto pos = std::find_if(m_torrentHandles.begin(), m_torrentHandles.end(), [alert](auto&& handle) {
+    auto handles = m_torrentHandles.values();
+    auto pos = std::find_if(handles.begin(), handles.end(), [alert](auto&& handle) {
         return handle.id() == alert->handle.id();
     });
+
     pos->save_resume_data(); // Otherwise it's behaving kinda weird
     emit torrentFinished(alert->handle.id(), alert->handle.status());
 }
@@ -122,8 +124,12 @@ void SessionManager::loadResumes()
         if (file.open(QIODevice::ReadOnly)) {
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
+            bool isPaused = (params.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+            if (isPaused) {
+                params.flags &= ~lt::torrent_flags::auto_managed;
+            }
             auto torrent_handle = m_session->add_torrent(std::move(params));
-            m_torrentHandles.insert(QString::fromStdString(lt::aux::to_hex(torrent_handle.info_hashes().get_best().to_string())), torrent_handle);
+            m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
 
             Torrent torrent = {
                 torrent_handle.id(),
@@ -159,15 +165,64 @@ void SessionManager::addTorrentByMagnet(QString magnetURI)
     addTorrent(std::move(params));
 }
 
+bool SessionManager::isTorrentPaused(const uint32_t id) const
+{
+    auto& torrentHandle = m_torrentHandles[id];
+    // bool IsPaused = torrentHandle.is_paused();
+    bool IsPaused = (torrentHandle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+    return IsPaused;
+}
+
+void SessionManager::pauseTorrent(const uint32_t id)
+{
+    qDebug() << "pause";
+    m_torrentHandles[id].pause();
+}
+
+void SessionManager::resumeTorrent(const uint32_t id)
+{
+    qDebug() << "resume";
+    m_torrentHandles[id].resume();
+}
+
+void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
+{
+    if (removeWithContents) {
+        m_session->remove_torrent(m_torrentHandles[id], lt::session::delete_files);
+    } else {
+        m_session->remove_torrent(m_torrentHandles[id]);
+    }
+    auto torrentHandle = m_torrentHandles[id];
+
+
+    // Delete .fastresume and .torrent
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto torrentsPath = basePath + QDir::separator() + "torrents";
+
+    auto hashString = QString{lt::aux::to_hex(torrentHandle.info_hashes().get_best().to_string()).c_str()};
+    auto torrentFile = torrentsPath + QDir::separator() + hashString + ".torrent";
+    if (!QFile::remove(torrentFile)) {
+        qDebug() << "Could not remove .torrent file";
+    }
+
+    auto statePath = basePath + QDir::separator() + "state";
+    auto stateFile = statePath + QDir::separator() + hashString + ".fastresume";
+    if (!QFile::remove(stateFile)) {
+        qDebug() << "Could not remove .fastresume file";
+    }
+
+    m_torrentHandles.remove(id);
+    emit torrentDeleted(id);
+}
+
 void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     auto appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsSaveDir = appDataPath + QDir::separator() + "torrents";
     params.save_path = torrentsSaveDir.toStdString();
-
     // TODO: Make it async later
     auto torrent_handle = m_session->add_torrent(params);
-    m_torrentHandles.insert(QString::fromStdString(lt::aux::to_hex(torrent_handle.info_hashes().get_best().to_string())), torrent_handle);
+    m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
 
     // No point setting status fields, since they are zeroed and will be filled on status alert
     Torrent torrent = {
