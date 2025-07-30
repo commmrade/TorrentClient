@@ -2,38 +2,46 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QDir>
+#include "torrent.h"
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
 {
-
-    // Setting up session and its settings
-    auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
-    auto sessionFileContents = readFile(sessionFilePath.toUtf8().constData());
-    lt::session_params sess_params;
-    if (sessionFileContents.empty()) {
-        sess_params.settings.set_int(lt::settings_pack::alert_mask,
-            lt::alert_category::status |
-            lt::alert_category::error |
-            lt::alert_category::storage);
-
-        // sess_params.settings.set_int(lt::settings_pack::download_rate_limit, 1 * 1024 * 1024); // Limti download speed
-    } else {
-        sess_params = std::move(lt::read_session_params(sessionFileContents));
-    }
-    m_session = std::make_unique<lt::session>(std::move(sess_params));
+    auto sessParams = loadSessionParams();
+    m_session = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
     m_alertTimer.start(100);
-    connect(&m_resumeDataTimer, &QTimer::timeout, this, [this] {
-        for (auto& torrent : m_torrentHandles) {
-            if (torrent.need_save_resume_data() && torrent.is_valid()) {
-                torrent.save_resume_data();
-            }
+    connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
+    m_resumeDataTimer.start(2000); // Check if torrent handles need save_resume, and then save .fastresume
+}
+
+libtorrent::session_params SessionManager::loadSessionParams()
+{
+    auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
+    auto sessionFileContents = readFile(sessionFilePath.toUtf8().constData());
+    lt::session_params sessParams;
+    if (sessionFileContents.empty()) {
+        sessParams.settings.set_int(
+            lt::settings_pack::alert_mask,
+            lt::alert_category::status |
+            lt::alert_category::error |
+            lt::alert_category::storage
+        );
+    } else {
+        sessParams = std::move(lt::read_session_params(sessionFileContents));
+    }
+    return sessParams;
+}
+
+
+void SessionManager::saveResumes()
+{
+    for (auto& torrent : m_torrentHandles) {
+        if (torrent.need_save_resume_data() && torrent.is_valid()) {
+            torrent.save_resume_data();
         }
-    });
-    m_resumeDataTimer.start(2000);
-    loadResumes();
+    }
 }
 
 SessionManager::~SessionManager()
@@ -51,66 +59,56 @@ SessionManager::~SessionManager()
     }
 }
 
-void SessionManager::addTorrentByFilename(QStringView filepath)
-{
-    auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
-    lt::add_torrent_params params{};
-
-    writeTorrentFile(torrent_info);
-
-    params.ti = std::move(torrent_info);
-    addTorrent(std::move(params));
-}
-
-void SessionManager::addTorrentByMagnet(QString magnetURI)
-{
-    auto params = lt::parse_magnet_uri(magnetURI.toStdString());
-    addTorrent(std::move(params));
-}
-
 void SessionManager::eventLoop()
 {
     std::vector<lt::alert*> alerts;
     m_session->pop_alerts(&alerts);
-    // qDebug() << "process alerts";
-
     for (auto* alert : alerts) {
         if (auto* finished_alert = lt::alert_cast<lt::torrent_finished_alert>(alert)) {
-            qDebug() << "finished downloading";
-            auto pos = std::find_if(m_torrentHandles.begin(), m_torrentHandles.end(), [finished_alert](auto&& handle) {
-                return handle.id() == finished_alert->handle.id();
-            });
-
-            // TODO: Clean up
-            // TODO: May wanna delete .fastresumt and .torrent, make separate methods
-            auto name = QString::fromStdString(lt::aux::to_hex(finished_alert->handle.info_hashes().get_best().to_string()));
-            m_torrentHandles.remove(name);
-
-            finished_alert->handle.pause();
-            m_session->remove_torrent(finished_alert->handle);
+            handleFinishedAlert(finished_alert);
         }
         if (auto* statusAlert = lt::alert_cast<lt::state_update_alert>(alert)) {
-            auto statuses = statusAlert->status;
-            for (auto status : statuses) {
-                qDebug() << "Speed"
-                         << status.download_rate / 1024.0 / 1024.0 << "MB/s" << "Name" << status.name << "Got: "
-                         << status.total_done / 1024.0 / 1024.0 << "MB out of"
-                         << status.total_wanted / 1024.0 / 1024.0 << "MB";
-            }
+            handleStateUpdateAlert(statusAlert);
         }
         if (auto* metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
-            // Need to backup the torrent file for a download that was started via magnet uri (.torrent already has all necessary metadata)
-            writeTorrentFile(metadataReceivedAlert->handle.torrent_file());
+            handleMetadataReceived(metadataReceivedAlert);
         }
         if (auto* resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert)) {
-            if (resumeDataAlert->handle.torrent_file()) {
-                auto resumeDataBuf = lt::write_resume_data_buf(resumeDataAlert->params);
-                saveResumeData(resumeDataAlert->handle.torrent_file(), resumeDataBuf);
-            }
+            handleResumeDataAlert(resumeDataAlert);
         }
     }
-    // For example, if its finish alert, find torrent handle by id and remove it
     m_session->post_torrent_updates();
+}
+
+void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
+{
+    auto pos = std::find_if(m_torrentHandles.begin(), m_torrentHandles.end(), [alert](auto&& handle) {
+        return handle.id() == alert->handle.id();
+    });
+    pos->save_resume_data(); // Otherwise it's behaving kinda weird
+    emit torrentFinished(alert->handle.id(), alert->handle.status());
+}
+
+void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
+{
+    auto statuses = alert->status;
+    for (auto status : statuses) {
+        auto& handle = status.handle;
+        handleStatusUpdate(status, handle);
+    }
+}
+
+void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert *alert)
+{
+    writeTorrentFile(alert->handle.torrent_file());
+}
+
+void SessionManager::handleResumeDataAlert(libtorrent::save_resume_data_alert *alert)
+{
+    if (alert->handle.torrent_file()) {
+        auto resumeDataBuf = lt::write_resume_data_buf(alert->params);
+        saveResumeData(alert->handle.torrent_file(), resumeDataBuf);
+    }
 }
 
 void SessionManager::loadResumes()
@@ -125,9 +123,40 @@ void SessionManager::loadResumes()
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
             auto torrent_handle = m_session->add_torrent(std::move(params));
-            m_torrentHandles.insert(QString::fromStdString(lt::aux::to_hex(torrent_handle.info_hashes().get_best().to_string())), std::move(torrent_handle));
+            m_torrentHandles.insert(QString::fromStdString(lt::aux::to_hex(torrent_handle.info_hashes().get_best().to_string())), torrent_handle);
+
+            Torrent torrent = {
+                torrent_handle.id(),
+                QString::fromStdString(torrent_handle.status().name),
+                "0 MB",
+                0.0,
+                torrentStateToString(torrent_handle.status().state),
+                0,
+                0,
+                "0 MB/s",
+                "0 MB/s"
+            };
+            emit torrentAdded(torrent);
         }
     }
+}
+
+
+void SessionManager::addTorrentByFilename(QStringView filepath)
+{
+    auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
+    lt::add_torrent_params params{};
+
+    writeTorrentFile(torrent_info);
+
+    params.ti = std::move(torrent_info);
+    addTorrent(params);
+}
+
+void SessionManager::addTorrentByMagnet(QString magnetURI)
+{
+    auto params = lt::parse_magnet_uri(magnetURI.toStdString());
+    addTorrent(std::move(params));
 }
 
 void SessionManager::addTorrent(libtorrent::add_torrent_params params)
@@ -135,8 +164,39 @@ void SessionManager::addTorrent(libtorrent::add_torrent_params params)
     auto appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsSaveDir = appDataPath + QDir::separator() + "torrents";
     params.save_path = torrentsSaveDir.toStdString();
+
     // TODO: Make it async later
     auto torrent_handle = m_session->add_torrent(params);
-    // m_torrentHandles.append(torrent_handle);
     m_torrentHandles.insert(QString::fromStdString(lt::aux::to_hex(torrent_handle.info_hashes().get_best().to_string())), torrent_handle);
+
+    // No point setting status fields, since they are zeroed and will be filled on status alert
+    Torrent torrent = {
+        torrent_handle.id(),
+        QString::fromStdString(torrent_handle.status().name),
+        "0 MB",
+        0.0,
+        torrentStateToString(torrent_handle.status().state),
+        0,
+        0,
+        "0 MB/s",
+        "0 MB/s"
+    };
+
+    emit torrentAdded(torrent);
+}
+
+void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)
+{
+    Torrent torrent = {
+        handle.id(),
+        QString::fromStdString(status.name),
+        QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
+        std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0,
+        torrentStateToString(status.state),
+        status.num_seeds,
+        status.num_peers,
+        QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+    };
+    emit torrentUpdated(torrent);
 }

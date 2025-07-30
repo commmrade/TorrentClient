@@ -23,12 +23,16 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_pushButton_3_clicked();
+
 private:
+    void setupTableView();
+
     Ui::TorrentWidget *ui;
     SessionManager m_sessionManager;
 
-    TorrentsTableModel* m_tableModel{nullptr};
-    TorrentItemDelegate* m_tableDelegate{nullptr};
+    TorrentsTableModel m_tableModel;
+    TorrentItemDelegate m_tableDelegate;
 };
 
 #endif // TORRENTWIDGET_H

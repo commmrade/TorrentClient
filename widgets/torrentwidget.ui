@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLineEdit" name="lineEdit">
      <property name="alignment">
       <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -24,14 +24,14 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QPushButton" name="pushButton_2">
      <property name="text">
       <string>add by torrent file</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QPushButton" name="pushButton">
      <property name="text">
       <string>Add</string>
@@ -40,6 +40,13 @@
    </item>
    <item row="0" column="0">
     <widget class="QTableView" name="tableView"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="text">
+      <string>test new</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

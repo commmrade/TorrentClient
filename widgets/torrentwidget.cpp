@@ -9,16 +9,20 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_tableModel = new TorrentsTableModel{parent};
-    m_tableDelegate = new TorrentItemDelegate{parent};
+    setupTableView();
 
-    ui->tableView->setModel(m_tableModel);
-    ui->tableView->setItemDelegateForColumn(3, m_tableDelegate);
+    connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
+        qDebug() << "got EMIT";
+        m_tableModel.addTorrent(torrent);
+    });
+    connect(&m_sessionManager, &SessionManager::torrentUpdated, this, [this](const Torrent& torrent) {
+        m_tableModel.updateTorrent(torrent);
+    });
+    connect(&m_sessionManager, &SessionManager::torrentFinished, this, [this](const std::uint32_t id, const lt::torrent_status& status) {
+        m_tableModel.finishTorrent(id, status);
+    });
 
-    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
+    m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }
 
 TorrentWidget::~TorrentWidget()
@@ -26,17 +30,28 @@ TorrentWidget::~TorrentWidget()
     delete ui;
 }
 
+void TorrentWidget::setupTableView()
+{
+    ui->tableView->setModel(&m_tableModel);
+    ui->tableView->setItemDelegateForColumn(3, &m_tableDelegate);
+
+    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
 void TorrentWidget::on_pushButton_clicked()
 {
     m_sessionManager.addTorrentByMagnet(ui->lineEdit->text());
-    qDebug() << "Torrent added";
 }
-
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this, "OPen torrent", "/home/klewy", "Torrents (*.torrent)");
-    if (!filename.isEmpty())
+    if (!filename.isEmpty()) {
         m_sessionManager.addTorrentByFilename(filename);
+    }
 }
+
+
 

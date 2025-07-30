@@ -1,32 +1,7 @@
 #ifndef TORRENTSTABLEMODEL_H
 #define TORRENTSTABLEMODEL_H
 #include <QAbstractTableModel>
-
-
-struct Torrent {
-    std::uint32_t id;
-    QString name;
-    QString size;
-    double progress; // 0.0% to 100.0%
-    QString status;
-    int seeds;
-    int peers;
-    QString downSpeed;
-    QString upSpeed;
-};
-
-enum TorrentsFields {
-    ID = 0,
-    NAME,
-    SIZE,
-    PROGRESS,
-    STATUS,
-    SEEDS,
-    PEERS,
-    DOWN_SPEED,
-    UP_SPEED
-};
-constexpr int TORRENT_FIELD_COUNT = TorrentsFields::UP_SPEED + 1;
+#include "torrent.h"
 
 class TorrentsTableModel : public QAbstractTableModel
 {
@@ -50,6 +25,11 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
+
+    void addTorrent(const Torrent& torrent);
+    bool updateTorrent(const Torrent& torrent);
+    bool finishTorrent(const std::uint32_t id, const lt::torrent_status& status);
+    bool removeTorrent(const std::uint32_t id);
 private:
     QList<Torrent> m_torrents;
 };

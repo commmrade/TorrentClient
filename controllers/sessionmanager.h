@@ -9,7 +9,7 @@
 #include <QStandardPaths>
 #include <QDir>
 
-
+struct Torrent;
 constexpr const char* SESSION_FILENAME = ".session";
 
 class SessionManager : public QObject
@@ -28,12 +28,25 @@ public:
 
     void addTorrentByFilename(QStringView filepath);
     void addTorrentByMagnet(QString magnetURI);
-private:
-    void eventLoop();
 
     void loadResumes();
+private:
+    lt::session_params loadSessionParams();
+
+    // Event loop and alert functions
+    void eventLoop();
+    void handleFinishedAlert(lt::torrent_finished_alert* alert);
+    void handleStateUpdateAlert(lt::state_update_alert* alert);
+    void handleMetadataReceived(lt::metadata_received_alert* alert);
+    void handleResumeDataAlert(lt::save_resume_data_alert* alert);
+
+    void saveResumes();
     void addTorrent(lt::add_torrent_params params);
+    void handleStatusUpdate(const lt::torrent_status& status, const lt::torrent_handle& handle);
 signals:
+    void torrentAdded(const Torrent& torrent);
+    void torrentUpdated(const Torrent& torrent);
+    void torrentFinished(const std::uint32_t id, const lt::torrent_status& status);
 };
 
 inline std::vector<char> readFile(const char *filename)

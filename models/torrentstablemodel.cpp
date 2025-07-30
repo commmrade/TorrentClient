@@ -1,19 +1,9 @@
 #include "torrentstablemodel.h"
-
+#include <QList>
+#include <spdlog/spdlog.h>
 
 TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
-    m_torrents.append(Torrent {
-        328473,
-        "ArchLinux 28.0.07.iso",
-        "1.4 GB",
-        15.4,
-        "Downloading",
-        100,
-        100,
-        "22.7 MB/s",
-        "160.23 KB/s"
-    });
 }
 
 QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::DisplayRole */) const
@@ -179,5 +169,57 @@ QHash<int, QByteArray> TorrentsTableModel::roleNames() const
 {
     // TODO: Implement custom roles
     return {};
+}
+
+void TorrentsTableModel::addTorrent(const Torrent &torrent)
+{
+    auto newRowIdx = m_torrents.size();
+    beginInsertRows(QModelIndex{}, newRowIdx, newRowIdx);
+    m_torrents.append(torrent);
+    endInsertRows();
+}
+
+bool TorrentsTableModel::updateTorrent(const Torrent &torrent)
+{
+    auto torrentIterator = std::find_if(m_torrents.begin(), m_torrents.end(), [id = torrent.id](const auto& torrent) {
+        return torrent.id == id;
+    });
+    if (torrentIterator == m_torrents.end()) {
+        spdlog::warn("Such torrent does not exist, id: {}", torrent.id);
+        return false;
+    }
+
+    auto rowChanged = std::distance(m_torrents.begin(), torrentIterator);
+    *torrentIterator = torrent;
+    emit dataChanged(this->index(rowChanged, 0), this->index(rowChanged, columnCount()));
+    return true;
+}
+
+bool TorrentsTableModel::finishTorrent(const std::uint32_t id, const lt::torrent_status& status)
+{
+    auto torrentIterator = std::find_if(m_torrents.begin(), m_torrents.end(), [id](const auto& torrent) {
+        return torrent.id == id;
+    });
+    if (torrentIterator == m_torrents.end()) {
+        spdlog::warn("Such torrent does not exist, id: {}", id);
+        return false;
+    }
+
+    torrentIterator->progress = 100.0;
+    torrentIterator->status = torrentStateToString(status.state);
+    return true;
+}
+
+bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
+{
+    auto torrentIterator = std::find_if(m_torrents.begin(), m_torrents.end(), [id](const auto& torrent) {
+        return torrent.id == id;
+    });
+    if (torrentIterator == m_torrents.end()) {
+        spdlog::warn("Such torrent does not exist, id: {}", id);
+        return false;
+    }
+    m_torrents.remove(std::distance(m_torrents.begin(), torrentIterator));
+    return true;
 }
 
