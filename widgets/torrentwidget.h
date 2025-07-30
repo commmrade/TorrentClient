@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include "sessionmanager.h"
+#include "torrentstablemodel.h"
+#include "torrentitemdelegate.h"
 
 namespace Ui {
 class TorrentWidget;
@@ -24,6 +26,9 @@ private slots:
 private:
     Ui::TorrentWidget *ui;
     SessionManager m_sessionManager;
+
+    TorrentsTableModel* m_tableModel{nullptr};
+    TorrentItemDelegate* m_tableDelegate{nullptr};
 };
 
 #endif // TORRENTWIDGET_H

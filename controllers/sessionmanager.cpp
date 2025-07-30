@@ -80,8 +80,14 @@ void SessionManager::eventLoop()
             auto pos = std::find_if(m_torrentHandles.begin(), m_torrentHandles.end(), [finished_alert](auto&& handle) {
                 return handle.id() == finished_alert->handle.id();
             });
+
+            // TODO: Clean up
+            // TODO: May wanna delete .fastresumt and .torrent, make separate methods
             auto name = QString::fromStdString(lt::aux::to_hex(finished_alert->handle.info_hashes().get_best().to_string()));
             m_torrentHandles.remove(name);
+
+            finished_alert->handle.pause();
+            m_session->remove_torrent(finished_alert->handle);
         }
         if (auto* statusAlert = lt::alert_cast<lt::state_update_alert>(alert)) {
             auto statuses = statusAlert->status;

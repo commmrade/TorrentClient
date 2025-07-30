@@ -9,12 +9,16 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QSlider* slider = new QSlider(Qt::Horizontal);
-    slider->setRange(0, 100);
-    slider->setValue(50); // Example value
+    m_tableModel = new TorrentsTableModel{parent};
+    m_tableDelegate = new TorrentItemDelegate{parent};
 
-    ui->tableWidget->setColumnHidden(1, true);
-    ui->tableWidget->setCellWidget(0, 0, slider);
+    ui->tableView->setModel(m_tableModel);
+    ui->tableView->setItemDelegateForColumn(3, m_tableDelegate);
+
+    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
 }
 
 TorrentWidget::~TorrentWidget()
@@ -31,7 +35,6 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-
     QString filename = QFileDialog::getOpenFileName(this, "OPen torrent", "/home/klewy", "Torrents (*.torrent)");
     if (!filename.isEmpty())
         m_sessionManager.addTorrentByFilename(filename);

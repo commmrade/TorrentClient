@@ -14,13 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="text">
-      <string>add by torrent file</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0">
     <widget class="QLineEdit" name="lineEdit">
      <property name="alignment">
@@ -28,6 +21,13 @@
      </property>
      <property name="placeholderText">
       <string>magnet</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string>add by torrent file</string>
      </property>
     </widget>
    </item>
@@ -39,33 +39,7 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QTableWidget" name="tableWidget">
-     <row>
-      <property name="text">
-       <string>dffsfds</string>
-      </property>
-     </row>
-     <column>
-      <property name="text">
-       <string>name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>size</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>progress</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>status</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QTableView" name="tableView"/>
    </item>
   </layout>
  </widget>
