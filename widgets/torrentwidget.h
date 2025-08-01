@@ -23,11 +23,12 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void customContextMenu(const QPoint& pos);
 private:
     void setupTableView();
 
     Ui::TorrentWidget *ui;
-    SessionManager m_sessionManager;
+    SessionManager& m_sessionManager;
 
     TorrentsTableModel m_tableModel;
     TorrentItemDelegate m_tableDelegate;

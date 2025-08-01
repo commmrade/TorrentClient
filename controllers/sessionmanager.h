@@ -4,7 +4,9 @@
 #include <QObject>
 #include <fstream>
 #include <vector>
-#include <libtorrent/libtorrent.hpp>
+#include <libtorrent/session.hpp>
+#include <libtorrent/create_torrent.hpp>
+#include <libtorrent/aux_/session_call.hpp>
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
@@ -17,17 +19,23 @@ class SessionManager : public QObject
     Q_OBJECT
 
     std::unique_ptr<lt::session> m_session;
-    // QList<lt::torrent_handle> m_torrentHandles;
     QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
 
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
-public:
+
     explicit SessionManager(QObject *parent = nullptr);
+public:
+    Q_DISABLE_COPY_MOVE(SessionManager);
     ~SessionManager();
 
-    void addTorrentByFilename(QStringView filepath);
-    void addTorrentByMagnet(QString magnetURI);
+    static SessionManager& instance() {
+        static SessionManager sessionManager{nullptr};
+        return sessionManager;
+    }
+
+    void addTorrentByFilename(QStringView filepath, QStringView outputDir);
+    void addTorrentByMagnet(QString magnetURI, QStringView outputDir);
 
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);
@@ -35,6 +43,10 @@ public:
     void removeTorrent(const std::uint32_t id, bool removeWithContents);
 
     void loadResumes();
+
+    // Managing session
+    void setDownloadLimit(int value);
+    void setUploadLimit(int value);
 private:
     lt::session_params loadSessionParams();
 

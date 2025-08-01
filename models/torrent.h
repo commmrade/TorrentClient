@@ -3,7 +3,7 @@
 
 
 #include <QString>
-#include <libtorrent/libtorrent.hpp>
+#include <libtorrent/torrent_status.hpp>
 
 struct Torrent {
     std::uint32_t id;

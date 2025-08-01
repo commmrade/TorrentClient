@@ -8,6 +8,9 @@ TorrentItemDelegate::TorrentItemDelegate(QObject *parent) : QStyledItemDelegate(
 void TorrentItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     double value = index.data().toDouble();
+    if (std::isnan(value)) {
+        value = 0.0;
+    }
     QStyleOptionProgressBar pbOption;
     pbOption.progress = value;
     pbOption.minimum = 0;

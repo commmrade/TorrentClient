@@ -2,12 +2,16 @@
 #include <QStandardPaths>
 #include <QApplication>
 #include <QDir>
+#include <QSettings>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("klewy");
     QCoreApplication::setOrganizationDomain("klewy.com");
     QCoreApplication::setApplicationName("TorrentClient");
+
+    QSettings settings;
+    settings.setValue("a", "b");
 
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkdir(basePath);

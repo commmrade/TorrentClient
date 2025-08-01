@@ -3,6 +3,9 @@
 #include <QDebug>
 #include <QDir>
 #include "torrent.h"
+#include <libtorrent/libtorrent.hpp>
+#include <QSettings>
+#include "settingsvalues.h"
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
@@ -14,34 +17,6 @@ SessionManager::SessionManager(QObject *parent)
     m_alertTimer.start(100);
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(2000); // Check if torrent handles need save_resume, and then save .fastresume
-}
-
-libtorrent::session_params SessionManager::loadSessionParams()
-{
-    auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
-    auto sessionFileContents = readFile(sessionFilePath.toUtf8().constData());
-    lt::session_params sessParams;
-    if (sessionFileContents.empty()) {
-        sessParams.settings.set_int(
-            lt::settings_pack::alert_mask,
-            lt::alert_category::status |
-            lt::alert_category::error |
-            lt::alert_category::storage
-        );
-    } else {
-        sessParams = std::move(lt::read_session_params(sessionFileContents));
-    }
-    return sessParams;
-}
-
-
-void SessionManager::saveResumes()
-{
-    for (auto& torrent : m_torrentHandles) {
-        if (torrent.need_save_resume_data() && torrent.is_valid()) {
-            torrent.save_resume_data();
-        }
-    }
 }
 
 SessionManager::~SessionManager()
@@ -56,6 +31,41 @@ SessionManager::~SessionManager()
         }
         file.flush();
         file.close();
+    }
+}
+
+libtorrent::session_params SessionManager::loadSessionParams()
+{
+    auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
+    auto sessionFileContents = readFile(sessionFilePath.toUtf8().constData());
+    lt::session_params sessParams;
+    if (sessionFileContents.empty()) {
+        sessParams.settings.set_int(
+            lt::settings_pack::alert_mask,
+            lt::alert_category::status |
+            lt::alert_category::error |
+            lt::alert_category::storage
+        );
+
+        // TODO: load settings from qsettings
+        QSettings settings;
+        int downloadSpeedLimit = settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+        int uploadSpeedLimit = settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+        sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
+        sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
+    } else {
+        sessParams = std::move(lt::read_session_params(sessionFileContents));
+    }
+    return sessParams;
+}
+
+
+void SessionManager::saveResumes()
+{
+    for (auto& torrent : m_torrentHandles) {
+        if (torrent.need_save_resume_data() && torrent.is_valid()) {
+            torrent.save_resume_data();
+        }
     }
 }
 
@@ -128,27 +138,49 @@ void SessionManager::loadResumes()
             if (isPaused) {
                 params.flags &= ~lt::torrent_flags::auto_managed;
             }
-            auto torrent_handle = m_session->add_torrent(std::move(params));
-            m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
+            auto torrentHandle = m_session->add_torrent(std::move(params));
+            m_torrentHandles.insert(torrentHandle.id(), torrentHandle);
 
             Torrent torrent = {
-                torrent_handle.id(),
-                QString::fromStdString(torrent_handle.status().name),
+                torrentHandle.id(),
+                QString::fromStdString(torrentHandle.status().name),
                 "0 MB",
                 0.0,
-                torrentStateToString(torrent_handle.status().state),
+                torrentStateToString(torrentHandle.status().state),
                 0,
                 0,
                 "0 MB/s",
                 "0 MB/s"
             };
             emit torrentAdded(torrent);
+            handleStatusUpdate(torrentHandle.status(), torrentHandle);
         }
     }
 }
 
+void SessionManager::setDownloadLimit(int value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    auto asBytes = value * 1024; // value is in kilobytes per second
+    newSettings.set_int(lt::settings_pack::download_rate_limit, asBytes);
+    m_session->apply_settings(std::move(newSettings));
 
-void SessionManager::addTorrentByFilename(QStringView filepath)
+    QSettings settings;
+    settings.setValue(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{asBytes});
+}
+
+void SessionManager::setUploadLimit(int value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    auto asBytes = value * 1024; // value is in kilobytes per second
+    newSettings.set_int(lt::settings_pack::upload_rate_limit, asBytes);
+    m_session->apply_settings(std::move(newSettings));
+
+    QSettings settings;
+    settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{asBytes});
+}
+
+void SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
 {
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
     lt::add_torrent_params params{};
@@ -156,12 +188,14 @@ void SessionManager::addTorrentByFilename(QStringView filepath)
     writeTorrentFile(torrent_info);
 
     params.ti = std::move(torrent_info);
+    params.save_path = outputDir.toString().toStdString();
     addTorrent(params);
 }
 
-void SessionManager::addTorrentByMagnet(QString magnetURI)
+void SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir)
 {
     auto params = lt::parse_magnet_uri(magnetURI.toStdString());
+    params.save_path = outputDir.toString().toStdString();
     addTorrent(std::move(params));
 }
 
@@ -175,13 +209,11 @@ bool SessionManager::isTorrentPaused(const uint32_t id) const
 
 void SessionManager::pauseTorrent(const uint32_t id)
 {
-    qDebug() << "pause";
     m_torrentHandles[id].pause();
 }
 
 void SessionManager::resumeTorrent(const uint32_t id)
 {
-    qDebug() << "resume";
     m_torrentHandles[id].resume();
 }
 
@@ -218,8 +250,6 @@ void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     auto appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto torrentsSaveDir = appDataPath + QDir::separator() + "torrents";
-    params.save_path = torrentsSaveDir.toStdString();
     // TODO: Make it async later
     auto torrent_handle = m_session->add_torrent(params);
     m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
@@ -242,12 +272,14 @@ void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 
 void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)
 {
+    bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+
     Torrent torrent = {
         handle.id(),
         QString::fromStdString(status.name),
         QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0,
-        torrentStateToString(status.state),
+        !IsPaused ? torrentStateToString(status.state) : "Stopped",
         status.num_seeds,
         status.num_peers,
         QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
