@@ -22,7 +22,6 @@ SessionManager::SessionManager(QObject *parent)
 SessionManager::~SessionManager()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
-
     QFile file{sessionFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         auto sessionData = lt::write_session_params_buf(m_session->session_state());
@@ -47,7 +46,6 @@ libtorrent::session_params SessionManager::loadSessionParams()
             lt::alert_category::storage
         );
 
-        // TODO: load settings from qsettings
         QSettings settings;
         int downloadSpeedLimit = settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
         int uploadSpeedLimit = settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
@@ -104,7 +102,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
     auto statuses = alert->status;
-    for (auto status : statuses) {
+    for (auto& status : statuses) {
         auto& handle = status.handle;
         handleStatusUpdate(status, handle);
     }
@@ -153,7 +151,6 @@ void SessionManager::loadResumes()
                 "0 MB/s"
             };
             emit torrentAdded(torrent);
-            handleStatusUpdate(torrentHandle.status(), torrentHandle);
         }
     }
 }
@@ -202,7 +199,6 @@ void SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir
 bool SessionManager::isTorrentPaused(const uint32_t id) const
 {
     auto& torrentHandle = m_torrentHandles[id];
-    // bool IsPaused = torrentHandle.is_paused();
     bool IsPaused = (torrentHandle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
     return IsPaused;
 }

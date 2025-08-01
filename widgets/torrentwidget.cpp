@@ -30,7 +30,13 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     // Context Menu Stuff
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
+
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
+}
+
+TorrentWidget::~TorrentWidget()
+{
+    delete ui;
 }
 
 void TorrentWidget::customContextMenu(const QPoint& pos)
@@ -63,12 +69,6 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     menu->addAction(deleteAction);
 
     menu->popup(ui->tableView->viewport()->mapToGlobal(pos));
-}
-
-
-TorrentWidget::~TorrentWidget()
-{
-    delete ui;
 }
 
 void TorrentWidget::setupTableView()
