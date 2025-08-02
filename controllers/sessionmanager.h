@@ -56,6 +56,7 @@ private:
     void handleStateUpdateAlert(lt::state_update_alert* alert);
     void handleMetadataReceived(lt::metadata_received_alert* alert);
     void handleResumeDataAlert(lt::save_resume_data_alert* alert);
+    void handleAddTorrentAlert(lt::add_torrent_alert* alert);
 
     void saveResumes();
     void addTorrent(lt::add_torrent_params params);

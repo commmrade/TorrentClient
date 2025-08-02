@@ -3,14 +3,12 @@
 #include <QSettings>
 #include "sessionmanager.h"
 #include "settingsvalues.h"
-
+#include <QFileDialog>
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
-
-    // TODO: Load settings from QSettings
 
     QSettings settings;
 
@@ -83,7 +81,11 @@ void SettingsDialog::applyTorrentSettings()
 
 void SettingsDialog::on_savePathButton_clicked()
 {
-    // Change default save path
-    // TODO: OPen file dialog and choose folder
+    QString defaultSavePath = QFileDialog::getExistingDirectory(this, "Choose a new default save directory");
+    if (!defaultSavePath.isEmpty()) {
+        QSettings settings;
+        settings.setValue(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
+        ui->savePathLineEdit->setText(defaultSavePath);
+    }
 }
 

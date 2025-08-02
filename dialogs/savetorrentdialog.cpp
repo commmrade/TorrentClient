@@ -4,6 +4,7 @@
 #include <QSettings>
 #include "settingsvalues.h"
 #include <QStandardPaths>
+#include <QFileDialog>
 
 SaveTorrentDialog::SaveTorrentDialog(const QString& torrentPath, QWidget *parent)
     : QDialog(parent)
@@ -44,7 +45,10 @@ QString SaveTorrentDialog::getSavePath() const
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
 {
-    // TODO: Change Dir
-    ui->savePathLineEdit->setText(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+    QString saveDir = QFileDialog::getExistingDirectory(this, "Choose a directory to save torrent in");
+    if (!saveDir.isEmpty()) {
+        ui->savePathLineEdit->setText(saveDir);
+    }
+
 }
 

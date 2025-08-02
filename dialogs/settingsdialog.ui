@@ -52,8 +52,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>822</width>
-              <height>880</height>
+              <width>356</width>
+              <height>163</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -408,7 +408,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="placeholderText">
-                    <string>/home/klewy (todo: replace)</string>
+                    <string>/home</string>
                    </property>
                   </widget>
                  </item>

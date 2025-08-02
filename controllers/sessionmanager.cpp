@@ -84,6 +84,9 @@ void SessionManager::eventLoop()
         if (auto* resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert)) {
             handleResumeDataAlert(resumeDataAlert);
         }
+        if (auto* addTorrentAlert = lt::alert_cast<lt::add_torrent_alert>(alert)) {
+            handleAddTorrentAlert(addTorrentAlert);
+        }
     }
     m_session->post_torrent_updates();
 }
@@ -121,6 +124,27 @@ void SessionManager::handleResumeDataAlert(libtorrent::save_resume_data_alert *a
     }
 }
 
+void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
+{
+    auto& torrent_handle = alert->handle;
+    m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
+
+    // No point setting status fields, since they are zeroed and will be filled on status alert
+    Torrent torrent = {
+        torrent_handle.id(),
+        QString::fromStdString(torrent_handle.status().name),
+        "0 MB",
+        0.0,
+        torrentStateToString(torrent_handle.status().state),
+        0,
+        0,
+        "0 MB/s",
+        "0 MB/s"
+    };
+
+    emit torrentAdded(torrent);
+}
+
 void SessionManager::loadResumes()
 {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -136,21 +160,7 @@ void SessionManager::loadResumes()
             if (isPaused) {
                 params.flags &= ~lt::torrent_flags::auto_managed;
             }
-            auto torrentHandle = m_session->add_torrent(std::move(params));
-            m_torrentHandles.insert(torrentHandle.id(), torrentHandle);
-
-            Torrent torrent = {
-                torrentHandle.id(),
-                QString::fromStdString(torrentHandle.status().name),
-                "0 MB",
-                0.0,
-                torrentStateToString(torrentHandle.status().state),
-                0,
-                0,
-                "0 MB/s",
-                "0 MB/s"
-            };
-            emit torrentAdded(torrent);
+            m_session->async_add_torrent(std::move(params));
         }
     }
 }
@@ -245,25 +255,7 @@ void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 
 void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
-    auto appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    // TODO: Make it async later
-    auto torrent_handle = m_session->add_torrent(params);
-    m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
-
-    // No point setting status fields, since they are zeroed and will be filled on status alert
-    Torrent torrent = {
-        torrent_handle.id(),
-        QString::fromStdString(torrent_handle.status().name),
-        "0 MB",
-        0.0,
-        torrentStateToString(torrent_handle.status().state),
-        0,
-        0,
-        "0 MB/s",
-        "0 MB/s"
-    };
-
-    emit torrentAdded(torrent);
+    m_session->async_add_torrent(std::move(params));
 }
 
 void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)

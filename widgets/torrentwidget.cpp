@@ -95,7 +95,6 @@ void TorrentWidget::on_pushButton_2_clicked()
     if (filename.isEmpty()) {
         return;
     }
-    // TODO: Now show choose save location and etc dialog
     SaveTorrentDialog saveDialog{filename, this};
     if (saveDialog.exec() == QDialog::Accepted) {
         auto torrentSavePath = saveDialog.getSavePath();
