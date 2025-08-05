@@ -61,8 +61,9 @@ libtorrent::session_params SessionManager::loadSessionParams()
 void SessionManager::saveResumes()
 {
     for (auto& torrent : m_torrentHandles) {
-        if (torrent.need_save_resume_data() && torrent.is_valid()) {
-            torrent.save_resume_data();
+        if (torrent.isNeedSaveData() && torrent.isValid()) {
+            // torrent.save_resume_data();
+            torrent.saveResumeData();
         }
     }
 }
@@ -98,7 +99,8 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
         return handle.id() == alert->handle.id();
     });
 
-    pos->save_resume_data(); // Otherwise it's behaving kinda weird
+    pos->saveResumeData();
+    // Otherwise it's behaving kinda weird
     emit torrentFinished(alert->handle.id(), alert->handle.status());
 }
 
@@ -127,7 +129,7 @@ void SessionManager::handleResumeDataAlert(libtorrent::save_resume_data_alert *a
 void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
 {
     auto& torrent_handle = alert->handle;
-    m_torrentHandles.insert(torrent_handle.id(), torrent_handle);
+    m_torrentHandles.insert(torrent_handle.id(), TorrentHandle{torrent_handle});
 
     // No point setting status fields, since they are zeroed and will be filled on status alert
     Torrent torrent = {
@@ -209,8 +211,7 @@ void SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir
 bool SessionManager::isTorrentPaused(const uint32_t id) const
 {
     auto& torrentHandle = m_torrentHandles[id];
-    bool IsPaused = (torrentHandle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
-    return IsPaused;
+    return torrentHandle.isPaused();
 }
 
 void SessionManager::pauseTorrent(const uint32_t id)
@@ -226,18 +227,18 @@ void SessionManager::resumeTorrent(const uint32_t id)
 void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
     if (removeWithContents) {
-        m_session->remove_torrent(m_torrentHandles[id], lt::session::delete_files);
+        m_session->remove_torrent(m_torrentHandles[id].handle(), lt::session::delete_files);
     } else {
-        m_session->remove_torrent(m_torrentHandles[id]);
+        m_session->remove_torrent(m_torrentHandles[id].handle());
     }
-    auto torrentHandle = m_torrentHandles[id];
+    auto& torrentHandle = m_torrentHandles[id];
 
 
     // Delete .fastresume and .torrent
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsPath = basePath + QDir::separator() + "torrents";
 
-    auto hashString = QString{lt::aux::to_hex(torrentHandle.info_hashes().get_best().to_string()).c_str()};
+    auto hashString = QString{lt::aux::to_hex(torrentHandle.handle().info_hashes().get_best().to_string()).c_str()};
     auto torrentFile = torrentsPath + QDir::separator() + hashString + ".torrent";
     if (!QFile::remove(torrentFile)) {
         qDebug() << "Could not remove .torrent file";
@@ -255,6 +256,11 @@ void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 
 void SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
+    if (isTorrentExists(params.info_hashes.get_best().is_all_zeros() ? params.ti->info_hashes().get_best() : params.info_hashes.get_best())) {
+        // TODO: Signal error adding torrent
+        qDebug() << "here??";
+        return;
+    }
     m_session->async_add_torrent(std::move(params));
 }
 
@@ -274,4 +280,14 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
     };
     emit torrentUpdated(torrent);
+}
+
+bool SessionManager::isTorrentExists(const lt::sha1_hash& hash) const
+{
+    auto handles = m_torrentHandles.values();
+    auto torrentIter = std::find_if(handles.begin(), handles.end(), [&](const TorrentHandle& value) {
+        qDebug() << lt::aux::to_hex(value.handle().info_hashes().get_best()) << lt::aux::to_hex(hash);
+        return value.handle().info_hashes().get_best() == hash;
+    });
+    return torrentIter != handles.end();
 }

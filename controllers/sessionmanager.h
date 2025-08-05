@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
+#include "torrenthandle.h"
 
 struct Torrent;
 constexpr const char* SESSION_FILENAME = ".session";
@@ -19,7 +20,8 @@ class SessionManager : public QObject
     Q_OBJECT
 
     std::unique_ptr<lt::session> m_session;
-    QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
+    // QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
+    QHash<std::uint32_t, TorrentHandle> m_torrentHandles;
 
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
@@ -61,6 +63,8 @@ private:
     void saveResumes();
     void addTorrent(lt::add_torrent_params params);
     void handleStatusUpdate(const lt::torrent_status& status, const lt::torrent_handle& handle);
+
+    bool isTorrentExists(const lt::sha1_hash& hash) const;
 signals:
     void torrentAdded(const Torrent& torrent);
     void torrentUpdated(const Torrent& torrent);

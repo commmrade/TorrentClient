@@ -38,6 +38,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         dialogs/settingsdialog.h dialogs/settingsdialog.cpp dialogs/settingsdialog.ui
         common/settingsvalues.h
         dialogs/savetorrentdialog.h dialogs/savetorrentdialog.cpp dialogs/savetorrentdialog.ui
+        common/torrenthandle.h common/torrenthandle.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
