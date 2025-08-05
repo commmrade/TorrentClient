@@ -204,6 +204,7 @@ void SessionManager::addTorrentByFilename(QStringView filepath, QStringView outp
 void SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir)
 {
     auto params = lt::parse_magnet_uri(magnetURI.toStdString());
+    qDebug() << "magnet torrent" << params.name;
     params.save_path = outputDir.toString().toStdString();
     addTorrent(std::move(params));
 }
@@ -278,6 +279,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.num_peers,
         QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
         QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        status.download_rate == 0 ? -1 : static_cast<int>(status.total_wanted / status.download_rate),
     };
     emit torrentUpdated(torrent);
 }

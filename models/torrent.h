@@ -15,6 +15,7 @@ struct Torrent {
     int peers;
     QString downSpeed;
     QString upSpeed;
+    int eta; // In seconds
 };
 
 enum TorrentsFields {
@@ -26,9 +27,11 @@ enum TorrentsFields {
     SEEDS,
     PEERS,
     DOWN_SPEED,
-    UP_SPEED
+    UP_SPEED,
+    ETA
 };
-constexpr int TORRENT_FIELD_COUNT = TorrentsFields::UP_SPEED + 1;
+
+constexpr int TORRENT_FIELD_COUNT = TorrentsFields::ETA + 1;
 
 inline QString torrentStateToString(lt::torrent_status::state_t state) {
     using lt::torrent_status;

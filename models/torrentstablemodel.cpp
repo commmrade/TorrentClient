@@ -39,6 +39,11 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 case UP_SPEED: {
                     return torrent.upSpeed;
                 }
+                case ETA: {
+                    auto etaSecs = torrent.eta;
+                    QString etaStr = QString("%1 secs").arg(etaSecs == -1 ? "Infinity" : QString::number(etaSecs));
+                    return etaStr;
+                }
                 default: {
                     throw std::runtime_error("Something is wrong");
                     break;
@@ -90,6 +95,10 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
                 torrent.upSpeed = value.toString();
                 break;
             }
+            case ETA: {
+                torrent.eta = value.toInt();
+                break;
+            }
             default: {
                 throw std::runtime_error("Something is wrong");
                 break;
@@ -133,6 +142,9 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
             }
             case UP_SPEED: {
                 return QVariant{"Up Speed"};
+            }
+            case ETA: {
+                return QVariant{"ETA"};
             }
             default: {
                 throw std::runtime_error("Something is wrong");

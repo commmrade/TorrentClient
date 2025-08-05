@@ -83,7 +83,7 @@ void TorrentWidget::setupTableView()
 
 void TorrentWidget::on_pushButton_clicked()
 {
-    SaveTorrentDialog saveDialog{0, ui->lineEdit->text()};
+    SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
     if (saveDialog.exec() == QDialog::Accepted) {
         m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), saveDialog.getSavePath());
     }
@@ -95,7 +95,7 @@ void TorrentWidget::on_pushButton_2_clicked()
     if (filename.isEmpty()) {
         return;
     }
-    SaveTorrentDialog saveDialog{filename, this};
+    SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
     if (saveDialog.exec() == QDialog::Accepted) {
         auto torrentSavePath = saveDialog.getSavePath();
         m_sessionManager.addTorrentByFilename(filename, torrentSavePath);
