@@ -89,6 +89,19 @@ void SessionManager::eventLoop()
             handleAddTorrentAlert(addTorrentAlert);
         }
     }
+
+    if (m_currentTorrentId != -1) {
+        auto& handle = m_torrentHandles[m_currentTorrentId];
+        if (handle.isValid()) {
+            std::vector<lt::peer_info> peers;
+            // TODO: Should i make it async?
+            m_torrentHandles[m_currentTorrentId].handle().get_peer_info(peers);
+            emit peerInfo(m_currentTorrentId, std::move(peers));
+        }
+    } else {
+        emit clearPeerInfo();
+    }
+
     m_session->post_torrent_updates();
 }
 
@@ -227,13 +240,16 @@ void SessionManager::resumeTorrent(const uint32_t id)
 
 void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
+    if (id == m_currentTorrentId) {
+        m_currentTorrentId = -1;
+    }
+
     if (removeWithContents) {
         m_session->remove_torrent(m_torrentHandles[id].handle(), lt::session::delete_files);
     } else {
         m_session->remove_torrent(m_torrentHandles[id].handle());
     }
     auto& torrentHandle = m_torrentHandles[id];
-
 
     // Delete .fastresume and .torrent
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -271,26 +287,31 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 
 
     // debug
-    std::vector<lt::peer_info> peers;
-    handle.get_peer_info(peers);
-    for (const auto& peer : peers) {
-        QString conType;
-        if (peer.connection_type == lt::peer_info::standard_bittorrent) {
-            conType = "BT";
-        } else if (peer.connection_type == lt::peer_info::http_seed) {
-            conType = "HTTP";
-        } else {
-            conType = "URL";
-        }
-        auto con_type = peer.connection_type.all() == lt::peer_info::standard_bittorrent;
+    // std::vector<lt::peer_info> peers;
+    // handle.get_peer_info(peers);
+    // for (const auto& peer : peers) {
+    //     QString conType;
+    //     if (peer.connection_type == lt::peer_info::standard_bittorrent) {
+    //         conType = "BT";
+    //     } else if (peer.connection_type == lt::peer_info::http_seed) {
+    //         conType = "HTTP";
+    //     } else {
+    //         conType = "URL";
+    //     }
+
+    //     // { // Ban a peer
+    //     //     lt::ip_filter filter = m_session->get_ip_filter();
+    //     //     filter.add_rule(peer.ip.address(), peer.ip.address(), lt::ip_filter::blocked);
+    //     //     m_session->set_ip_filter(std::move(filter));
+    //     // }
 
 
-        qDebug() << "Country:" << "TODO" << "Ip:" << peer.ip.address().to_string() <<
-            "Port:" << peer.ip.port() << "Connection:" << conType <<
-            "Client:" << peer.client << "Progress:" << peer.progress <<
-            "Down speed:" << peer.down_speed / 1024.0 << "Up Speed:" << peer.up_speed <<
-            "Downloaded:" << peer.total_download / 1024.0 << "Uploaded:" << peer.total_upload / 1024.0;
-    }
+    //     qDebug() << "Country:" << "TODO" << "Ip:" << peer.ip.address().to_string() <<
+    //         "Port:" << peer.ip.port() << "Connection:" << conType <<
+    //         "Client:" << peer.client << "Progress:" << peer.progress <<
+    //         "Down speed:" << peer.down_speed / 1024.0 << "Up Speed:" << peer.up_speed <<
+    //         "Downloaded:" << peer.total_download / 1024.0 << "Uploaded:" << peer.total_upload / 1024.0;
+    // }
     //
 
     Torrent torrent = {

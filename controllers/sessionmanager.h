@@ -26,6 +26,8 @@ class SessionManager : public QObject
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
 
+    std::int64_t m_currentTorrentId{-1};
+
     explicit SessionManager(QObject *parent = nullptr);
 public:
     Q_DISABLE_COPY_MOVE(SessionManager);
@@ -49,6 +51,12 @@ public:
     // Managing session
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
+
+
+    // Peer
+    void setCurrentTorrentId(std::int64_t value) {
+        m_currentTorrentId = value;
+    }
 private:
     lt::session_params loadSessionParams();
 
@@ -70,6 +78,9 @@ signals:
     void torrentUpdated(const Torrent& torrent);
     void torrentFinished(const std::uint32_t id, const lt::torrent_status& status);
     void torrentDeleted(const std::uint32_t id);
+
+    void peerInfo(const std::uint32_t id, std::vector<lt::peer_info> peers);
+    void clearPeerInfo();
 };
 
 inline std::vector<char> readFile(const char *filename)

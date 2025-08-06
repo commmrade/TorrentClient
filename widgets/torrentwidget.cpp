@@ -12,6 +12,19 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Setup tab widgets names
+    ui->torrentInfoTab->setTabText(0, "General");
+    ui->torrentInfoTab->setTabText(1, "Trackers");
+    ui->torrentInfoTab->setTabText(2, "Peers");
+    ui->torrentInfoTab->setTabText(3, "HTTP Sources");
+
+    ui->peerTableView->setModel(&m_peerModel);
+    ui->peerTableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->peerTableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->peerTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    //
+
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -25,6 +38,18 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     });
     connect(&m_sessionManager, &SessionManager::torrentDeleted, this, [this](const std::uint32_t id) {
         m_tableModel.removeTorrent(id);
+    });
+
+    connect(&m_sessionManager, &SessionManager::peerInfo, this, [this](const std::uint32_t id, std::vector<lt::peer_info> peers) {
+        m_peerModel.setPeers(std::move(peers));
+    });
+    connect(&m_sessionManager, &SessionManager::clearPeerInfo, this, [this] {
+        m_peerModel.clearPeers();
+    });
+
+    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
+        auto torrentId = m_tableModel.index(index.row(), 0).data().toLongLong();
+        m_sessionManager.setCurrentTorrentId(torrentId);
     });
 
     // Context Menu Stuff
@@ -46,7 +71,6 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     auto torrentId = m_tableModel.index(index.row(), 0).data().toUInt();
     auto torrentStatus = m_tableModel.index(index.row(), 4).data().toString();
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
-    qDebug() << "Paused" << isPaused;
     QMenu* menu = new QMenu(this);
     if (isPaused) {
         QAction* resumeAction = new QAction("Resume", this);

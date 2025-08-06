@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 
-double ceilTwoAfterComa(double number) {
+inline double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
 }
 
@@ -16,6 +16,7 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
 {
     if (role < Qt::UserRole) {
         if (role == Qt::DisplayRole) {
+            if (std::abs(index.row()) >= m_torrents.size()) return {};
             auto& torrent = m_torrents[index.row()];
             switch (index.column()) {
                 case ID: {
