@@ -135,13 +135,13 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
     Torrent torrent = {
         torrent_handle.id(),
         QString::fromStdString(torrent_handle.status().name),
-        "0 MB",
+        0,
         0.0,
         torrentStateToString(torrent_handle.status().state),
         0,
         0,
-        "0 MB/s",
-        "0 MB/s"
+        0,
+        0
     };
 
     emit torrentAdded(torrent);
@@ -269,16 +269,43 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 {
     bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
 
+
+    // debug
+    std::vector<lt::peer_info> peers;
+    handle.get_peer_info(peers);
+    for (const auto& peer : peers) {
+        QString conType;
+        if (peer.connection_type == lt::peer_info::standard_bittorrent) {
+            conType = "BT";
+        } else if (peer.connection_type == lt::peer_info::http_seed) {
+            conType = "HTTP";
+        } else {
+            conType = "URL";
+        }
+        auto con_type = peer.connection_type.all() == lt::peer_info::standard_bittorrent;
+
+
+        qDebug() << "Country:" << "TODO" << "Ip:" << peer.ip.address().to_string() <<
+            "Port:" << peer.ip.port() << "Connection:" << conType <<
+            "Client:" << peer.client << "Progress:" << peer.progress <<
+            "Down speed:" << peer.down_speed / 1024.0 << "Up Speed:" << peer.up_speed <<
+            "Downloaded:" << peer.total_download / 1024.0 << "Uploaded:" << peer.total_upload / 1024.0;
+    }
+    //
+
     Torrent torrent = {
         handle.id(),
         QString::fromStdString(status.name),
-        QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
+        // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
+        static_cast<std::uint64_t>(status.total_wanted),
         std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0,
         !IsPaused ? torrentStateToString(status.state) : "Stopped",
         status.num_seeds,
         status.num_peers,
-        QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        static_cast<std::uint64_t>(status.download_rate),
+        // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        static_cast<std::uint64_t>(status.upload_rate),
         status.download_rate == 0 ? -1 : static_cast<int>(status.total_wanted / status.download_rate),
     };
     emit torrentUpdated(torrent);

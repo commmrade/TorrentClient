@@ -2,6 +2,12 @@
 #include <QList>
 #include <spdlog/spdlog.h>
 
+
+double ceilTwoAfterComa(double number) {
+    return std::ceil(number * 100.0) / 100.0;
+}
+
+
 TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
 }
@@ -19,7 +25,16 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                     return torrent.name;
                 }
                 case SIZE: {
-                    return torrent.size;
+                    auto sizeInBytes = torrent.size;
+                    QString sizeStr;
+                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB";
+                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB";
+                    } else {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
+                    }
+                    return QVariant{sizeStr};
                 }
                 case PROGRESS: {
                     return torrent.progress;
@@ -34,14 +49,42 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                     return torrent.peers;
                 }
                 case DOWN_SPEED: {
-                    return torrent.downSpeed;
+                    auto sizeInBytes = torrent.downSpeed;
+                    QString sizeStr;
+                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
+                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
+                    } else {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
+                    }
+                    return QVariant{sizeStr};
                 }
                 case UP_SPEED: {
-                    return torrent.upSpeed;
+                    auto sizeInBytes = torrent.upSpeed;
+                    QString sizeStr;
+                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
+                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
+                    } else {
+                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
+                    }
+                    return QVariant{sizeStr};
                 }
                 case ETA: {
                     auto etaSecs = torrent.eta;
-                    QString etaStr = QString("%1 secs").arg(etaSecs == -1 ? "Infinity" : QString::number(etaSecs));
+
+                    auto hrs = etaSecs / 3600;
+                    auto mins = etaSecs % 3600 / 60;
+                    auto secs = etaSecs % 60;
+
+                    QString etaStr;
+                    if (etaSecs == -1) {
+                        etaStr = "infinity";
+                    } else {
+                        etaStr = QString("%1:%2:%3").arg(hrs).arg(mins).arg(secs);
+                    }
                     return etaStr;
                 }
                 default: {
@@ -68,7 +111,7 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
                 break;
             }
             case SIZE: {
-                torrent.size = value.toString();
+                torrent.size = value.toULongLong();
                 break;
             }
             case PROGRESS: {
@@ -88,11 +131,11 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
                 break;
             }
             case DOWN_SPEED: {
-                torrent.downSpeed = value.toString();
+                torrent.downSpeed = value.toULongLong();
                 break;
             }
             case UP_SPEED: {
-                torrent.upSpeed = value.toString();
+                torrent.upSpeed = value.toULongLong();
                 break;
             }
             case ETA: {

@@ -1,21 +1,25 @@
 #ifndef TORRENT_H
 #define TORRENT_H
 
-
 #include <QString>
 #include <libtorrent/torrent_status.hpp>
 
+// All int fields are in bytes
 struct Torrent {
     std::uint32_t id;
     QString name;
-    QString size;
+    // QString size;
+    std::uint64_t size;
     double progress; // 0.0% to 100.0%
     QString status;
     int seeds;
     int peers;
-    QString downSpeed;
-    QString upSpeed;
-    int eta; // In seconds
+    // QString downSpeed;
+    std::uint64_t downSpeed;
+    // QString upSpeed;
+    std::uint64_t upSpeed;
+    // int eta; // In seconds
+    std::int64_t eta; // signed for -1 if inf
 };
 
 enum TorrentsFields {
