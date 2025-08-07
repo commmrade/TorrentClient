@@ -3,6 +3,15 @@
 #include <QAbstractTableModel>
 #include "torrent.h"
 
+constexpr inline int getIdIndex() {
+    return TORRENT_FIELD_COUNT + 1488;
+}
+
+constexpr inline int getStatusIndex() {
+    return STATUS;
+}
+
+
 class TorrentsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -13,7 +22,8 @@ public:
         return m_torrents.size();
     }
     int columnCount(const QModelIndex& index = QModelIndex{}) const override {
-        return TORRENT_FIELD_COUNT;
+        // return TORRENT_FIELD_COUNT;
+        return TORRENT_FIELD_COUNT - 1; // where -1 is remove id
     }
 
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
@@ -30,6 +40,10 @@ public:
     bool updateTorrent(const Torrent& torrent);
     bool finishTorrent(const std::uint32_t id, const lt::torrent_status& status);
     bool removeTorrent(const std::uint32_t id);
+
+    std::uint32_t getTorrentId(const int row) {
+        return m_torrents[row].id;
+    }
 private:
     QList<Torrent> m_torrents;
 };

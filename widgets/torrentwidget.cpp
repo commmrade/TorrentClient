@@ -48,7 +48,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     });
 
     connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
-        auto torrentId = m_tableModel.index(index.row(), 0).data().toLongLong();
+        auto torrentId = m_tableModel.getTorrentId(index.row());
         m_sessionManager.setCurrentTorrentId(torrentId);
     });
 
@@ -68,8 +68,9 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
 {
     auto index = ui->tableView->indexAt(pos);
 
-    auto torrentId = m_tableModel.index(index.row(), 0).data().toUInt();
-    auto torrentStatus = m_tableModel.index(index.row(), 4).data().toString();
+    auto torrentId = m_tableModel.getTorrentId(index.row()); // TODO: is there a better way for this?
+
+    auto torrentStatus = m_tableModel.index(index.row(), getStatusIndex()).data().toString(); // Status was 4, now 3
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
     QMenu* menu = new QMenu(this);
     if (isPaused) {
@@ -98,7 +99,7 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
 void TorrentWidget::setupTableView()
 {
     ui->tableView->setModel(&m_tableModel);
-    ui->tableView->setItemDelegateForColumn(3, &m_tableDelegate);
+    ui->tableView->setItemDelegateForColumn(2, &m_tableDelegate);
 
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);

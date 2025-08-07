@@ -2,7 +2,7 @@
 #include <QList>
 #include <spdlog/spdlog.h>
 
-
+// TODO: Move into utils common
 inline double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
 }
@@ -12,13 +12,16 @@ TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(pa
 {
 }
 
+// to get id u need to do index(row, -1)
 QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::DisplayRole */) const
 {
     if (role < Qt::UserRole) {
         if (role == Qt::DisplayRole) {
             if (std::abs(index.row()) >= m_torrents.size()) return {};
             auto& torrent = m_torrents[index.row()];
-            switch (index.column()) {
+
+            auto id = index.column() + 1;
+            switch (id) {
                 case ID: {
                     return torrent.id;
                 }
@@ -102,7 +105,7 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
 {
     if (role == Qt::EditRole) {
         auto& torrent = m_torrents[index.row()];
-        switch (index.column()) {
+        switch (index.column() + 1) {
             case ID: {
                 torrent.id = value.toUInt();
                 break;
@@ -159,10 +162,10 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
         return {};
     }
     if (orientation == Qt::Horizontal) {
-        switch (section) {
-            case ID: {
-                return QVariant{"ID"};
-            }
+        switch (section + 1) {
+            // case ID: {
+            //     return QVariant{"ID"};
+            // }
             case NAME: {
                 return QVariant{"Name"};
             }
@@ -197,6 +200,7 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
     } else {
         return QVariant{section + 1};
     }
+    return {};
 }
 
 QHash<int, QByteArray> TorrentsTableModel::roleNames() const

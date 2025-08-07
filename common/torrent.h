@@ -32,7 +32,8 @@ enum TorrentsFields {
     PEERS,
     DOWN_SPEED,
     UP_SPEED,
-    ETA
+    ETA,
+
 };
 
 constexpr int TORRENT_FIELD_COUNT = TorrentsFields::ETA + 1;
