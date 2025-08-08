@@ -5,7 +5,7 @@
 #include "sessionmanager.h"
 #include "torrentstablemodel.h"
 #include "torrentitemdelegate.h"
-#include "peertablemodel.h"
+
 
 namespace Ui {
 class TorrentWidget;
@@ -33,7 +33,7 @@ private:
 
     TorrentsTableModel m_tableModel;
     TorrentItemDelegate m_tableDelegate;
-    PeerTableModel m_peerModel;
+
 };
 
 #endif // TORRENTWIDGET_H

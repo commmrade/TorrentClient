@@ -15,6 +15,9 @@
 struct Torrent;
 constexpr const char* SESSION_FILENAME = ".session";
 
+struct TorrentInfo;
+struct InternetInfo;
+
 class SessionManager : public QObject
 {
     Q_OBJECT
@@ -62,6 +65,8 @@ private:
 
     // Event loop and alert functions
     void eventLoop();
+    void updateProperties();
+    void updateGeneralProperty(const lt::torrent_handle& handle);
     void handleFinishedAlert(lt::torrent_finished_alert* alert);
     void handleStateUpdateAlert(lt::state_update_alert* alert);
     void handleMetadataReceived(lt::metadata_received_alert* alert);
@@ -79,8 +84,11 @@ signals:
     void torrentFinished(const std::uint32_t id, const lt::torrent_status& status);
     void torrentDeleted(const std::uint32_t id);
 
-    void peerInfo(const std::uint32_t id, std::vector<lt::peer_info> peers);
+    void peerInfo(const std::uint32_t id, const std::vector<lt::peer_info>& peers);
     void clearPeerInfo();
+
+    void generalInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
+    void clearGeneralInfo();
 };
 
 inline std::vector<char> readFile(const char *filename)

@@ -26,7 +26,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 
-    void setPeers(std::vector<lt::peer_info> peers);
+    void setPeers(const std::vector<lt::peer_info>& peers);
     void clearPeers();
 signals:
 

@@ -6,6 +6,9 @@
 #include <libtorrent/libtorrent.hpp>
 #include <QSettings>
 #include "settingsvalues.h"
+#include "torrentinfo.h"
+#include <QDateTime>
+
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
@@ -14,7 +17,7 @@ SessionManager::SessionManager(QObject *parent)
     m_session = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(100);
+    m_alertTimer.start(1000);
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(2000); // Check if torrent handles need save_resume, and then save .fastresume
 }
@@ -90,19 +93,31 @@ void SessionManager::eventLoop()
         }
     }
 
+    m_session->post_torrent_updates();
+    updateProperties(); // TODO: Maybe make properties call session manager themselves
+}
+
+void SessionManager::updateProperties()
+{
     if (m_currentTorrentId != -1) {
         auto& handle = m_torrentHandles[m_currentTorrentId];
-        if (handle.isValid()) {
-            std::vector<lt::peer_info> peers;
-            // TODO: Should i make it async?
-            m_torrentHandles[m_currentTorrentId].handle().get_peer_info(peers);
-            emit peerInfo(m_currentTorrentId, std::move(peers));
+
+        { // peer stats
+            if (handle.isValid()) {
+                std::vector<lt::peer_info> peers;
+                // TODO: Should i make it async?
+                m_torrentHandles[m_currentTorrentId].handle().get_peer_info(peers);
+                emit peerInfo(m_currentTorrentId, std::move(peers));
+            } else { // if its not valid something is wrong
+                m_currentTorrentId = -1;
+            }
         }
     } else {
+        // clear stats
         emit clearPeerInfo();
+        emit clearGeneralInfo();
     }
 
-    m_session->post_torrent_updates();
 }
 
 void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
@@ -122,9 +137,51 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     auto statuses = alert->status;
     for (auto& status : statuses) {
         auto& handle = status.handle;
+        if (handle.id() == m_currentTorrentId) {
+            updateGeneralProperty(handle);
+        }
         handleStatusUpdate(status, handle);
     }
 }
+
+void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
+{
+    auto status = handle.status();
+    InternetInfo iInfo;
+    iInfo.activeTime = status.active_duration.count();
+    iInfo.downloaded = status.total_download;
+    iInfo.downSpeed = status.download_rate;
+    iInfo.downLimit = handle.download_limit();
+
+    iInfo.eta = status.download_rate == 0 ? -1 : static_cast<int>(status.total_wanted / status.download_rate);
+
+    iInfo.uploaded = status.total_upload;
+    iInfo.upSpeed = status.upload_rate;
+    iInfo.upLimit = handle.upload_limit();
+
+    iInfo.connections = status.num_connections;
+    iInfo.seeds = status.num_seeds;
+    iInfo.peers = status.num_peers;
+
+    TorrentInfo tInfo;
+
+    tInfo.size = status.total_wanted;
+
+    tInfo.startTime = QDateTime::currentSecsSinceEpoch();
+    tInfo.hashBest = QString::fromStdString(lt::aux::to_hex(handle.info_hashes().get_best().to_string()));
+    tInfo.savePath = QString::fromStdString(status.save_path);
+    tInfo.comment = "Nigeria";
+
+    tInfo.piecesCount = status.num_pieces;
+
+    auto tfile = handle.torrent_file();
+    if (tfile) {
+        tInfo.pieceSize = tfile->piece_length();
+    }
+
+    emit generalInfo(tInfo, iInfo);
+}
+
 
 void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert *alert)
 {

@@ -4,6 +4,7 @@
 #include <QTableWidgetItem>
 #include <QMenu>
 #include "savetorrentdialog.h"
+#include <QElapsedTimer>
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -12,19 +13,8 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Setup tab widgets names
-    ui->torrentInfoTab->setTabText(0, "General");
-    ui->torrentInfoTab->setTabText(1, "Trackers");
-    ui->torrentInfoTab->setTabText(2, "Peers");
-    ui->torrentInfoTab->setTabText(3, "HTTP Sources");
-
-    ui->peerTableView->setModel(&m_peerModel);
-    ui->peerTableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->peerTableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->peerTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    //
-
+    QElapsedTimer perfTimer;
+    perfTimer.start();
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -40,12 +30,12 @@ TorrentWidget::TorrentWidget(QWidget *parent)
         m_tableModel.removeTorrent(id);
     });
 
-    connect(&m_sessionManager, &SessionManager::peerInfo, this, [this](const std::uint32_t id, std::vector<lt::peer_info> peers) {
-        m_peerModel.setPeers(std::move(peers));
-    });
-    connect(&m_sessionManager, &SessionManager::clearPeerInfo, this, [this] {
-        m_peerModel.clearPeers();
-    });
+    connect(&m_sessionManager, &SessionManager::peerInfo, ui->propertiesTab, &PropertiesWidget::setPeers);
+    connect(&m_sessionManager, &SessionManager::clearPeerInfo, ui->propertiesTab, &PropertiesWidget::clearPeers);
+
+    connect(&m_sessionManager, &SessionManager::generalInfo, ui->propertiesTab, &PropertiesWidget::setGeneralInfo);
+    connect(&m_sessionManager, &SessionManager::clearGeneralInfo, ui->propertiesTab, &PropertiesWidget::clearGeneralInfo);
+
 
     connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
         auto torrentId = m_tableModel.getTorrentId(index.row());
@@ -55,6 +45,8 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     // Context Menu Stuff
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
+
+    qDebug() << "Torrent widget ms" << perfTimer.elapsed();
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }

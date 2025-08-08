@@ -1,6 +1,8 @@
 #ifndef TORRENTHANDLE_H
 #define TORRENTHANDLE_H
 #include <libtorrent/torrent_handle.hpp>
+#include <chrono>
+#include <libtorrent/torrent_status.hpp>
 
 class TorrentHandle
 {
@@ -39,6 +41,10 @@ public:
 
     void saveResumeData() {
         m_handle.save_resume_data();
+    }
+
+    std::uint64_t activeDur() {
+        return m_handle.status().active_duration.count();
     }
 };
 

@@ -1,4 +1,7 @@
 #include "peertablemodel.h"
+#include <QElapsedTimer>
+#include <QThread>
+
 
 PeerTableModel::PeerTableModel(QObject *parent)
     : QAbstractTableModel{parent}
@@ -144,40 +147,125 @@ QHash<int, QByteArray> PeerTableModel::roleNames() const
 
 void PeerTableModel::clearPeers()
 {
-    beginRemoveRows(QModelIndex(), 0, m_peers.size());
+    beginResetModel();
     m_peers.clear();
-    endRemoveRows();
+    endResetModel();
 }
 
-void PeerTableModel::setPeers(std::vector<libtorrent::peer_info> peers)
+void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
 {
     auto conToStr = [](lt::connection_type_t t) -> QString {
         switch (t) {
         case lt::peer_info::standard_bittorrent: return "BT";
-        case lt::peer_info::http_seed:           return "HTTP";
-        case lt::peer_info::web_seed:            return "URL";
-        default:                                 return "UNKNOWN";
+        case lt::peer_info::http_seed: return "HTTP";
+        case lt::peer_info::web_seed: return "URL";
+        default: return "UNKNOWN";
         }
     };
+    auto makeKeyPeer = [](const Peer& peer) {
+        return peer.ip + ":" + QString::number(peer.port);
+    };
+    auto makeKeyPeerInfo = [](const lt::peer_info& peer) {
+        return QString::fromStdString(peer.ip.address().to_string()) + ":" + QString::number(peer.ip.port());
+    };
 
-    beginResetModel();
-    m_peers.clear();
-    m_peers.reserve(peers.size());
+    QHash<QString, int> newPeersMap; // key - row
+    QHash<QString, int> oldPeersMap; // key - row
 
-    for (const auto& peer : peers) {
-        m_peers.append(Peer {
-            "Ukraine",  // ← TODO: Replace with actual country if possible
-            QString::fromStdString(peer.ip.address().to_string()),
-            peer.ip.port(),
-            conToStr(peer.connection_type),
-            QString::fromStdString(peer.client),
-            peer.progress,
-            static_cast<std::uint64_t>(peer.up_speed),
-            static_cast<std::uint64_t>(peer.down_speed),
-            static_cast<std::uint64_t>(peer.total_download),
-            static_cast<std::uint64_t>(peer.total_upload)
-        });
+    // Cache peers
+
+    QElapsedTimer perfTimer;
+    perfTimer.start();
+    for (auto i = 0; i < peers.size(); ++i) {
+        QString const key = makeKeyPeerInfo(peers[i]);
+        newPeersMap.insert(key, i);
+    }
+    for (auto i = 0; i < m_peers.size(); ++i) {
+        QString const key = makeKeyPeer(m_peers[i]);
+        oldPeersMap.insert(key, i);
     }
 
-    endResetModel();
+
+    // Handle inserts 'n updates
+    for (auto i = 0; i < peers.size(); ++i) {
+        auto newKey = makeKeyPeerInfo(peers[i]);
+        if (oldPeersMap.contains(newKey)) {
+            int row = oldPeersMap[newKey];
+            auto& oldPeer = m_peers[row];
+
+            float progress = peers[i].progress;
+            quint64 upSpeed = static_cast<quint64>(peers[i].up_speed);
+            quint64 downSpeed = static_cast<quint64>(peers[i].down_speed);
+            quint64 downloaded = static_cast<quint64>(peers[i].total_download);
+            quint64 uploaded = static_cast<quint64>(peers[i].total_upload);
+
+            if (oldPeer.progress != progress ||
+                oldPeer.upSpeed != upSpeed ||
+                oldPeer.downSpeed != downSpeed ||
+                oldPeer.downloaded != downloaded ||
+                oldPeer.uploaded != uploaded)
+            {
+                oldPeer.progress = progress;
+                oldPeer.upSpeed = upSpeed;
+                oldPeer.downSpeed = downSpeed;
+                oldPeer.downloaded = downloaded;
+                oldPeer.uploaded = uploaded;
+
+                // emit dataChanged(index(row, 6), index(row, columnCount() - 1));
+            }
+        } else {
+            auto row = m_peers.size();
+            beginInsertRows(QModelIndex(), row, row);
+            m_peers.append(Peer {
+                "Ukraine",  // ← TODO: Replace with actual country if possible
+                QString::fromStdString(peers[i].ip.address().to_string()),
+                peers[i].ip.port(),
+                conToStr(peers[i].connection_type),
+                QString::fromStdString(peers[i].client),
+                peers[i].progress,
+                static_cast<std::uint64_t>(peers[i].up_speed),
+                static_cast<std::uint64_t>(peers[i].down_speed),
+                static_cast<std::uint64_t>(peers[i].total_download),
+                static_cast<std::uint64_t>(peers[i].total_upload)
+            });
+            endInsertRows();
+        }
+    }
+
+
+
+    // Handle deleted rows, do it in the end, so it wont fuck up ids
+    for (auto i = m_peers.size() - 1; i >= 0; --i) {
+        QString const key = makeKeyPeer(m_peers[i]);
+        if (!newPeersMap.contains(key)) { // if peer exists in old, but doesnt in new, it is deleted
+            beginRemoveRows(QModelIndex(), i, i);
+            m_peers.removeAt(i);
+            endRemoveRows();
+        }
+    }
+
+    if (m_peers.size())
+        emit dataChanged(index(0, 5), index(m_peers.size() - 1, columnCount() - 1));
 }
+
+
+// beginResetModel();
+// m_peers.clear();
+// m_peers.reserve(peers.size());
+
+// for (const auto& peer : peers) {
+//     m_peers.append(Peer {
+//         "Ukraine",  // ← TODO: Replace with actual country if possible
+//         QString::fromStdString(peer.ip.address().to_string()),
+//         peer.ip.port(),
+//         conToStr(peer.connection_type),
+//         QString::fromStdString(peer.client),
+//         peer.progress,
+//         static_cast<std::uint64_t>(peer.up_speed),
+//         static_cast<std::uint64_t>(peer.down_speed),
+//         static_cast<std::uint64_t>(peer.total_download),
+//         static_cast<std::uint64_t>(peer.total_upload)
+//     });
+// }
+
+// endResetModel();
