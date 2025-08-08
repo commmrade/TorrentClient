@@ -22,28 +22,28 @@ PropertiesWidget::~PropertiesWidget()
 
 void PropertiesWidget::setPeers(const std::uint32_t id, const std::vector<lt::peer_info>& peers)
 {
-    if (ui->propertiesTab->currentIndex() == 2) {
+    if (ui->propertiesTab->currentIndex() == 2 && isEnabled()) {
         ui->peerTable->setPeers(id, peers);
     }
 }
 
 void PropertiesWidget::clearPeers()
 {
-    if (ui->propertiesTab->currentIndex() == 2) {
+    if (ui->propertiesTab->currentIndex() == 2 && isEnabled()) {
         ui->peerTable->clearPeers();
     }
 }
 
 void PropertiesWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
-    if (ui->propertiesTab->currentIndex() == 0) {
+    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
         ui->infoWidget->setGeneralInfo(tInfo, iInfo);
     }
 }
 
 void PropertiesWidget::clearGeneralInfo()
 {
-    if (ui->propertiesTab->currentIndex() == 0) {
+    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
         ui->infoWidget->clearGeneralInfo();
     }
 }

@@ -52,6 +52,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="togglePropertiesBtn">
+       <property name="text">
+        <string>Hide properties</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="PropertiesWidget" name="propertiesTab" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">

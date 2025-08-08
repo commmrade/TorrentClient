@@ -25,6 +25,9 @@ private slots:
     void on_pushButton_2_clicked();
 
     void customContextMenu(const QPoint& pos);
+
+    void on_togglePropertiesBtn_clicked();
+
 private:
     void setupTableView();
 
