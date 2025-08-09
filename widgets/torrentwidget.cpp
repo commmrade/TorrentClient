@@ -13,8 +13,8 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QElapsedTimer perfTimer;
-    perfTimer.start();
+    // QElapsedTimer perfTimer;
+    // perfTimer.start();
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -46,7 +46,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
 
-    qDebug() << "Torrent widget ms" << perfTimer.elapsed();
+    // qDebug() << "Torrent widget ms" << perfTimer.elapsed();
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }
@@ -108,7 +108,7 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "OPen torrent", "/home/klewy", "Torrents (*.torrent)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open torrent", "/home/klewy", "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }
