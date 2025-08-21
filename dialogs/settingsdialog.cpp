@@ -63,13 +63,17 @@ void SettingsDialog::applyApplicationSettings()
 {
     QSettings settings;
     // Language
+    qDebug() << "Changed Language setting";
     settings.setValue(SettingsValues::GUI_LANGUAGE, ui->languageBox->currentText());
     // Theme
+    // TODO: Popup telling user to restart app to apply settings, придумать как лучше всего реализовать, ведь пока что нет проверок, что конкретно меняется, мб переделать
+    qDebug() << "Changed Theme setting";
     settings.setValue(SettingsValues::GUI_THEME, ui->themeBox->currentText());
 }
 
 void SettingsDialog::applyTorrentSettings()
 {
+    // TODO: Менять speed даже если ничо не изменилосб не очень оптимизированный подход
     auto& sessionManager = SessionManager::instance();
     auto downloadLimitValue = ui->downloadLimitSpin->value();
     sessionManager.setDownloadLimit(downloadLimitValue);

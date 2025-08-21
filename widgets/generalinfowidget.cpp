@@ -34,6 +34,7 @@ GeneralInfoWidget::~GeneralInfoWidget()
 
 void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
+    // TODO: Convert to B mb kb gb depending on size
     auto timeActive = QString::number(iInfo.activeTime) + " s";
     ui->timeActValue->setText(timeActive);
 

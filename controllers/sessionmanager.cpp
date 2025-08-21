@@ -239,6 +239,7 @@ void SessionManager::loadResumes()
 
 void SessionManager::setDownloadLimit(int value)
 {
+    qDebug() << "Changed download limit";
     lt::settings_pack newSettings = m_session->get_settings();
     auto asBytes = value * 1024; // value is in kilobytes per second
     newSettings.set_int(lt::settings_pack::download_rate_limit, asBytes);
@@ -250,6 +251,7 @@ void SessionManager::setDownloadLimit(int value)
 
 void SessionManager::setUploadLimit(int value)
 {
+    qDebug() << "Changed upload limit";
     lt::settings_pack newSettings = m_session->get_settings();
     auto asBytes = value * 1024; // value is in kilobytes per second
     newSettings.set_int(lt::settings_pack::upload_rate_limit, asBytes);

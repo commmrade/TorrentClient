@@ -121,7 +121,6 @@ void TorrentWidget::on_pushButton_2_clicked()
 
 void TorrentWidget::on_togglePropertiesBtn_clicked()
 {
-    qDebug() << "nigga op";
     ui->propertiesTab->setEnabled(!ui->propertiesTab->isEnabled());
     ui->propertiesTab->setVisible(!ui->propertiesTab->isVisible());
 }
