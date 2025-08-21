@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QPointer>
 #include "torrentwidget.h"
-#include "settingsdialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,6 +26,5 @@ private:
     Ui::MainWindow *ui;
 
     QPointer<TorrentWidget> m_torrentWidget;
-    QPointer<SettingsDialog> m_settingsDialog;
 };
 #endif // MAINWINDOW_H

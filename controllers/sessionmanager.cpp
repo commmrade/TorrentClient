@@ -94,7 +94,7 @@ void SessionManager::eventLoop()
     }
 
     m_session->post_torrent_updates();
-    updateProperties(); // TODO: Maybe make properties call session manager themselves
+    updateProperties();
 }
 
 void SessionManager::updateProperties()
@@ -105,7 +105,6 @@ void SessionManager::updateProperties()
         { // peer stats
             if (handle.isValid()) {
                 std::vector<lt::peer_info> peers;
-                // TODO: Should i make it async?
                 m_torrentHandles[m_currentTorrentId].handle().get_peer_info(peers);
                 emit peerInfo(m_currentTorrentId, std::move(peers));
             } else { // if its not valid something is wrong
@@ -239,7 +238,6 @@ void SessionManager::loadResumes()
 
 void SessionManager::setDownloadLimit(int value)
 {
-    qDebug() << "Changed download limit";
     lt::settings_pack newSettings = m_session->get_settings();
     auto asBytes = value * 1024; // value is in kilobytes per second
     newSettings.set_int(lt::settings_pack::download_rate_limit, asBytes);
@@ -251,7 +249,6 @@ void SessionManager::setDownloadLimit(int value)
 
 void SessionManager::setUploadLimit(int value)
 {
-    qDebug() << "Changed upload limit";
     lt::settings_pack newSettings = m_session->get_settings();
     auto asBytes = value * 1024; // value is in kilobytes per second
     newSettings.set_int(lt::settings_pack::upload_rate_limit, asBytes);
@@ -261,24 +258,23 @@ void SessionManager::setUploadLimit(int value)
     settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{asBytes});
 }
 
-void SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
+bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
 {
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
     lt::add_torrent_params params{};
-
     writeTorrentFile(torrent_info);
 
     params.ti = std::move(torrent_info);
     params.save_path = outputDir.toString().toStdString();
-    addTorrent(params);
+    return addTorrent(params);
 }
 
-void SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir)
+bool SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir)
 {
     auto params = lt::parse_magnet_uri(magnetURI.toStdString());
     qDebug() << "magnet torrent" << params.name;
     params.save_path = outputDir.toString().toStdString();
-    addTorrent(std::move(params));
+    return addTorrent(std::move(params));
 }
 
 bool SessionManager::isTorrentPaused(const uint32_t id) const
@@ -330,14 +326,13 @@ void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     emit torrentDeleted(id);
 }
 
-void SessionManager::addTorrent(libtorrent::add_torrent_params params)
+bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     if (isTorrentExists(params.info_hashes.get_best().is_all_zeros() ? params.ti->info_hashes().get_best() : params.info_hashes.get_best())) {
-        // TODO: Signal error adding torrent
-        qDebug() << "here??";
-        return;
+        return false;
     }
     m_session->async_add_torrent(std::move(params));
+    return true;
 }
 
 void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)
@@ -365,7 +360,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
     //     // }
 
 
-    //     qDebug() << "Country:" << "TODO" << "Ip:" << peer.ip.address().to_string() <<
+    //     qDebug() << "Country:" << << "Ip:" << peer.ip.address().to_string() <<
     //         "Port:" << peer.ip.port() << "Connection:" << conType <<
     //         "Client:" << peer.client << "Progress:" << peer.progress <<
     //         "Down speed:" << peer.down_speed / 1024.0 << "Up Speed:" << peer.up_speed <<

@@ -34,8 +34,6 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 {
     ui->setupUi(this);
     ui->sizeInfo->setText("Fetching...");
-    // TODO: set size
-    // The idea is that I launch a session and get metadata
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetUri.toStdString());
     auto saveTorrentFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "torrents" + QDir::separator() + QString::fromStdString(libtorrent::aux::to_hex(params.info_hashes.get_best().to_string()));

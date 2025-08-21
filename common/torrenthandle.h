@@ -19,7 +19,6 @@ public:
         return m_handle;
     }
 
-    // TODO: add default flags and etc
     bool isNeedSaveData() const {
         return m_handle.need_save_resume_data();
     }

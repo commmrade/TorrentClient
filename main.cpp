@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     QDir().mkdir(basePath + QDir::separator() + "torrents"); // Directory for downloads by default
     QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
     QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?
+    QDir().mkdir(basePath + QDir::separator() + "themes");
 
 
 
@@ -27,13 +28,15 @@ int main(int argc, char *argv[])
     // Set theme
     QString theme = settings.value(SettingsValues::GUI_THEME, "Dark").toString();
     if (theme == "Dark") {
-        QFile file("dark.qss");
+        auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
+        QFile file(darkThemePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             a.setStyleSheet(file.readAll());
             file.close();
         }
     } else {
-        QFile file("light.qss");
+        auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
+        QFile file(lightThemePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             a.setStyleSheet(file.readAll());
             file.close();

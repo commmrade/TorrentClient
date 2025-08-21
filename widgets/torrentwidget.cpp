@@ -5,6 +5,7 @@
 #include <QMenu>
 #include "savetorrentdialog.h"
 #include <QElapsedTimer>
+#include <QMessageBox>
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -100,9 +101,16 @@ void TorrentWidget::setupTableView()
 
 void TorrentWidget::on_pushButton_clicked()
 {
-    SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
-    if (saveDialog.exec() == QDialog::Accepted) {
-        m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), saveDialog.getSavePath());
+    try {
+        SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
+        if (saveDialog.exec() == QDialog::Accepted) {
+            if (!m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), saveDialog.getSavePath())) {
+                QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+            }
+        }
+    } catch (const std::exception& ex) {
+        qCritical() << ex.what();
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
     }
 }
 
@@ -112,10 +120,17 @@ void TorrentWidget::on_pushButton_2_clicked()
     if (filename.isEmpty()) {
         return;
     }
-    SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
-    if (saveDialog.exec() == QDialog::Accepted) {
-        auto torrentSavePath = saveDialog.getSavePath();
-        m_sessionManager.addTorrentByFilename(filename, torrentSavePath);
+    try {
+        SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
+        if (saveDialog.exec() == QDialog::Accepted) {
+            auto torrentSavePath = saveDialog.getSavePath();
+            if (!m_sessionManager.addTorrentByFilename(filename, torrentSavePath)) {
+                QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+            }
+        }
+    } catch (const std::exception& ex) {
+        qCritical() << ex.what();
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
     }
 }
 

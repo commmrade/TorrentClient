@@ -1,18 +1,12 @@
 #include "torrentstablemodel.h"
 #include <QList>
 #include <spdlog/spdlog.h>
-
-// TODO: Move into utils common
-inline double ceilTwoAfterComa(double number) {
-    return std::ceil(number * 100.0) / 100.0;
-}
-
+#include "utils.h"
 
 TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
 }
 
-// to get id u need to do index(row, -1)
 QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::DisplayRole */) const
 {
     if (role < Qt::UserRole) {

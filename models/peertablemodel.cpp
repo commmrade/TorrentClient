@@ -255,7 +255,7 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
 
 // for (const auto& peer : peers) {
 //     m_peers.append(Peer {
-//         "Ukraine",  // ← TODO: Replace with actual country if possible
+//         "Ukraine",
 //         QString::fromStdString(peer.ip.address().to_string()),
 //         peer.ip.port(),
 //         conToStr(peer.connection_type),

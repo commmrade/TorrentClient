@@ -30,9 +30,29 @@ private slots:
 
     void on_savePathButton_clicked();
 
+    void on_languageBox_currentTextChanged(const QString &arg1);
+
+    void on_themeBox_currentTextChanged(const QString &arg1);
+
+    void on_downloadLimitSpin_valueChanged(int arg1);
+
+    void on_uploadLimitSpin_valueChanged(int arg1);
+
+    void on_okButton_clicked();
+
+    void on_closeButton_clicked();
+
 private:
     Ui::SettingsDialog *ui;
 
+    // Settings flags
+    bool m_restartRequired{false};
+    // General
+    bool m_languageChanged{false};
+    bool m_themeChanged{false};
+    // Torrent
+    bool m_downloadLimitChanged{false};
+    bool m_uploadLimitChanged{false};
 
     void applyApplicationSettings();
     void applyTorrentSettings();

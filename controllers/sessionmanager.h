@@ -41,8 +41,8 @@ public:
         return sessionManager;
     }
 
-    void addTorrentByFilename(QStringView filepath, QStringView outputDir);
-    void addTorrentByMagnet(QString magnetURI, QStringView outputDir);
+    bool addTorrentByFilename(QStringView filepath, QStringView outputDir);
+    bool addTorrentByMagnet(QString magnetURI, QStringView outputDir);
 
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);
@@ -74,7 +74,7 @@ private:
     void handleAddTorrentAlert(lt::add_torrent_alert* alert);
 
     void saveResumes();
-    void addTorrent(lt::add_torrent_params params);
+    bool addTorrent(lt::add_torrent_params params);
     void handleStatusUpdate(const lt::torrent_status& status, const lt::torrent_handle& handle);
 
     bool isTorrentExists(const lt::sha1_hash& hash) const;
