@@ -61,7 +61,7 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
 {
     auto index = ui->tableView->indexAt(pos);
 
-    auto torrentId = m_tableModel.getTorrentId(index.row()); // TODO: is there a better way for this?
+    auto torrentId = m_tableModel.getTorrentId(index.row());
 
     auto torrentStatus = m_tableModel.index(index.row(), getStatusIndex()).data().toString(); // Status was 4, now 3
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);

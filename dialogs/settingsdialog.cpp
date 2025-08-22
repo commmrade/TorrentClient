@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProcess>
+#include <QStandardPaths>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
@@ -80,7 +81,9 @@ void SettingsDialog::on_applyButton_clicked()
         // Prompt
         int ret = QMessageBox::information(this, "Restart required", "You may need to restart the app to apply new settings, do it now?", QMessageBox::Apply | QMessageBox::Cancel);
         if (ret == QMessageBox::Apply) {
-            QApplication::exit(); // TODO: Actually restart
+            QString const binaryPath = QCoreApplication::applicationFilePath();
+            QProcess::startDetached(binaryPath);
+            QApplication::exit();
         }
 
         m_restartRequired = false;

@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
             file.close();
         }
     }
+    // qDebug() << "Application is in" << QCoreApplication::applicationFilePath();
 
     MainWindow w;
     w.show();
