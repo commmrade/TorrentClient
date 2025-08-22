@@ -408,7 +408,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_31">
+           <widget class="QLabel" name="commentLabel">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -477,7 +477,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_32">
+           <widget class="QLabel" name="commentValue">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
               <horstretch>0</horstretch>

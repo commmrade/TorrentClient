@@ -24,14 +24,7 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case SIZE: {
                     auto sizeInBytes = torrent.size;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
-                    }
+                    QString sizeStr = bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PROGRESS: {
@@ -48,26 +41,12 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case DOWN_SPEED: {
                     auto sizeInBytes = torrent.downSpeed;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
-                    }
+                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case UP_SPEED: {
                     auto sizeInBytes = torrent.upSpeed;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
-                    }
+                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case ETA: {

@@ -5,6 +5,8 @@
 #include <QSettings>
 #include "settingsvalues.h"
 
+#include <QDateTime>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("klewy");
@@ -20,6 +22,7 @@ int main(int argc, char *argv[])
     QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
     QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?
     QDir().mkdir(basePath + QDir::separator() + "themes");
+
 
 
     QApplication a(argc, argv);

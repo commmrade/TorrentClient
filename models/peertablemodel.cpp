@@ -1,7 +1,7 @@
 #include "peertablemodel.h"
 #include <QElapsedTimer>
 #include <QThread>
-
+#include "utils.h"
 
 PeerTableModel::PeerTableModel(QObject *parent)
     : QAbstractTableModel{parent}
@@ -51,50 +51,22 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const
                 }
                 case PeerFields::UP_SPEED: {
                     auto sizeInBytes = peer.upSpeed;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
-                    }
+                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::DOWN_SPEED: {
                     auto sizeInBytes = peer.downSpeed;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB/s";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB/s";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
-                    }
+                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::DOWNLOADED: {
                     auto sizeInBytes = peer.downloaded;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
-                    }
+                    QString sizeStr = bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::UPLOADED: {
                     auto sizeInBytes = peer.uploaded;
-                    QString sizeStr;
-                    if (sizeInBytes < 1024 * 1024) { // if less than a kilobyte
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0)) + " KB";
-                    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0)) + " MB";
-                    } else {
-                        sizeStr = QString::number(ceilTwoAfterComa(sizeInBytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
-                    }
+                    QString sizeStr = bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 default: {
@@ -251,7 +223,6 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
             auto row = m_peers.size();
             beginInsertRows(QModelIndex(), row, row);
 
-            // fetch Country from geoip database TODO
             auto ipStr = peers[i].ip.address().to_string();
             QString countryName = countryFromIp(ipStr);
 
@@ -285,25 +256,3 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
     if (m_peers.size())
         emit dataChanged(index(0, 5), index(m_peers.size() - 1, columnCount() - 1));
 }
-
-
-// beginResetModel();
-// m_peers.clear();
-// m_peers.reserve(peers.size());
-
-// for (const auto& peer : peers) {
-//     m_peers.append(Peer {
-//         "Ukraine",
-//         QString::fromStdString(peer.ip.address().to_string()),
-//         peer.ip.port(),
-//         conToStr(peer.connection_type),
-//         QString::fromStdString(peer.client),
-//         peer.progress,
-//         static_cast<std::uint64_t>(peer.up_speed),
-//         static_cast<std::uint64_t>(peer.down_speed),
-//         static_cast<std::uint64_t>(peer.total_download),
-//         static_cast<std::uint64_t>(peer.total_upload)
-//     });
-// }
-
-// endResetModel();

@@ -1,5 +1,7 @@
 #include "generalinfowidget.h"
 #include "ui_generalinfowidget.h"
+#include "utils.h"
+#include <QDateTime>
 
 GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
     : QWidget(parent)
@@ -34,29 +36,49 @@ GeneralInfoWidget::~GeneralInfoWidget()
 
 void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
-    // TODO: Convert to B mb kb gb depending on size
-    auto timeActive = QString::number(iInfo.activeTime) + " s";
-    ui->timeActValue->setText(timeActive);
+    {
+        auto hrs = iInfo.activeTime / 3600;
+        auto mins = iInfo.activeTime % 3600 / 60;
+        auto secs = iInfo.activeTime % 60;
+        QString timeStr;
+        if (iInfo.activeTime == -1) {
+            timeStr = "infinity";
+        } else {
+            timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
+        }
+        ui->timeActValue->setText(timeStr);
+    }
 
-    auto downloaded = QString::number(iInfo.downloaded) + " B";
+    auto downloaded = bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
 
-    auto downSpeed = QString::number(iInfo.downSpeed) + " B/s";
+    auto downSpeed = bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    auto downLim = QString::number(iInfo.downLimit) + " B";
+    auto downLim = bytesToHigherPerSec(iInfo.downLimit);
     ui->downloadLimValue->setText(downLim);
 
-    auto eta = QString::number(iInfo.eta) + " s";
-    ui->etaValue->setText(eta);
+    {
+        auto etaSecs = iInfo.eta;
+        auto hrs = etaSecs / 3600;
+        auto mins = etaSecs % 3600 / 60;
+        auto secs = etaSecs % 60;
+        QString etaStr;
+        if (etaSecs == -1) {
+            etaStr = "infinity";
+        } else {
+            etaStr = QString("%1:%2:%3").arg(hrs).arg(mins).arg(secs);
+        }
+        ui->etaValue->setText(etaStr);
+    }
 
-    auto uploaded = QString::number(iInfo.uploaded);
+    auto uploaded = bytesToHigher(iInfo.uploaded);
     ui->uploadedValue->setText(uploaded);
 
-    auto upSpeed = QString::number(iInfo.upSpeed);
+    auto upSpeed = bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    auto upLim = QString::number(iInfo.upLimit);
+    auto upLim = bytesToHigherPerSec(iInfo.upLimit);
     ui->uploadLimValue->setText(upLim);
 
     auto conns = QString::number(iInfo.connections);
@@ -70,11 +92,13 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
 
     //
 
-    auto torSize = QString::number(tInfo.size) + " B";
+    auto torSize = bytesToHigher(tInfo.size);
     ui->torSizeValue->setText(torSize);
 
-    auto startTime = QString::number(tInfo.startTime);
-    ui->startTimeValue->setText(startTime);
+
+    QDateTime timestamp;
+    timestamp.setSecsSinceEpoch(tInfo.startTime);
+    ui->startTimeValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
 
     auto infoHash = tInfo.hashBest;
     ui->infoHashValue->setText(infoHash);
@@ -82,14 +106,18 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto savePath = tInfo.savePath;
     ui->savePathValue->setText(savePath);
 
-    // auto comm = tInfo.comment; TODO: Add
+    auto comm = tInfo.comment;
+    ui->commentValue->setText(comm);
+
     auto pieces = QString::number(tInfo.piecesCount);
-    auto piecesSize = QString::number(tInfo.pieceSize);
-    auto piecesStr = pieces + " x " + piecesSize + " B";
+    auto piecesStr = pieces + " x " + bytesToHigher(tInfo.pieceSize);
     ui->piecesValue->setText(piecesStr);
 
-    auto complTime = "TODO"; // TODO: ADD FIELD
-    ui->completionValue->setText(complTime);
+    if (tInfo.completedTime.has_value()) {
+        QDateTime timestamp;
+        timestamp.setSecsSinceEpoch(tInfo.completedTime.value());
+        ui->completionValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
+    }
 }
 
 void GeneralInfoWidget::clearGeneralInfo()

@@ -23,6 +23,9 @@ struct InternetInfo {
 struct TorrentInfo {
     std::uint64_t size;
     std::uint64_t startTime;
+
+    std::optional<std::uint64_t> completedTime; // -1 for not completed yet
+
     QString hashBest;
     QString savePath;
     QString comment;
