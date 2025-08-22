@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
     QDir().mkdir(basePath + QDir::separator() + "themes");
 
 
-
     QApplication a(argc, argv);
 
     // Set theme

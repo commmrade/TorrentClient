@@ -5,12 +5,14 @@
 #include <QAbstractTableModel>
 #include "peer.h"
 #include <libtorrent/peer_info.hpp>
+#include <maxminddb.h>
 
 class PeerTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
     explicit PeerTableModel(QObject *parent = nullptr);
+    ~PeerTableModel();
 
     int rowCount(const QModelIndex& index = QModelIndex{}) const override {
         return m_peers.size();
@@ -32,6 +34,9 @@ signals:
 
 private:
     QList<Peer> m_peers;
+    MMDB_s m_mmdb;
+
+    QString countryFromIp(QByteArrayView ip);
 };
 
 #endif // PEERTABLEMODEL_H

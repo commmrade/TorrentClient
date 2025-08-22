@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QDesktopServices>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
@@ -55,19 +56,15 @@ void SettingsDialog::on_customizeButton_clicked()
     if (themeString == "Dark") {
         // open dark.qss or whatevuh
         auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
-#ifdef __linux__
-        QProcess::startDetached("xdg-open", QStringList{darkThemePath});
-#else
-        throw std::runtime_error("Not supported yet");
-#endif
+        if (!QDesktopServices::openUrl("file:" + darkThemePath)) {
+            qCritical("Could not open .qss file");
+        }
     } else {
         // open light.qss or whatever
         auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
-#ifdef __linux__
-        QProcess::startDetached("xdg-open", QStringList{lightThemePath});
-#else
-        throw std::runtime_error("Not supported yet");
-#endif
+        if (!QDesktopServices::openUrl("file:" + lightThemePath)) {
+            qCritical("Could not open .qss file");
+        }
     }
 }
 
@@ -83,7 +80,7 @@ void SettingsDialog::on_applyButton_clicked()
         if (ret == QMessageBox::Apply) {
             QString const binaryPath = QCoreApplication::applicationFilePath();
             QProcess::startDetached(binaryPath);
-            QApplication::exit();
+            QApplication::exit(); // Kill old app process and start a detached new one
         }
 
         m_restartRequired = false;

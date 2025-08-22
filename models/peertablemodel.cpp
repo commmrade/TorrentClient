@@ -5,7 +5,20 @@
 
 PeerTableModel::PeerTableModel(QObject *parent)
     : QAbstractTableModel{parent}
-{}
+{
+    int status = MMDB_open("GeoIP.mmdb", MMDB_MODE_MMAP, &m_mmdb);
+    if (status != MMDB_SUCCESS) {
+        qWarning("GeoIP Database was not found, defaulting to Unknown");
+        m_mmdb.filename = nullptr; // Make sure mmdb context is not valid
+    }
+}
+
+PeerTableModel::~PeerTableModel()
+{
+    if (m_mmdb.filename) {
+        MMDB_close(&m_mmdb);
+    }
+}
 
 inline double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
@@ -152,6 +165,27 @@ void PeerTableModel::clearPeers()
     endResetModel();
 }
 
+QString PeerTableModel::countryFromIp(QByteArrayView ip)
+{
+    QString countryName{"Unknown"};
+    if (m_mmdb.filename) {
+        int gai_status;
+        int status;
+        MMDB_lookup_result_s search_result = MMDB_lookup_string(&m_mmdb, ip.data(), &gai_status, &status);
+        if (status != MMDB_SUCCESS) {
+            qWarning() << "Could not lookup address" << ip;
+            return countryName;
+        }
+
+        MMDB_entry_data_s entry_data;
+        status = MMDB_get_value(&search_result.entry, &entry_data, "country", "names", "en", NULL);
+        if (status == MMDB_SUCCESS && entry_data.has_data) {
+            countryName.assign(entry_data.utf8_string, entry_data.utf8_string + entry_data.data_size);
+        }
+    }
+    return countryName;
+}
+
 void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
 {
     auto conToStr = [](lt::connection_type_t t) -> QString {
@@ -216,8 +250,13 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
         } else {
             auto row = m_peers.size();
             beginInsertRows(QModelIndex(), row, row);
+
+            // fetch Country from geoip database TODO
+            auto ipStr = peers[i].ip.address().to_string();
+            QString countryName = countryFromIp(ipStr);
+
             m_peers.append(Peer {
-                "Ukraine",  // ← TODO: Replace with actual country if possible
+                countryName,
                 QString::fromStdString(peers[i].ip.address().to_string()),
                 peers[i].ip.port(),
                 conToStr(peers[i].connection_type),
@@ -231,7 +270,6 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
             endInsertRows();
         }
     }
-
 
 
     // Handle deleted rows, do it in the end, so it wont fuck up ids

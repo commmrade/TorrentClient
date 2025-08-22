@@ -18,6 +18,7 @@ pkg_check_modules(LIBTORRENT REQUIRED libtorrent-rasterbar)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+find_library(MAXMINDDB_LIBRARY maxminddb)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -65,8 +66,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES})
-target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS})
+target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY})
+target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${MAXMINDDB_INCLUDE_DIR})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
