@@ -166,7 +166,7 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
 
     tInfo.completedTime = std::nullopt; // TODO: Write actual completed time (if completed)
     tInfo.size = status.total_wanted;
-    tInfo.startTime = QDateTime::currentSecsSinceEpoch(); // TODO: Write actual start time since the first session
+    tInfo.startTime = status.added_time; // TODO: Write actual start time since the first session
     tInfo.hashBest = QString::fromStdString(lt::aux::to_hex(handle.info_hashes().get_best().to_string()));
     tInfo.savePath = QString::fromStdString(status.save_path);
     tInfo.comment = "Nigeria";
