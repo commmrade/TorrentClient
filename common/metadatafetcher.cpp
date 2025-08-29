@@ -5,6 +5,11 @@
 #include <QDebug>
 #include <libtorrent/alert_types.hpp>
 
+void MetadataFetcher::stopRunning()
+{
+    m_isRunning = false;
+}
+
 void MetadataFetcher::run()
 {
     lt::session_params sessParams;
@@ -18,8 +23,7 @@ void MetadataFetcher::run()
     lt::session session{sessParams};
     auto torrentHandle = session.add_torrent(std::move(m_params));
 
-    bool is_running = true;
-    while (is_running) {
+    while (m_isRunning) {
         std::vector<lt::alert*> alerts;
 
         session.pop_alerts(&alerts);
@@ -27,11 +31,11 @@ void MetadataFetcher::run()
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
                 // this->setSize(metadataRecAlert->handle.torrent_file()->total_size());
                 emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());
-                is_running = false;
+                m_isRunning = false;
                 break;
             } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {
                 qWarning() << "Could not fetch metadata for magnet, because" << metadataFailedAlert->message();
-                is_running = false;
+                m_isRunning = false;
                 break;
             }
         }
