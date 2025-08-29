@@ -4,16 +4,16 @@
 #include <QString>
 
 struct InternetInfo {
-    std::uint64_t activeTime;
-    std::uint64_t downloaded;
-    std::uint64_t downSpeed;
-    std::uint64_t downLimit;
+    std::int64_t activeTime;
+    std::int64_t downloaded;
+    int downSpeed;
+    int downLimit;
 
     std::int64_t eta; // signed for -1
 
-    std::uint64_t uploaded;
-    std::uint64_t upSpeed;
-    std::uint64_t upLimit;
+    std::int64_t uploaded;
+    int upSpeed;
+    int upLimit;
 
     int connections;
     int seeds;
@@ -21,17 +21,17 @@ struct InternetInfo {
 };
 
 struct TorrentInfo {
-    std::uint64_t size;
-    std::uint64_t startTime;
+    std::int64_t size;
+    std::int64_t startTime;
 
-    std::optional<std::uint64_t> completedTime; // -1 for not completed yet
+    std::int64_t completedTime; // -1 for not completed yet
 
     QString hashBest;
     QString savePath;
     QString comment;
 
     int piecesCount;
-    std::uint64_t pieceSize;
+    int pieceSize;
 };
 
 #endif // TORRENTINFO_H

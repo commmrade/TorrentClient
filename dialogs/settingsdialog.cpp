@@ -143,7 +143,7 @@ void SettingsDialog::on_themeBox_currentTextChanged(const QString &arg1)
 }
 
 void SettingsDialog::on_downloadLimitSpin_valueChanged(int arg1)
-{ // TODO: Fix download limti changed = true, when you went from 100 to 102 and then back to 100, or just forget about it
+{
     m_downloadLimitChanged = true;
 }
 

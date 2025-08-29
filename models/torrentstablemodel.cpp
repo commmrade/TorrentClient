@@ -51,7 +51,7 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case ETA: {
                     auto etaSecs = torrent.eta;
-
+                    // qDebug() << etaSecs;
                     auto hrs = etaSecs / 3600;
                     auto mins = etaSecs % 3600 / 60;
                     auto secs = etaSecs % 60;
@@ -235,7 +235,7 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
 
     auto rowIndex = std::distance(m_torrents.begin(), torrentIterator);
     beginRemoveRows(QModelIndex{}, rowIndex, rowIndex);
-    m_torrents.remove(std::distance(m_torrents.begin(), torrentIterator));
+    m_torrents.remove(rowIndex));
     endRemoveRows();
 
     return true;

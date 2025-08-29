@@ -49,14 +49,14 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
         ui->timeActValue->setText(timeStr);
     }
 
+
     auto downloaded = bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
 
     auto downSpeed = bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    auto downLim = bytesToHigherPerSec(iInfo.downLimit);
-    ui->downloadLimValue->setText(downLim);
+    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.downLimit));
 
     {
         auto etaSecs = iInfo.eta;
@@ -78,8 +78,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto upSpeed = bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    auto upLim = bytesToHigherPerSec(iInfo.upLimit);
-    ui->uploadLimValue->setText(upLim);
+    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.upLimit));
 
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
@@ -113,10 +112,12 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto piecesStr = pieces + " x " + bytesToHigher(tInfo.pieceSize);
     ui->piecesValue->setText(piecesStr);
 
-    if (tInfo.completedTime.has_value()) {
+    if (tInfo.completedTime != 0) {
         QDateTime timestamp;
-        timestamp.setSecsSinceEpoch(tInfo.completedTime.value());
+        timestamp.setSecsSinceEpoch(tInfo.completedTime);
         ui->completionValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
+    } else {
+        ui->completionValue->setText("Not finished");
     }
 }
 
