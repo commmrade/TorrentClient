@@ -50,18 +50,7 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                     return QVariant{sizeStr};
                 }
                 case ETA: {
-                    auto etaSecs = torrent.eta;
-                    // qDebug() << etaSecs;
-                    auto hrs = etaSecs / 3600;
-                    auto mins = etaSecs % 3600 / 60;
-                    auto secs = etaSecs % 60;
-
-                    QString etaStr;
-                    if (etaSecs == -1) {
-                        etaStr = "infinity";
-                    } else {
-                        etaStr = QString("%1:%2:%3").arg(hrs).arg(mins).arg(secs);
-                    }
+                    auto etaStr = secsToFormattedTime(torrent.eta);
                     return etaStr;
                 }
                 default: {
@@ -235,7 +224,7 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
 
     auto rowIndex = std::distance(m_torrents.begin(), torrentIterator);
     beginRemoveRows(QModelIndex{}, rowIndex, rowIndex);
-    m_torrents.remove(rowIndex));
+    m_torrents.remove(rowIndex);
     endRemoveRows();
 
     return true;

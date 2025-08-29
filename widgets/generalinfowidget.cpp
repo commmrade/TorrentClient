@@ -59,16 +59,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.downLimit));
 
     {
-        auto etaSecs = iInfo.eta;
-        auto hrs = etaSecs / 3600;
-        auto mins = etaSecs % 3600 / 60;
-        auto secs = etaSecs % 60;
-        QString etaStr;
-        if (etaSecs == -1) {
-            etaStr = "infinity";
-        } else {
-            etaStr = QString("%1:%2:%3").arg(hrs).arg(mins).arg(secs);
-        }
+        auto etaStr = secsToFormattedTime(iInfo.eta);
         ui->etaValue->setText(etaStr);
     }
 

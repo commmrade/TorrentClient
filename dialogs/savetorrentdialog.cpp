@@ -12,6 +12,7 @@
 #include <libtorrent/hex.hpp>
 // #include <libtorrent/libtorrent.hpp>
 #include <QThread>
+#include "utils.h"
 
 SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPath, QWidget *parent)
     : QDialog(parent)
@@ -39,37 +40,12 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     auto saveTorrentFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "torrents" + QDir::separator() + QString::fromStdString(libtorrent::aux::to_hex(params.info_hashes.get_best().to_string()));
     params.save_path = saveTorrentFile.toStdString();
 
-    std::thread{[this, params = std::move(params)]() mutable {
-        lt::session_params sessParams;
-        sessParams.settings.set_int(
-        lt::settings_pack::alert_mask,
-        lt::alert_category::status |
-            lt::alert_category::error |
-            lt::alert_category::storage
-        );
+    m_fetcher = new MetadataFetcher{params};
+    connect(m_fetcher, &MetadataFetcher::sizeReady, this, &SaveTorrentDialog::setSize);
+    m_fetcher->start();
 
-        lt::session session{sessParams};
-        auto torrentHandle = session.add_torrent(std::move(params));
-
-        bool is_running {true};
-        while (is_running) {
-            std::vector<lt::alert*> alerts;
-
-            session.pop_alerts(&alerts);
-            for (auto* alert : alerts) {
-                if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
-                    auto totalSize = metadataRecAlert->handle.torrent_file()->total_size() / 1024.0 / 1024.0;
-
-                    ui->sizeInfo->setText(QString::number(totalSize) + " MB");
-
-                    metadataRecAlert->handle.pause();
-                    is_running = false;
-                    break;
-                }
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
-    }}.detach();
+    // Simulating detached (hack)
+    connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
@@ -78,13 +54,19 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
 SaveTorrentDialog::~SaveTorrentDialog()
 {
-    // if (thread) thread->join();
+    m_fetcher->requestInterruption();
     delete ui;
 }
 
 QString SaveTorrentDialog::getSavePath() const
 {
     return ui->savePathLineEdit->text();
+}
+
+void SaveTorrentDialog::setSize(int64_t bytes)
+{
+    auto bytesStr = bytesToHigher(bytes);
+    ui->sizeInfo->setText(bytesStr);
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()

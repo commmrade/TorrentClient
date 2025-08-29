@@ -1,0 +1,40 @@
+#include "metadatafetcher.h"
+#include <libtorrent/session_params.hpp>
+#include <libtorrent/alert.hpp>
+#include <libtorrent/session.hpp>
+#include <QDebug>
+#include <libtorrent/alert_types.hpp>
+
+void MetadataFetcher::run()
+{
+    lt::session_params sessParams;
+    sessParams.settings.set_int(
+        lt::settings_pack::alert_mask,
+        lt::alert_category::status |
+            lt::alert_category::error |
+            lt::alert_category::storage
+        );
+
+    lt::session session{sessParams};
+    auto torrentHandle = session.add_torrent(std::move(m_params));
+
+    bool is_running = true;
+    while (is_running) {
+        std::vector<lt::alert*> alerts;
+
+        session.pop_alerts(&alerts);
+        for (auto* alert : alerts) {
+            if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
+                // this->setSize(metadataRecAlert->handle.torrent_file()->total_size());
+                emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());
+                is_running = false;
+                break;
+            } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {
+                qWarning() << "Could not fetch metadata for magnet, because" << metadataFailedAlert->message();
+                is_running = false;
+                break;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+}

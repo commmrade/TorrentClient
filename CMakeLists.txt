@@ -47,6 +47,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/generalinfowidget.h widgets/generalinfowidget.cpp widgets/generalinfowidget.ui
         common/torrentinfo.h
         common/utils.h common/utils.cpp
+        common/metadatafetcher.h common/metadatafetcher.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

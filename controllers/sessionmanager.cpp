@@ -242,7 +242,7 @@ void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert 
 
 void SessionManager::handleResumeDataAlert(libtorrent::save_resume_data_alert *alert)
 {
-    if (alert->handle.torrent_file()) {
+    if (alert->handle.is_valid() && alert->handle.torrent_file()) {
         auto resumeDataBuf = lt::write_resume_data_buf(alert->params);
         saveResumeData(alert->handle.torrent_file(), resumeDataBuf);
     }

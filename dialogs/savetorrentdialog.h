@@ -2,7 +2,9 @@
 #define SAVETORRENTDIALOG_H
 
 #include <QDialog>
-#include <thread>
+#include "metadatafetcher.h"
+#include <QPointer>
+
 namespace Ui {
 class SaveTorrentDialog;
 }
@@ -19,11 +21,14 @@ public:
     explicit SaveTorrentDialog(magnet_tag, const QString& magnetUri, QWidget* parent = nullptr);
     ~SaveTorrentDialog();
     QString getSavePath() const;
+
+public slots:
+    void setSize(std::int64_t bytes);
 private slots:
     void on_changeSavePathButton_clicked();
-
 private:
     Ui::SaveTorrentDialog *ui;
+    QPointer<MetadataFetcher> m_fetcher{nullptr};
 
     void tryLoadData();
 };

@@ -1,6 +1,13 @@
 #include "utils.h"
 #include <cmath>
 
+constexpr int SECONDS_IN_DAY = 86400;
+constexpr int SECONDS_IN_HOUR = 3600;
+constexpr int SECONDS_IN_MINUTE = 60;
+constexpr int SECONDS_IN_WEEK = 604800;
+constexpr int SECONDS_IN_YEAR = 31449600;
+
+
 double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
 }
@@ -29,4 +36,30 @@ QString bytesToHigherPerSec(const std::uint64_t bytes)
         sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
     }
     return sizeStr;
+}
+
+QString secsToFormattedTime(std::int64_t secs)
+{
+    if (secs == -1) return QString("infinity");
+
+    QString etaStr;
+    auto years = secs / SECONDS_IN_YEAR;
+    if (years) {
+        etaStr += QString::number(years) + " y ";
+    }
+    auto weeks = secs / SECONDS_IN_WEEK;
+    if (weeks) {
+        etaStr += QString::number(weeks) + " w ";
+    }
+    auto days = secs / SECONDS_IN_DAY;
+    if (days) {
+        etaStr += QString::number(days) + " d ";
+    }
+
+    auto hrs = secs % SECONDS_IN_YEAR % SECONDS_IN_WEEK % SECONDS_IN_DAY / SECONDS_IN_HOUR;
+    auto mins = secs % SECONDS_IN_HOUR / SECONDS_IN_MINUTE;
+    auto seconds = secs % SECONDS_IN_MINUTE;
+    etaStr += QString("%1:%2:%3").arg(hrs).arg(mins).arg(seconds);
+
+    return etaStr;
 }
