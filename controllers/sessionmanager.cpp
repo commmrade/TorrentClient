@@ -8,7 +8,7 @@
 #include "settingsvalues.h"
 #include "torrentinfo.h"
 #include <QDateTime>
-
+#include "tracker.h"
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
@@ -101,12 +101,34 @@ void SessionManager::updateProperties()
 {
     if (m_currentTorrentId != -1) {
         auto& handle = m_torrentHandles[m_currentTorrentId];
-
-        { // peer stats
+        {
             if (handle.isValid()) {
-                std::vector<lt::peer_info> peers;
-                m_torrentHandles[m_currentTorrentId].handle().get_peer_info(peers);
+                std::vector<lt::peer_info> peers = m_torrentHandles[m_currentTorrentId].getPeerInfo();
                 emit peerInfo(m_currentTorrentId, std::move(peers));
+
+                auto trackers = handle.getTrackers();
+                QList<Tracker> tracks;
+                for (const auto& tracker : trackers) {
+                    Tracker tr{};
+                    tr.url = QString::fromStdString(tracker.url);
+                    tr.tier = tracker.tier;
+                    for (const auto& ep : tracker.endpoints) {
+                        if (ep.enabled) {
+                            tr.isWorking = true;
+                        }
+                        const auto& ihash = ep.info_hashes[lt::protocol_version::V1];
+                        tr.seeds = ihash.scrape_complete == -1 ? 0 : ihash.scrape_complete;
+                        tr.leeches = ihash.scrape_incomplete == -1 ? 0 : ihash.scrape_incomplete;
+                        tr.message = QString::fromStdString(ihash.message);
+                    }
+
+                    tracks.append(std::move(tr));
+                }
+                emit trackersInfo(tracks);
+
+
+                auto urlSeeds = m_torrentHandles[m_currentTorrentId].handle().url_seeds();
+                emit urlSeedsInfo(urlSeeds);
             } else { // if its not valid something is wrong
                 m_currentTorrentId = -1;
             }
@@ -115,6 +137,8 @@ void SessionManager::updateProperties()
         // clear stats
         emit clearPeerInfo();
         emit clearGeneralInfo();
+        emit clearTrackers();
+        emit clearUrlSeeds();
     }
 
 }
@@ -363,7 +387,7 @@ void SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsPath = basePath + QDir::separator() + "torrents";
 
-    auto hashString = QString{lt::aux::to_hex(torrentHandle.handle().info_hashes().get_best().to_string()).c_str()};
+    auto hashString = torrentHandle.bestHashAsString();
     auto torrentFile = torrentsPath + QDir::separator() + hashString + ".torrent";
     if (!QFile::remove(torrentFile)) {
         qDebug() << "Could not remove .torrent file";
@@ -393,8 +417,7 @@ bool SessionManager::isTorrentExists(const lt::sha1_hash& hash) const
 {
     auto handles = m_torrentHandles.values();
     auto torrentIter = std::find_if(handles.begin(), handles.end(), [&](const TorrentHandle& value) {
-        qDebug() << lt::aux::to_hex(value.handle().info_hashes().get_best()) << lt::aux::to_hex(hash);
-        return value.handle().info_hashes().get_best() == hash;
+        return value.bestHash() == hash;
     });
     return torrentIter != handles.end();
 }

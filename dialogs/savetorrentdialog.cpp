@@ -54,7 +54,9 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
 SaveTorrentDialog::~SaveTorrentDialog()
 {
-    m_fetcher->stopRunning();
+    if (m_fetcher) {
+        m_fetcher->stopRunning();
+    }
     delete ui;
 }
 

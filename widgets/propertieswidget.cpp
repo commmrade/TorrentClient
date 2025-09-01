@@ -13,6 +13,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
     ui->propertiesTab->setTabText(2, "Peers");
     ui->propertiesTab->setTabText(3, "HTTP Sources");
 
+    ui->sourcesList->clear();
 }
 
 PropertiesWidget::~PropertiesWidget()
@@ -46,4 +47,34 @@ void PropertiesWidget::clearGeneralInfo()
     if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
         ui->infoWidget->clearGeneralInfo();
     }
+}
+
+void PropertiesWidget::setTrackers(const QList<Tracker> &trackers)
+{
+    qDebug() << ui->propertiesTab->currentIndex();
+    if (ui->propertiesTab->currentIndex() == 1 && isEnabled()) {
+        ui->trackersTable->setTrackers(trackers);
+    }
+}
+
+void PropertiesWidget::clearTrackers()
+{
+    if (ui->propertiesTab->currentIndex() == 1 && isEnabled()) {
+        ui->trackersTable->clearTrackers();
+    }
+}
+
+void PropertiesWidget::setUrlSeeds(const std::set<std::string> &urlSeeds)
+{
+    qDebug() << "mty?" << urlSeeds.empty();
+    if (ui->sourcesList->count() != 0) return;
+    for (const auto& url : urlSeeds) {
+        qDebug() << "aaass";
+        ui->sourcesList->addItem(QString::fromStdString(url));
+    }
+}
+
+void PropertiesWidget::clearUrlSeeds()
+{
+    ui->sourcesList->clear();
 }

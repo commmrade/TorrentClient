@@ -8,7 +8,7 @@
 namespace Ui {
 class PropertiesWidget;
 }
-
+struct Tracker;
 class PropertiesWidget : public QWidget
 {
     Q_OBJECT
@@ -22,6 +22,11 @@ public slots:
     void clearPeers();
     void setGeneralInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
     void clearGeneralInfo();
+    void setTrackers(const QList<Tracker>& trackers);
+    void clearTrackers();
+
+    void setUrlSeeds(const std::set<std::string>& urlSeeds);
+    void clearUrlSeeds();
 private:
     Ui::PropertiesWidget *ui;
 };

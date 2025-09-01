@@ -32,7 +32,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -48,6 +48,11 @@
       <attribute name="title">
        <string>Tab 2</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="TrackersWidget" name="trackersTable" native="true"/>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
@@ -63,6 +68,11 @@
       <attribute name="title">
        <string>Page</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QListWidget" name="sourcesList"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
@@ -79,6 +89,12 @@
    <class>GeneralInfoWidget</class>
    <extends>QWidget</extends>
    <header location="global">generalinfowidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TrackersWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">trackerswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

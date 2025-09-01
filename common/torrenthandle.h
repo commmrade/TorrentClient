@@ -3,6 +3,10 @@
 #include <libtorrent/torrent_handle.hpp>
 #include <chrono>
 #include <libtorrent/torrent_status.hpp>
+#include <libtorrent/hex.hpp>
+#include <QString>
+#include <QDebug>
+// #include <libtorrent/libtorrent.hpp>
 
 class TorrentHandle
 {
@@ -24,6 +28,21 @@ public:
     }
     bool isValid() const {
         return m_handle.is_valid();
+    }
+
+    std::vector<lt::announce_entry> getTrackers() const;
+
+    std::vector<lt::peer_info> getPeerInfo() const {
+        std::vector<lt::peer_info> peers;
+        m_handle.get_peer_info(peers);
+        return peers;
+    }
+
+    QString bestHashAsString() const {
+        return QString::fromStdString(lt::aux::to_hex(m_handle.info_hashes().get_best()));
+    }
+    lt::sha1_hash bestHash() const {
+        return m_handle.info_hashes().get_best();
     }
 
     void pause() {

@@ -17,6 +17,7 @@ constexpr const char* SESSION_FILENAME = ".session";
 
 struct TorrentInfo;
 struct InternetInfo;
+struct Tracker;
 
 class SessionManager : public QObject
 {
@@ -89,6 +90,12 @@ signals:
 
     void generalInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
     void clearGeneralInfo();
+
+    void trackersInfo(const QList<Tracker>& trackers);
+    void clearTrackers();
+
+    void urlSeedsInfo(const std::set<std::string>&);
+    void clearUrlSeeds();
 };
 
 inline std::vector<char> readFile(const char *filename)
