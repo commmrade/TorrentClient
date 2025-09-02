@@ -84,14 +84,73 @@ QHash<int, QByteArray> TrackerTableModel::roleNames() const
     return {};
 }
 
-// TODO: change to && or vec<tracker> trackers so i can move here
 void TrackerTableModel::setTrackers(const QList<Tracker> &trackers)
 {
-    // TODO: нормально это написать убррать эту хуйнбю
-    beginResetModel();
-    m_trackers = trackers;
-    endResetModel();
+    auto makeKeyTracker = [](const Tracker& tracker) {
+        return tracker.url;
+    };
+
+    QHash<QString, int> newTrackersMap; // key - index in trackers
+    QHash<QString, int> oldTrackersMap; // key - index in m_trackers
+
+    // Cache trackers
+    for (int i = 0; i < trackers.size(); ++i) {
+        QString const key = makeKeyTracker(trackers[i]);
+        newTrackersMap.insert(key, i);
+    }
+    for (int i = 0; i < m_trackers.size(); ++i) {
+        QString const key = makeKeyTracker(m_trackers[i]);
+        oldTrackersMap.insert(key, i);
+    }
+
+    for (int i = 0; i < trackers.size(); ++i) {
+        QString const newKey = makeKeyTracker(trackers[i]);
+        if (oldTrackersMap.contains(newKey)) {
+            // Tracker exists, check for updates
+            int row = oldTrackersMap[newKey];
+            auto& oldTracker = m_trackers[row];
+
+            // Check if any properties have changed
+            if (oldTracker.tier != trackers[i].tier ||
+                oldTracker.isWorking != trackers[i].isWorking ||
+                oldTracker.seeds != trackers[i].seeds ||
+                oldTracker.leeches != trackers[i].leeches ||
+                oldTracker.message != trackers[i].message ||
+                oldTracker.nextAnnounce != trackers[i].nextAnnounce ||
+                oldTracker.minAnnounce != trackers[i].minAnnounce) {
+                // Update properties
+                oldTracker.tier = trackers[i].tier;
+                oldTracker.isWorking = trackers[i].isWorking;
+                oldTracker.seeds = trackers[i].seeds;
+                oldTracker.leeches = trackers[i].leeches;
+                oldTracker.message = trackers[i].message;
+                oldTracker.nextAnnounce = trackers[i].nextAnnounce;
+                oldTracker.minAnnounce = trackers[i].minAnnounce;
+
+            }
+        } else {
+            int row = m_trackers.size();
+            beginInsertRows(QModelIndex(), row, row);
+            m_trackers.append(trackers[i]);
+            endInsertRows();
+        }
+    }
+
+    // Handle deletions
+    for (int i = m_trackers.size() - 1; i >= 0; --i) {
+        QString const key = makeKeyTracker(m_trackers[i]);
+        if (!newTrackersMap.contains(key)) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_trackers.removeAt(i);
+            endRemoveRows();
+        }
+    }
+
+    if (!m_trackers.isEmpty()) {
+        emit dataChanged(index(0, 1), index(m_trackers.size() - 1, columnCount() - 1));
+    }
 }
+
 
 void TrackerTableModel::clearTrackers()
 {

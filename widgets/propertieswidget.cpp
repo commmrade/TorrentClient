@@ -51,7 +51,6 @@ void PropertiesWidget::clearGeneralInfo()
 
 void PropertiesWidget::setTrackers(const QList<Tracker> &trackers)
 {
-    qDebug() << ui->propertiesTab->currentIndex();
     if (ui->propertiesTab->currentIndex() == 1 && isEnabled()) {
         ui->trackersTable->setTrackers(trackers);
     }
@@ -66,10 +65,9 @@ void PropertiesWidget::clearTrackers()
 
 void PropertiesWidget::setUrlSeeds(const std::set<std::string> &urlSeeds)
 {
-    qDebug() << "mty?" << urlSeeds.empty();
+    // i think its pretty good for now, since url seeds dont change automatically
     if (ui->sourcesList->count() != 0) return;
     for (const auto& url : urlSeeds) {
-        qDebug() << "aaass";
         ui->sourcesList->addItem(QString::fromStdString(url));
     }
 }

@@ -180,8 +180,8 @@ void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
 
     // Cache peers
 
-    QElapsedTimer perfTimer;
-    perfTimer.start();
+    // QElapsedTimer perfTimer;
+    // perfTimer.start();
     for (auto i = 0; i < peers.size(); ++i) {
         QString const key = makeKeyPeerInfo(peers[i]);
         newPeersMap.insert(key, i);
