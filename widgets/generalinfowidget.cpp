@@ -110,6 +110,9 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     } else {
         ui->completionValue->setText("Not finished");
     }
+
+
+    ui->piecesBar->update();
 }
 
 void GeneralInfoWidget::clearGeneralInfo()
@@ -132,4 +135,11 @@ void GeneralInfoWidget::clearGeneralInfo()
     ui->savePathValue->setText("-");
     ui->piecesValue->setText("-");
     ui->completionValue->setText("-");
+
+    ui->piecesBar->clearPieces();
+}
+
+void GeneralInfoWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces)
+{
+    ui->piecesBar->setPieces(pieces);
 }

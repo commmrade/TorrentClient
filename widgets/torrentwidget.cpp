@@ -43,6 +43,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     connect(&m_sessionManager, &SessionManager::urlSeedsInfo, ui->propertiesTab, &PropertiesWidget::setUrlSeeds);
     connect(&m_sessionManager, &SessionManager::clearUrlSeeds, ui->propertiesTab, &PropertiesWidget::clearUrlSeeds);
 
+    connect(&m_sessionManager, &SessionManager::pieceBarInfo, ui->propertiesTab, &PropertiesWidget::setPieces);
 
     connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
         auto torrentId = m_tableModel.getTorrentId(index.row());

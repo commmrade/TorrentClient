@@ -63,6 +63,13 @@ void PropertiesWidget::clearTrackers()
     }
 }
 
+void PropertiesWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces)
+{
+    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
+        ui->infoWidget->setPieces(pieces);
+    }
+}
+
 void PropertiesWidget::setUrlSeeds(const std::set<std::string> &urlSeeds)
 {
     // i think its pretty good for now, since url seeds dont change automatically

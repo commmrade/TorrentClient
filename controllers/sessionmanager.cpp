@@ -162,10 +162,10 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
         auto& handle = status.handle;
 
         // if (handle.torrent_file())
-        std::cout << "Pieces: " << status.pieces.size() << std::endl;
-        for (auto i = 0; i < status.pieces.size(); ++i) {
-            std::cout << ((status.pieces[i]) ? "1" : "0");
-        }
+        // std::cout << "Pieces: " << status.pieces.size() << std::endl;
+        // for (auto i = 0; i < status.pieces.size(); ++i) {
+        //     std::cout << ((status.pieces[i]) ? "1" : "0");
+        // }
 
         if (handle.id() == m_currentTorrentId) {
             updateGeneralProperty(handle);
@@ -263,6 +263,8 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
+    // Update pieces bar
+    emit pieceBarInfo(status.pieces);
 }
 
 

@@ -51,6 +51,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         models/trackertablemodel.h models/trackertablemodel.cpp
         common/tracker.h
         widgets/trackerswidget.h widgets/trackerswidget.cpp widgets/trackerswidget.ui
+        widgets/piecesbarwidget.h widgets/piecesbarwidget.cpp widgets/piecesbarwidget.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

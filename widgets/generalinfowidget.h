@@ -3,10 +3,13 @@
 
 #include <QWidget>
 #include "torrentinfo.h"
+#include <libtorrent/libtorrent.hpp>
 
 namespace Ui {
 class GeneralInfoWidget;
 }
+
+
 
 class GeneralInfoWidget : public QWidget
 {
@@ -18,6 +21,8 @@ public:
 
     void setGeneralInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
     void clearGeneralInfo();
+
+    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces);
 private:
     Ui::GeneralInfoWidget *ui;
 };
