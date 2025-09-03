@@ -160,6 +160,13 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     auto statuses = alert->status;
     for (auto& status : statuses) {
         auto& handle = status.handle;
+
+        // if (handle.torrent_file())
+        std::cout << "Pieces: " << status.pieces.size() << std::endl;
+        for (auto i = 0; i < status.pieces.size(); ++i) {
+            std::cout << ((status.pieces[i]) ? "1" : "0");
+        }
+
         if (handle.id() == m_currentTorrentId) {
             updateGeneralProperty(handle);
         }
