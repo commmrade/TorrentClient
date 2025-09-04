@@ -11,13 +11,14 @@
 #include <QStandardPaths>
 #include <QDir>
 #include "torrenthandle.h"
+#include "tracker.h"
 
-struct Torrent;
 constexpr const char* SESSION_FILENAME = ".session";
 
+struct Torrent;
 struct TorrentInfo;
 struct InternetInfo;
-struct Tracker;
+// struct Tracker;
 
 class SessionManager : public QObject
 {
