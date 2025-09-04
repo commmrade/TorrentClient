@@ -8,6 +8,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->propertiesTab->setCurrentIndex(0);
     ui->propertiesTab->setTabText(0, "General");
     ui->propertiesTab->setTabText(1, "Trackers");
     ui->propertiesTab->setTabText(2, "Peers");
