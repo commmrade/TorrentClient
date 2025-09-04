@@ -97,9 +97,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 color = QColor::fromRgb(50, 50, 255);
             } else if (isDownloading || finishedPieces) {
                 color = QColor::fromRgb(50, 255, 50);
-            } else {
-                color = QColor::fromRgb(199, 199, 199);
-            } // TODO: Fix sometimes it gets to else (i think?) basically green strips disappear and are replaced by blue ones in a tick
+            }
 
 
             painter.fillRect(piece, QBrush{color});
@@ -108,9 +106,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             if (pidxUntil == m_pieces.size()) break;
         }
     } else {
-
-        // TODO: Doesnt work
-        // TODO: implement downloading pieces
         int const pixelsInPiece = BAR_WIDTH_PX / m_pieces.size();
 
         for (int i = 0; i < m_pieces.size(); ++i) {
