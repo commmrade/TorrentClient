@@ -139,7 +139,7 @@ void GeneralInfoWidget::clearGeneralInfo()
     ui->piecesBar->clearPieces();
 }
 
-void GeneralInfoWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces)
+void GeneralInfoWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces, const std::vector<int>& downloadingPiecesIndices)
 {
-    ui->piecesBar->setPieces(pieces);
+    ui->piecesBar->setPieces(pieces, downloadingPiecesIndices);
 }

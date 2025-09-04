@@ -22,7 +22,7 @@ public:
     void setGeneralInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
     void clearGeneralInfo();
 
-    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces);
+    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIndices);
 private:
     Ui::GeneralInfoWidget *ui;
 };

@@ -98,7 +98,7 @@ signals:
     void urlSeedsInfo(const std::set<std::string>&);
     void clearUrlSeeds();
 
-    void pieceBarInfo(const lt::typed_bitfield<lt::piece_index_t>& pieces);
+    void pieceBarInfo(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIdx);
 };
 
 inline std::vector<char> readFile(const char *filename)

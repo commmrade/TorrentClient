@@ -25,7 +25,7 @@ public slots:
     void setTrackers(const QList<Tracker>& trackers);
     void clearTrackers();
 
-    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces);
+    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIndices);
 
     void setUrlSeeds(const std::set<std::string>& urlSeeds);
     void clearUrlSeeds();

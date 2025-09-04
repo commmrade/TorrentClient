@@ -203,7 +203,7 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     tInfo.savePath = QString::fromStdString(status.save_path);
     tInfo.comment = "Something";
 
-    tInfo.piecesCount = status.num_pieces;
+    tInfo.piecesCount = status.pieces.size();
 
     auto tfile = handle.torrent_file();
     if (tfile) {
@@ -211,6 +211,20 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     }
 
     emit generalInfo(tInfo, iInfo);
+
+    // Update pieces bar
+    std::vector<int> downloadingPiecesIndices;
+
+    std::vector<lt::partial_piece_info> pieces;
+    handle.get_download_queue(pieces);
+
+    for (const auto& pcs : pieces) {
+        if (pcs.finished && pcs.finished < pcs.blocks_in_piece) { // finished more than 1, finished == blocks means finished
+            downloadingPiecesIndices.push_back(pcs.piece_index);
+        }
+    }
+
+    emit pieceBarInfo(status.pieces, downloadingPiecesIndices);
 }
 
 
@@ -263,8 +277,6 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
-    // Update pieces bar
-    emit pieceBarInfo(status.pieces);
 }
 
 

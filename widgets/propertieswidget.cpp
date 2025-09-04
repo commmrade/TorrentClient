@@ -64,10 +64,10 @@ void PropertiesWidget::clearTrackers()
     }
 }
 
-void PropertiesWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces)
+void PropertiesWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces, const std::vector<int>& downloadingPiecesIndices)
 {
     if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
-        ui->infoWidget->setPieces(pieces);
+        ui->infoWidget->setPieces(pieces, downloadingPiecesIndices);
     }
 }
 

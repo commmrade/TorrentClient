@@ -17,13 +17,15 @@ PiecesBarWidget::~PiecesBarWidget()
 
 void PiecesBarWidget::clearPieces()
 {
-    // m_pieces.clear_all();
     m_pieces.clear();
+    m_downloadingPiecesIndices.clear();
+    update();
 }
 
-void PiecesBarWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces)
+void PiecesBarWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces, const std::vector<int>& downloadingPiecesIndices)
 {
     m_pieces = pieces;
+    m_downloadingPiecesIndices = downloadingPiecesIndices;
     update();
 }
 
@@ -48,6 +50,9 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
     int const piecesPerPixel = m_pieces.size() / BAR_WIDTH_PX; // How many pieces will be considered in 1 pixel
 
+    QSet<int> hashedDownloadingPieces; // idx bool
+
+
     int startPos = startX;
     int endPos = startX + BAR_WIDTH_PX;
     if (piecesPerPixel) { // if pieces per pixel >= 1
@@ -55,6 +60,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
         for (int i = 0; i < chunks; ++i) {
             // bool isDownloaded = true; // TODO: Add currently downloaded pieces
             int finishedPieces = 0;
+            bool isDownloading = false;
 
             int pidxUntil = piecesPerPixel * i + piecesPerPixel;
             if (startPos >= endPos - 1) { // if its the last iteration
@@ -63,8 +69,21 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
             for (auto pidx = piecesPerPixel * i; pidx < pidxUntil; ++pidx) {
                 if (m_pieces[pidx]) {
-                    // isDownloaded = false;
                     ++finishedPieces;
+                    continue;
+                }
+
+                if (hashedDownloadingPieces.contains(pidx)) {
+                    isDownloading = true;
+                } else {
+                    auto iter = std::find_if(m_downloadingPiecesIndices.begin(), m_downloadingPiecesIndices.end(), [pidx](const auto value) {
+                        return value == pidx;
+                    });
+                    if (iter != m_downloadingPiecesIndices.end()) {
+                        hashedDownloadingPieces.insert(pidx);
+                        isDownloading = true;
+                    }
+
                 }
             }
 
@@ -72,13 +91,16 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             QRect piece{startPos, startY, 1, barHeight};
             QColor color;/* isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199, 199);*/
 
-            if (finishedPieces == 0) {
+            if (finishedPieces == 0 && !isDownloading) {
                 color = QColor::fromRgb(199, 199, 199);
-            } else if (finishedPieces < piecesPerPixel) {
+            } else if (finishedPieces == piecesPerPixel) {
+                color = QColor::fromRgb(50, 50, 255);
+            } else if (isDownloading || finishedPieces) {
                 color = QColor::fromRgb(50, 255, 50);
             } else {
-                color = QColor::fromRgb(50, 50, 255);
-            }
+                color = QColor::fromRgb(199, 199, 199);
+            } // TODO: Fix sometimes it gets to else (i think?) basically green strips disappear and are replaced by blue ones in a tick
+
 
             painter.fillRect(piece, QBrush{color});
             ++startPos;
@@ -86,27 +108,73 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             if (pidxUntil == m_pieces.size()) break;
         }
     } else {
+
+        // TODO: Doesnt work
+        // TODO: implement downloading pieces
         int const pixelsInPiece = BAR_WIDTH_PX / m_pieces.size();
 
         for (int i = 0; i < m_pieces.size(); ++i) {
+            bool isDownloaded = false;
+            bool isDownloading = false;
+
+
             if (startPos >= endPos - pixelsInPiece) {
-                bool isDownloaded = false;
                 for (; i < m_pieces.size(); ++i) {
                     if (m_pieces[i]) {
                         isDownloaded = true;
                     }
                 }
 
+                if (hashedDownloadingPieces.contains(i)) {
+                    isDownloading = true;
+                } else {
+                    auto iter = std::find_if(m_downloadingPiecesIndices.begin(), m_downloadingPiecesIndices.end(), [i](const auto value) {
+                        return value == i;
+                    });
+                    if (iter != m_downloadingPiecesIndices.end()) {
+                        hashedDownloadingPieces.insert(i);
+                        isDownloading = true;
+                    }
+                }
+                QColor color;
+
+                if (!isDownloaded && !isDownloading) {
+                    color = QColor::fromRgb(199, 199, 199);
+                } else if (isDownloaded && !isDownloading) {
+                    color = QColor::fromRgb(50, 50, 255);
+                } else if (!isDownloaded && isDownloading) {
+                    color = QColor::fromRgb(50, 255, 50);
+                } // Cant be both isDownloaded and isDownloading (hope so)
+
                 QRect rect{startPos, startY, pixelsInPiece, barHeight};
-                QColor color = isDownloaded ? QColor::fromRgb(0, 0, 255) : QColor::fromRgb(0, 0, 0);
                 painter.fillRect(rect, QBrush{color});
                 break;
             }
 
-            bool isDownloaded = m_pieces[i];
-            QRect rect{startPos, startY, pixelsInPiece, barHeight};
+            isDownloaded = m_pieces[i];
+            if (hashedDownloadingPieces.contains(i)) {
+                isDownloading = true;
+            } else {
+                auto iter = std::find_if(m_downloadingPiecesIndices.begin(), m_downloadingPiecesIndices.end(), [i](const auto value) {
+                    return value == i;
+                });
+                if (iter != m_downloadingPiecesIndices.end()) {
+                    hashedDownloadingPieces.insert(i);
+                    isDownloading = true;
+                }
+            }
 
-            QColor color = isDownloaded ? QColor::fromRgb(0, 0, 255) : QColor::fromRgb(0, 0, 0);
+
+            QRect rect{startPos, startY, pixelsInPiece, barHeight};
+            QColor color;
+            if (!isDownloaded && !isDownloading) {
+                color = QColor::fromRgb(199, 199, 199);
+            } else if (isDownloaded && !isDownloading) {
+                color = QColor::fromRgb(50, 50, 255);
+            } else if (!isDownloaded && isDownloading) {
+                color = QColor::fromRgb(50, 255, 50);
+            } // Cant be both isDownloaded and isDownloading (hope so)
+
             painter.fillRect(rect, QBrush{color});
 
             startPos += pixelsInPiece;
