@@ -161,11 +161,11 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     for (auto& status : statuses) {
         auto& handle = status.handle;
 
-        std::vector<lt::partial_piece_info> queue;
-        handle.get_download_queue(queue);
-        for (auto& entry : queue) {
-            qDebug() << entry.piece_index << entry.blocks_in_piece;
-        }
+        // std::vector<lt::partial_piece_info> queue;
+        // handle.get_download_queue(queue);
+        // for (auto& entry : queue) {
+        //     qDebug() << entry.piece_index << entry.finished;
+        // }
 
         if (handle.id() == m_currentTorrentId) {
             updateGeneralProperty(handle);
