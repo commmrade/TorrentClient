@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QSettings>
 #include "settingsvalues.h"
-
+#include <QDebug>
 #include <QDateTime>
 
 int main(int argc, char *argv[])
@@ -17,12 +17,15 @@ int main(int argc, char *argv[])
     settings.setValue("a", "b");
 
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkdir(basePath);
+
+    if (!QDir().mkpath(basePath)) {
+        qDebug() << "Could not create base path for torrent client";
+    }
     QDir().mkdir(basePath + QDir::separator() + "torrents"); // Directory for downloads by default
     QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
     QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?
     QDir().mkdir(basePath + QDir::separator() + "themes");
-
+    qDebug() << basePath;
 
 
     QApplication a(argc, argv);

@@ -53,7 +53,8 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
     if (piecesPerPixel) { // if pieces per pixel >= 1
         int const chunks = m_pieces.size() / piecesPerPixel;
         for (int i = 0; i < chunks; ++i) {
-            bool isDownloaded = true; // TODO: Add currently downloaded pieces
+            // bool isDownloaded = true; // TODO: Add currently downloaded pieces
+            int finishedPieces = 0;
 
             int pidxUntil = piecesPerPixel * i + piecesPerPixel;
             if (startPos >= endPos - 1) { // if its the last iteration
@@ -61,13 +62,24 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             }
 
             for (auto pidx = piecesPerPixel * i; pidx < pidxUntil; ++pidx) {
-                if (!m_pieces[pidx]) {
-                    isDownloaded = false;
+                if (m_pieces[pidx]) {
+                    // isDownloaded = false;
+                    ++finishedPieces;
                 }
             }
 
+
             QRect piece{startPos, startY, 1, barHeight};
-            QColor color = isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199, 199);
+            QColor color;/* isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199, 199);*/
+
+            if (finishedPieces == 0) {
+                color = QColor::fromRgb(199, 199, 199);
+            } else if (finishedPieces < piecesPerPixel) {
+                color = QColor::fromRgb(50, 255, 50);
+            } else {
+                color = QColor::fromRgb(50, 50, 255);
+            }
+
             painter.fillRect(piece, QBrush{color});
             ++startPos;
 
@@ -78,10 +90,10 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
         for (int i = 0; i < m_pieces.size(); ++i) {
             if (startPos >= endPos - pixelsInPiece) {
-                bool isDownloaded = true;
+                bool isDownloaded = false;
                 for (; i < m_pieces.size(); ++i) {
-                    if (!m_pieces[i]) {
-                        isDownloaded = false;
+                    if (m_pieces[i]) {
+                        isDownloaded = true;
                     }
                 }
 
