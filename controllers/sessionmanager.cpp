@@ -356,6 +356,24 @@ void SessionManager::setUploadLimit(int value)
     settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{asBytes});
 }
 
+void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bannablePeers)
+{
+    lt::ip_filter filter = m_session->get_ip_filter();
+    for (const auto& peer : bannablePeers) {
+        auto address = boost::asio::ip::make_address(peer.first.toUtf8().constData());
+        filter.add_rule(address, address, lt::ip_filter::blocked);
+    }
+    m_session->set_ip_filter(filter);
+}
+
+void SessionManager::addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoint &ep)
+{
+    if (m_currentTorrentId == -1) {
+        throw std::runtime_error("Torrent is not set");
+    }
+    m_torrentHandles[m_currentTorrentId].connectToPeer(ep);
+}
+
 bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
 {
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());

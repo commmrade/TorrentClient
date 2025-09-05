@@ -5,7 +5,7 @@
 struct Peer {
     QString country;
     QString ip;
-    std::uint16_t port;
+    unsigned short port;
     QString connectionType;
     QString client;
     float progress;
@@ -13,6 +13,11 @@ struct Peer {
     std::uint64_t downSpeed;
     std::uint64_t downloaded;
     std::uint64_t uploaded;
+};
+
+struct PeerShort {
+    QString ip;
+    unsigned short port;
 };
 
 enum class PeerFields {

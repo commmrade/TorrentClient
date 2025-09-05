@@ -73,28 +73,28 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
 
     auto torrentStatus = m_tableModel.index(index.row(), getStatusIndex()).data().toString(); // Status was 4, now 3
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
-    QMenu* menu = new QMenu(this);
+    QMenu menu(this);
     if (isPaused) {
         QAction* resumeAction = new QAction("Resume", this);
         connect(resumeAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.resumeTorrent(torrentId);
         });
-        menu->addAction(resumeAction);
+        menu.addAction(resumeAction);
     } else {
         QAction* pauseAction = new QAction("Pause", this);
         connect(pauseAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.pauseTorrent(torrentId);
         });
-        menu->addAction(pauseAction);
+        menu.addAction(pauseAction);
     }
     QAction* deleteAction = new QAction("Delete", this);
     connect(deleteAction, &QAction::triggered, this, [this, torrentId] {
         bool removeWithContents = true;
         m_sessionManager.removeTorrent(torrentId, removeWithContents);
     });
-    menu->addAction(deleteAction);
+    menu.addAction(deleteAction);
 
-    menu->popup(ui->tableView->viewport()->mapToGlobal(pos));
+    menu.exec(ui->tableView->viewport()->mapToGlobal(pos));
 }
 
 void TorrentWidget::setupTableView()

@@ -137,6 +137,12 @@ void PeerTableModel::clearPeers()
     endResetModel();
 }
 
+std::pair<QString, unsigned short> PeerTableModel::getPeerShortInfo(int index)
+{
+    const auto& peer = m_peers[index];
+    return {peer.ip, peer.port};
+}
+
 QString PeerTableModel::countryFromIp(QByteArrayView ip)
 {
     QString countryName{"Unknown"};

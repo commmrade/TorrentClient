@@ -28,8 +28,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("klewy.com");
     QCoreApplication::setApplicationName("TorrentClient");
 
-    QSettings settings;
-    settings.setValue("a", "b");
+
 
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
@@ -40,11 +39,10 @@ int main(int argc, char *argv[])
     QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
     QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?
     QDir().mkdir(basePath + QDir::separator() + "themes");
-    qDebug() << basePath;
 
 
     QApplication a(argc, argv);
-
+    QSettings settings;
     // Set theme
     QString theme = settings.value(SettingsValues::GUI_THEME, "Dark").toString();
     if (theme == "Dark") {

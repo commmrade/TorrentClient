@@ -30,6 +30,7 @@ public:
 
     void setPeers(const std::vector<lt::peer_info>& peers);
     void clearPeers();
+    std::pair<QString, unsigned short> getPeerShortInfo(int index);
 signals:
 
 private:

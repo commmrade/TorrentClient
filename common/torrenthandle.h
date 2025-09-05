@@ -23,6 +23,10 @@ public:
         return m_handle;
     }
 
+    void connectToPeer(const boost::asio::ip::tcp::endpoint& ep) {
+        m_handle.connect_peer(ep);
+    }
+
     bool isNeedSaveData() const {
         return m_handle.need_save_resume_data();
     }
