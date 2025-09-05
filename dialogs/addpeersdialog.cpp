@@ -9,12 +9,6 @@ AddPeersDialog::AddPeersDialog(QWidget *parent)
     , ui(new Ui::AddPeersDialog)
 {
     ui->setupUi(this);
-
-    connect(this, &QDialog::finished, this, [](int result) {
-        qDebug() << "zzz";
-        return;
-    });
-
 }
 
 AddPeersDialog::~AddPeersDialog()
@@ -30,12 +24,6 @@ bool AddPeersDialog::parseEndpoints()
     QString line;
     QList<boost::asio::ip::tcp::endpoint> eps;
     while (stream.readLineInto(&line)) {
-
-
-        // parse addr
-        // construct endpoint from addr and port
-        // get it in add peers dialog, pass into session manager
-
         auto addrPortStr = line.toUtf8();
         auto addrPortView = QByteArrayView{addrPortStr};
         auto colIndexIter = std::find_if(addrPortView.begin(), addrPortView.end(), [](const auto ch) {
