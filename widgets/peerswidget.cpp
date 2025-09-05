@@ -5,6 +5,7 @@
 #include <QPair>
 #include "sessionmanager.h"
 #include <QClipboard>
+#include "addpeersdialog.h"
 
 PeersWidget::PeersWidget(QWidget *parent)
     : QWidget(parent)
@@ -34,7 +35,6 @@ void PeersWidget::clearPeers()
 void PeersWidget::contextMenuRequested(const QPoint &pos)
 {
     auto index = ui->peerTable->indexAt(pos);
-    if (index.row() == -1) return;
 
     QMenu menu(this);
     QAction* banAction = new QAction("Ban peers", this);
@@ -63,14 +63,23 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
 
     QAction* addPeerAction = new QAction("Add a peer", this);
     connect(addPeerAction, &QAction::triggered, this, [this] {
+        AddPeersDialog dialog(this);
 
+        if (dialog.exec() == QDialog::Accepted) {
+            auto eps = dialog.getAddrs();
+            auto& sessionManager = SessionManager::instance();
+            sessionManager.addPeersToCurrentTorrent(eps);
+        }
     });
 
-    banAction->setEnabled(false);
-    copyAction->setEnabled(false);
+    if (index.row() == -1) {
+        banAction->setEnabled(false);
+        copyAction->setEnabled(false);
+    }
 
     menu.addAction(banAction);
     menu.addAction(copyAction);
+    menu.addAction(addPeerAction);
 
     menu.exec(ui->peerTable->viewport()->mapToGlobal(pos));
 }

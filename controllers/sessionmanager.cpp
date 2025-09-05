@@ -374,6 +374,17 @@ void SessionManager::addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoin
     m_torrentHandles[m_currentTorrentId].connectToPeer(ep);
 }
 
+void SessionManager::addPeersToCurrentTorrent(const QList<boost::asio::ip::tcp::endpoint> &eps)
+{
+    if (m_currentTorrentId == -1) {
+        throw std::runtime_error("Torrent is not set");
+    }
+    auto& torrentHandle = m_torrentHandles[m_currentTorrentId];
+    for (const auto& ep : eps) {
+        torrentHandle.connectToPeer(ep);
+    }
+}
+
 bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
 {
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());

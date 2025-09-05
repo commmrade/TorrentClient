@@ -61,6 +61,7 @@ public:
     // Peer
     void banPeers(const QList<QPair<QString, unsigned short>>& bannablePeers);
     void addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoint& ep);
+    void addPeersToCurrentTorrent(const QList<boost::asio::ip::tcp::endpoint>& eps);
 
     void setCurrentTorrentId(std::int64_t value) {
         m_currentTorrentId = value;

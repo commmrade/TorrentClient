@@ -58,7 +58,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
     if (piecesPerPixel) { // if pieces per pixel >= 1
         int const chunks = m_pieces.size() / piecesPerPixel;
         for (int i = 0; i < chunks; ++i) {
-            // bool isDownloaded = true; // TODO: Add currently downloaded pieces
             int finishedPieces = 0;
             bool isDownloading = false;
 
@@ -83,10 +82,8 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                         hashedDownloadingPieces.insert(pidx);
                         isDownloading = true;
                     }
-
                 }
             }
-
 
             QRect piece{startPos, startY, 1, barHeight};
             QColor color;/* isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199, 199);*/
