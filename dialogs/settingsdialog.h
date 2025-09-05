@@ -24,7 +24,7 @@ public:
 private slots:
     void on_listWidget_currentRowChanged(int currentRow);
 
-    void on_customizeButton_clicked();
+    // void on_customizeButton_clicked();
 
     void on_applyButton_clicked();
 
@@ -41,6 +41,8 @@ private slots:
     void on_okButton_clicked();
 
     void on_closeButton_clicked();
+
+    void on_chooseThemeBtn_clicked();
 
 private:
     Ui::SettingsDialog *ui;

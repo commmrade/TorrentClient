@@ -7,6 +7,21 @@
 #include <QDebug>
 #include <QDateTime>
 
+
+void fallToDefaultTheme(QApplication& a, QSettings& settings) {
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
+    QFile file(darkThemePath);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        a.setStyleSheet(file.readAll());
+        file.close();
+    }
+
+    settings.setValue(SettingsValues::GUI_THEME, "Dark"); // reset to default theme (factor out in a function)
+    settings.remove("gui/customTheme");
+}
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("klewy");
@@ -39,12 +54,27 @@ int main(int argc, char *argv[])
             a.setStyleSheet(file.readAll());
             file.close();
         }
-    } else {
+    } else if (theme == "Light") {
         auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
         QFile file(lightThemePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             a.setStyleSheet(file.readAll());
             file.close();
+        }
+    } else if (theme == "Custom") {
+        QString customThemePath = settings.value("gui/customTheme").toString();
+        if (!customThemePath.isEmpty()) {
+            QFile file(customThemePath);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                a.setStyleSheet(file.readAll());
+                file.close();;
+            } else { // if cant open theme file
+                qDebug() << "Could not open theme file";
+                fallToDefaultTheme(a, settings);
+            }
+        } else {
+            qDebug() << "loaded theme but its not set";
+            fallToDefaultTheme(a, settings);
         }
     }
     // qDebug() << "Application is in" << QCoreApplication::applicationFilePath();

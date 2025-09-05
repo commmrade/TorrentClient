@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QFileDialog>
 #include <QDesktopServices>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
@@ -15,14 +16,34 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Default size
+    this->setFixedSize(900, 600);
+
+
+    // Disable cutom theme stuff
+    ui->chooseThemeBtn->setVisible(false);
+    ui->customThemeEdit->setVisible(false);
+
     QSettings settings;
 
     // Application category
     QString language = settings.value(SettingsValues::GUI_LANGUAGE, QString{"English"}).toString();
     ui->languageBox->setCurrentText(language);
 
+
     QString theme = settings.value(SettingsValues::GUI_THEME, QString{"Dark"}).toString();
     ui->themeBox->setCurrentText(theme);
+    if (theme == "Custom") { // if theme is custom set custom theme edit, if empty set to dark (default)
+        QString customTheme = settings.value("gui/customTheme").toString();
+        qDebug() << "Custom theme found";
+        if (!customTheme.isEmpty()) { // Weird
+            ui->customThemeEdit->setText(customTheme);
+        } else {
+            qDebug() << "Loaded custom theme but its empty";
+            ui->themeBox->setCurrentText("Dark"); // default theme is dark
+        }
+    }
+
 
     // Torrent category
     int downloadSpeedLimit = settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt() / 1024;
@@ -46,27 +67,27 @@ void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
     ui->stackedWidget->setCurrentIndex(currentRow);
 }
 
-void SettingsDialog::on_customizeButton_clicked()
-{
-    QSettings settings;
-    auto themeString = settings.value(SettingsValues::GUI_THEME, "Dark");
+// void SettingsDialog::on_customizeButton_clicked()
+// {
+//     QSettings settings;
+//     auto themeString = settings.value(SettingsValues::GUI_THEME, "Dark");
 
-    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+//     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
-    if (themeString == "Dark") {
-        // open dark.qss or whatevuh
-        auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
-        if (!QDesktopServices::openUrl("file:" + darkThemePath)) {
-            qCritical("Could not open .qss file");
-        }
-    } else {
-        // open light.qss or whatever
-        auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
-        if (!QDesktopServices::openUrl("file:" + lightThemePath)) {
-            qCritical("Could not open .qss file");
-        }
-    }
-}
+//     if (themeString == "Dark") {
+//         // open dark.qss or whatevuh
+//         auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
+//         if (!QDesktopServices::openUrl("file:" + darkThemePath)) {
+//             qCritical("Could not open .qss file");
+//         }
+//     } else {
+//         // open light.qss or whatever
+//         auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
+//         if (!QDesktopServices::openUrl("file:" + lightThemePath)) {
+//             qCritical("Could not open .qss file");
+//         }
+//     }
+// }
 
 void SettingsDialog::on_applyButton_clicked()
 {
@@ -97,7 +118,15 @@ void SettingsDialog::applyApplicationSettings()
     }
     // Theme
     if (m_themeChanged) {
-        settings.setValue(SettingsValues::GUI_THEME, ui->themeBox->currentText());
+        auto theme = ui->themeBox->currentText();
+        if (theme == "Custom") {
+            qDebug() << "CUstom theme";
+            settings.setValue(SettingsValues::GUI_THEME, theme); // Remove theme
+            settings.setValue("gui/customTheme", ui->customThemeEdit->text());
+        } else {
+            settings.setValue(SettingsValues::GUI_THEME, theme);
+        }
+
         m_themeChanged = false;
     }
 }
@@ -138,6 +167,14 @@ void SettingsDialog::on_languageBox_currentTextChanged(const QString &arg1)
 
 void SettingsDialog::on_themeBox_currentTextChanged(const QString &arg1)
 {
+    if (arg1 == "Custom") {
+        ui->customThemeEdit->setVisible(true);
+        ui->chooseThemeBtn->setVisible(true);
+    } else {
+        ui->customThemeEdit->setVisible(false);
+        ui->chooseThemeBtn->setVisible(false);
+    }
+
     m_themeChanged = true;
     m_restartRequired = true; // Can't change theme in runtime (i think)
 }
@@ -162,5 +199,17 @@ void SettingsDialog::on_okButton_clicked()
 void SettingsDialog::on_closeButton_clicked()
 {
     close();
+}
+
+
+void SettingsDialog::on_chooseThemeBtn_clicked()
+{
+    auto homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    QString themePath = QFileDialog::getOpenFileName(this, "Style file", homePath, "Style (*.qss)");
+
+    if (!themePath.isEmpty()) {
+        ui->customThemeEdit->setText(themePath);
+        m_themeChanged = true;
+    }
 }
 
