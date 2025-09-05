@@ -1,6 +1,7 @@
 #include "propertieswidget.h"
 #include "ui_propertieswidget.h"
 #include <libtorrent/peer_info.hpp>
+#include "sessionmanager.h"
 
 PropertiesWidget::PropertiesWidget(QWidget *parent)
     : QWidget(parent)
@@ -15,6 +16,23 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
     ui->propertiesTab->setTabText(3, "HTTP Sources");
 
     ui->sourcesList->clear();
+
+    auto& sessionManager = SessionManager::instance();
+    connect(&sessionManager, &SessionManager::peerInfo, this, &PropertiesWidget::setPeers);
+    connect(&sessionManager, &SessionManager::clearPeerInfo, this, &PropertiesWidget::clearPeers);
+
+    connect(&sessionManager, &SessionManager::generalInfo, this, &PropertiesWidget::setGeneralInfo);
+    connect(&sessionManager, &SessionManager::clearGeneralInfo, this, &PropertiesWidget::clearGeneralInfo);
+
+    connect(&sessionManager, &SessionManager::trackersInfo, this, &PropertiesWidget::setTrackers);
+    connect(&sessionManager, &SessionManager::clearTrackers, this, &PropertiesWidget::clearTrackers);
+
+    connect(&sessionManager, &SessionManager::urlSeedsInfo, this, &PropertiesWidget::setUrlSeeds);
+    connect(&sessionManager, &SessionManager::clearUrlSeeds, this, &PropertiesWidget::clearUrlSeeds);
+
+    connect(&sessionManager, &SessionManager::pieceBarInfo, this, &PropertiesWidget::setPieces);
+
+    // TODO: think about optimization - i can disconnect signals from all tabs besides the choosen one
 }
 
 PropertiesWidget::~PropertiesWidget()
