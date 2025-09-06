@@ -17,6 +17,9 @@ TorrentWidget::TorrentWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    closeAllTabs();
+
+
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -129,13 +132,31 @@ void TorrentWidget::on_pushButton_2_clicked()
 
 void TorrentWidget::on_togglePropertiesBtn_clicked()
 {
-    ui->propertiesTab->setEnabled(!ui->propertiesTab->isEnabled());
-    ui->propertiesTab->setVisible(!ui->propertiesTab->isVisible());
+
+    if (!ui->stackedWidget->isEnabled()) {
+        ui->stackedWidget->setEnabled(true);
+        ui->stackedWidget->setVisible(true);
+        ui->stackedWidget->setCurrentIndex(0);
+    } else {
+        closeAllTabs();
+    }
 }
 
 
-void TorrentWidget::on_pushButton_3_clicked() // open speed graph
+void TorrentWidget::on_toggleGraphsButton_clicked()
 {
-    m_speedGraph->show();
+    if (!ui->stackedWidget->isEnabled()) {
+        ui->stackedWidget->setEnabled(true);
+        ui->stackedWidget->setVisible(true);
+        ui->stackedWidget->setCurrentIndex(1);
+    } else {
+        closeAllTabs();
+    }
+}
+
+void TorrentWidget::closeAllTabs()
+{
+    ui->stackedWidget->setVisible(false);
+    ui->stackedWidget->setEnabled(false);
 }
 

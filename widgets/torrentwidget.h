@@ -30,7 +30,9 @@ private slots:
 
     void on_togglePropertiesBtn_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_toggleGraphsButton_clicked();
+
+    void closeAllTabs();
 
 private:
     void setupTableView();
