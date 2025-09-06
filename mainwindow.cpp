@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "settingsdialog.h"
+// test
+#include "speedgraphwidget.h"
+//
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setCentralWidget(m_torrentWidget);
+
+    // test
 }
 
 MainWindow::~MainWindow()

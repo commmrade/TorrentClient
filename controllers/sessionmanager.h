@@ -33,6 +33,11 @@ class SessionManager : public QObject
 
     std::int64_t m_currentTorrentId{-1};
 
+
+    std::int64_t lastSessionRecvPayloadBytes{0};
+    std::int64_t lastSessionUploadPayloadBytes{0};
+
+
     explicit SessionManager(QObject *parent = nullptr);
 public:
     Q_DISABLE_COPY_MOVE(SessionManager);
@@ -103,6 +108,8 @@ signals:
     void clearUrlSeeds();
 
     void pieceBarInfo(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIdx);
+
+    void chartPoint(int download, int upload);
 };
 
 inline std::vector<char> readFile(const char *filename)

@@ -15,8 +15,8 @@ find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBTORRENT REQUIRED libtorrent-rasterbar)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Charts)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Charts)
 
 find_library(MAXMINDDB_LIBRARY maxminddb)
 
@@ -53,6 +53,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/trackerswidget.h widgets/trackerswidget.cpp widgets/trackerswidget.ui
         widgets/piecesbarwidget.h widgets/piecesbarwidget.cpp widgets/piecesbarwidget.ui
         dialogs/addpeersdialog.h dialogs/addpeersdialog.cpp dialogs/addpeersdialog.ui
+        widgets/speedgraphwidget.h widgets/speedgraphwidget.cpp widgets/speedgraphwidget.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -72,7 +73,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY})
+target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY} Qt${QT_VERSION_MAJOR}::Charts)
 target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${MAXMINDDB_INCLUDE_DIR})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

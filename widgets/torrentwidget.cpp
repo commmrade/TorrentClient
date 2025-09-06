@@ -6,16 +6,17 @@
 #include "savetorrentdialog.h"
 #include <QElapsedTimer>
 #include <QMessageBox>
+#include "speedgraphwidget.h"
+
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TorrentWidget)
     , m_sessionManager(SessionManager::instance())
+    , m_speedGraph(new SpeedGraphWidget{})
 {
     ui->setupUi(this);
 
-    // QElapsedTimer perfTimer;
-    // perfTimer.start();
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -39,7 +40,6 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     // Context Menu Stuff
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
-
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }
@@ -131,5 +131,11 @@ void TorrentWidget::on_togglePropertiesBtn_clicked()
 {
     ui->propertiesTab->setEnabled(!ui->propertiesTab->isEnabled());
     ui->propertiesTab->setVisible(!ui->propertiesTab->isVisible());
+}
+
+
+void TorrentWidget::on_pushButton_3_clicked() // open speed graph
+{
+    m_speedGraph->show();
 }
 

@@ -91,9 +91,23 @@ void SessionManager::eventLoop()
         if (auto* addTorrentAlert = lt::alert_cast<lt::add_torrent_alert>(alert)) {
             handleAddTorrentAlert(addTorrentAlert);
         }
+        if (auto* stateAlert = lt::alert_cast<lt::session_stats_alert>(alert)) { // if happens every second so i think i wont use chrono stuff
+            // TODO: Factor out in a function
+            const auto& counters = stateAlert->counters();
+            auto recvPayloadBytes = counters[lt::counters::recv_bytes];
+            auto newRecv = recvPayloadBytes - lastSessionRecvPayloadBytes;
+            lastSessionRecvPayloadBytes = recvPayloadBytes;
+
+            auto uploadPayloadBytes = counters[lt::counters::sent_bytes];
+            auto newUpload = uploadPayloadBytes - lastSessionUploadPayloadBytes;
+            lastSessionUploadPayloadBytes = uploadPayloadBytes;
+
+            emit chartPoint(newRecv, newUpload);
+        }
     }
 
     m_session->post_torrent_updates();
+    m_session->post_session_stats();
     updateProperties();
 }
 
@@ -161,12 +175,6 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     for (auto& status : statuses) {
         auto& handle = status.handle;
 
-        // std::vector<lt::partial_piece_info> queue;
-        // handle.get_download_queue(queue);
-        // for (auto& entry : queue) {
-        //     qDebug() << entry.piece_index << entry.finished;
-        // }
-
         if (handle.id() == m_currentTorrentId) {
             updateGeneralProperty(handle);
         }
@@ -232,35 +240,6 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 {
     bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
 
-
-    // debug
-    // std::vector<lt::peer_info> peers;
-    // handle.get_peer_info(peers);
-    // for (const auto& peer : peers) {
-    //     QString conType;
-    //     if (peer.connection_type == lt::peer_info::standard_bittorrent) {
-    //         conType = "BT";
-    //     } else if (peer.connection_type == lt::peer_info::http_seed) {
-    //         conType = "HTTP";
-    //     } else {
-    //         conType = "URL";
-    //     }
-
-    //     // { // Ban a peer
-    //     //     lt::ip_filter filter = m_session->get_ip_filter();
-    //     //     filter.add_rule(peer.ip.address(), peer.ip.address(), lt::ip_filter::blocked);
-    //     //     m_session->set_ip_filter(std::move(filter));
-    //     // }
-
-
-    //     qDebug() << "Country:" << << "Ip:" << peer.ip.address().to_string() <<
-    //         "Port:" << peer.ip.port() << "Connection:" << conType <<
-    //         "Client:" << peer.client << "Progress:" << peer.progress <<
-    //         "Down speed:" << peer.down_speed / 1024.0 << "Up Speed:" << peer.up_speed <<
-    //         "Downloaded:" << peer.total_download / 1024.0 << "Uploaded:" << peer.total_upload / 1024.0;
-    // }
-    //
-
     Torrent torrent = {
         handle.id(),
         QString::fromStdString(status.name),
@@ -271,7 +250,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.num_seeds,
         status.num_peers,
         // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        static_cast<std::uint64_t>(status.download_rate),
+        static_cast<std::uint64_t>(status.download_rate), // TODO: Replace uint64_t with int, since it is used by torrent_status
         // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
         static_cast<std::uint64_t>(status.upload_rate),
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
