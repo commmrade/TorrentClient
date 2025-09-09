@@ -5,7 +5,6 @@
 #include <QSettings>
 #include "settingsvalues.h"
 #include <QDebug>
-#include <QDateTime>
 
 
 void fallToDefaultTheme(QApplication& a, QSettings& settings) {

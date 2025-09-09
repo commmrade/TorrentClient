@@ -1,7 +1,6 @@
 #include "addpeersdialog.h"
 #include "ui_addpeersdialog.h"
 #include <QCloseEvent>
-// #include <boost/asio/ip/tcp.hpp>
 #include <QMessageBox>
 
 AddPeersDialog::AddPeersDialog(QWidget *parent)

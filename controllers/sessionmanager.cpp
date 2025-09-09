@@ -7,7 +7,6 @@
 #include <QSettings>
 #include "settingsvalues.h"
 #include "torrentinfo.h"
-#include <QDateTime>
 #include "tracker.h"
 
 SessionManager::SessionManager(QObject *parent)

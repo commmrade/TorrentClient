@@ -6,7 +6,6 @@
 #include <libtorrent/hex.hpp>
 #include <QString>
 #include <QDebug>
-// #include <libtorrent/libtorrent.hpp>
 
 class TorrentHandle
 {

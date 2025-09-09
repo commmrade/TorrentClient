@@ -2,7 +2,6 @@
 #define SESSIONMANAGER_H
 
 #include <QObject>
-#include <fstream>
 #include <vector>
 #include <libtorrent/session.hpp>
 #include <libtorrent/create_torrent.hpp>

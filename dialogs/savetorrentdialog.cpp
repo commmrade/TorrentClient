@@ -10,7 +10,6 @@
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/hex.hpp>
-// #include <libtorrent/libtorrent.hpp>
 #include <QThread>
 #include "utils.h"
 

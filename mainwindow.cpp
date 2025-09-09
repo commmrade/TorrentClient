@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "settingsdialog.h"
-// test
-#include "speedgraphwidget.h"
-//
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -27,4 +24,3 @@ void MainWindow::on_actionSettings_triggered()
     SettingsDialog dialog(this);
     dialog.exec(); // idc if it is accepted or rejected
 }
-

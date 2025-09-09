@@ -1,5 +1,6 @@
 #ifndef TORRENTINFO_H
 #define TORRENTINFO_H
+
 #include <cstdint>
 #include <QString>
 

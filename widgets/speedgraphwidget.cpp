@@ -61,7 +61,6 @@ void SpeedGraphWidget::addLine(int download, int upload)
     QString targetFormat = "%.0f B/s";
     double targetScale = 1.0;
     if (maxSpeed >= 1024 * 1024) {
-        qDebug() << "here";
         targetFormat = "%.0f MB/s";
         targetScale = 1024.0 * 1024.0;
     } else if (maxSpeed >= 1024) {

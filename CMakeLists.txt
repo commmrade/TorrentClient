@@ -55,17 +55,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         dialogs/addpeersdialog.h dialogs/addpeersdialog.cpp dialogs/addpeersdialog.ui
         widgets/speedgraphwidget.h widgets/speedgraphwidget.cpp widgets/speedgraphwidget.ui
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+    # Define target properties for Android with Qt 6 as:
+    #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
         add_library(torrent-client SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+        # Define properties for Android with Qt 5 after find_package() calls as:
+        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(torrent-client
             ${PROJECT_SOURCES}
@@ -80,7 +80,7 @@ target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${M
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.torrent-client)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.torrent-client)
 endif()
 set_target_properties(torrent-client PROPERTIES
     ${BUNDLE_ID_OPTION}
