@@ -50,13 +50,15 @@ void SpeedGraphWidget::addLine(int download, int upload)
     auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());
     auto* horizontalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Horizontal).first());
 
+    // Next x pos of graph
     qreal lastX = m_downloadSeries->points().isEmpty() ? 0 : m_downloadSeries->points().constLast().x() + 1;
 
     int seriesSize = m_downloadSeries->points().size();
-
+    // Graph is 60 points wide
     int firstRangePos = seriesSize > 60 ? seriesSize - 60 : 0;
     int lastRangePos = seriesSize > 60 ? seriesSize : 60;
 
+    // We are converting into format of newly added point (TODO: Change to max)
     int maxSpeed = std::max(download, upload);
     QString targetFormat = "%.0f B/s";
     double targetScale = 1.0;
@@ -76,6 +78,7 @@ void SpeedGraphWidget::addLine(int download, int upload)
         currentScale = 1024.0 * 1024.0;
     }
 
+    // Use this to scale series to target scale
     double factor = currentScale / targetScale;
     bool unitChanged = currentFormat != targetFormat; // Scale series only if something is changed
 
