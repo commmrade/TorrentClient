@@ -73,6 +73,9 @@ void SessionManager::saveResumes()
 
 void SessionManager::eventLoop()
 {
+    QElapsedTimer timer;
+    timer.start();
+
     std::vector<lt::alert*> alerts;
     m_session->pop_alerts(&alerts);
     for (auto* alert : alerts) {
@@ -109,6 +112,8 @@ void SessionManager::eventLoop()
     m_session->post_torrent_updates();
     m_session->post_session_stats();
     updateProperties();
+
+    qDebug() << "Took" << timer.elapsed();
 }
 
 void SessionManager::updateProperties()
