@@ -55,7 +55,6 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 default: {
                     throw std::runtime_error("Something is wrong");
-                    break;
                 }
             }
         }

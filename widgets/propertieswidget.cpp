@@ -14,6 +14,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
     ui->propertiesTab->setTabText(1, "Trackers");
     ui->propertiesTab->setTabText(2, "Peers");
     ui->propertiesTab->setTabText(3, "HTTP Sources");
+    ui->propertiesTab->setTabText(4, "Files");
 
     ui->sourcesList->clear();
 
@@ -32,6 +33,8 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 
     connect(&sessionManager, &SessionManager::pieceBarInfo, this, &PropertiesWidget::setPieces);
 
+    connect(&sessionManager, &SessionManager::filesInfo, this, &PropertiesWidget::setFiles);
+    connect(&sessionManager, &SessionManager::clearFiles, this, &PropertiesWidget::clearFiles);
     // TODO: think about optimization - i can disconnect signals from all tabs besides the choosen one
 }
 
@@ -101,4 +104,18 @@ void PropertiesWidget::setUrlSeeds(const std::set<std::string> &urlSeeds)
 void PropertiesWidget::clearUrlSeeds()
 {
     ui->sourcesList->clear();
+}
+
+void PropertiesWidget::setFiles(const QList<File> &files)
+{
+    if (ui->propertiesTab->currentIndex() == 4 && isEnabled()) {
+        ui->filesList->setFiles(files);
+    }
+}
+
+void PropertiesWidget::clearFiles()
+{
+    if (ui->propertiesTab->currentIndex() == 4 && isEnabled()) {
+        ui->filesList->clearFiles();
+    }
 }

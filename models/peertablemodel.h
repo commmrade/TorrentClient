@@ -22,7 +22,6 @@ public:
     }
 
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
-    // Not editabl;e
 
     QVariant headerData(int section, Qt::Orientation, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <libtorrent/peer_info.hpp>
 #include "torrentinfo.h"
+#include "file.h"
 
 namespace Ui {
 class PropertiesWidget;
@@ -29,6 +30,9 @@ public slots:
 
     void setUrlSeeds(const std::set<std::string>& urlSeeds);
     void clearUrlSeeds();
+
+    void setFiles(const QList<File> &files);
+    void clearFiles();
 private:
     Ui::PropertiesWidget *ui;
 };

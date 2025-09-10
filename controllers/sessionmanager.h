@@ -11,6 +11,7 @@
 #include <QDir>
 #include "torrenthandle.h"
 #include "tracker.h"
+#include "file.h"
 
 constexpr const char* SESSION_FILENAME = ".session";
 
@@ -110,6 +111,9 @@ signals:
     void pieceBarInfo(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIdx);
 
     void chartPoint(int download, int upload);
+
+    void filesInfo(const QList<File>& files);
+    void clearFiles();
 };
 
 inline std::vector<char> readFile(const char *filename)

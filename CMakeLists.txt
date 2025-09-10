@@ -54,6 +54,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/piecesbarwidget.h widgets/piecesbarwidget.cpp widgets/piecesbarwidget.ui
         dialogs/addpeersdialog.h dialogs/addpeersdialog.cpp dialogs/addpeersdialog.ui
         widgets/speedgraphwidget.h widgets/speedgraphwidget.cpp widgets/speedgraphwidget.ui
+        models/filestablemodel.h models/filestablemodel.cpp models/filestablemodel.ui
+        common/file.h
+        delegates/fileitemdelegate.h delegates/fileitemdelegate.cpp
+        widgets/filelistwidget.h widgets/filelistwidget.cpp widgets/filelistwidget.ui
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

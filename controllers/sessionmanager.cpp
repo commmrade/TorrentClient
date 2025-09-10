@@ -126,6 +126,33 @@ void SessionManager::updateProperties()
         }
         return tracks;
     };
+    auto fileListFromTorrentInfo = [this](const TorrentHandle& handle, std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File> {
+        const auto& files = tinfo->files();
+        auto num_files = files.num_files();
+
+        QList<File> result;
+        for (auto i = 0; i < num_files; ++i) {
+            std::uint64_t fileSizeBytes = 0;
+            auto startPieceIndex = files.piece_index_at_file(i);
+            auto numPiecesInFile = files.file_num_pieces(i);
+
+            auto pieces = m_torrentHandles[m_currentTorrentId].handle().status().pieces;
+            for (auto pidx = startPieceIndex; pidx < static_cast<int>(startPieceIndex) + numPiecesInFile; ++pidx) {
+                if (pieces[pidx]) {
+                    fileSizeBytes += files.piece_size(pidx);
+                }
+            }
+
+            File file;
+            file.isEnabled = true; // TODO: Figure out if a file is disabled
+            file.filename = QString::fromStdString(files.file_path(i));
+            file.filesize = files.file_size(i);
+            file.downloaded = fileSizeBytes;
+            file.priority = handle.handle().file_priority(i);
+            result.append(std::move(file));
+        }
+        return result;
+    };
     if (m_currentTorrentId != -1) {
         auto& handle = m_torrentHandles[m_currentTorrentId];
         {
@@ -138,6 +165,14 @@ void SessionManager::updateProperties()
                 auto ltTrackers = handle.getTrackers();
                 QList<Tracker> trackers = trackersFromLtTrackers(ltTrackers);
                 emit trackersInfo(trackers);
+
+
+                // Update files
+
+                if (auto tinfo = m_torrentHandles[m_currentTorrentId].handle().torrent_file()) {
+                    auto files = fileListFromTorrentInfo(handle, tinfo);
+                    emit filesInfo(files);
+                }
 
                 // update url seeds
                 auto urlSeeds = m_torrentHandles[m_currentTorrentId].handle().url_seeds();
@@ -152,6 +187,7 @@ void SessionManager::updateProperties()
         emit clearGeneralInfo();
         emit clearTrackers();
         emit clearUrlSeeds();
+        emit clearFiles();
     }
 
 }
@@ -170,9 +206,37 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
+    // if (auto tinfo = status.torrent_file.lock()) {
+    //     const auto& files = tinfo->files();
+    //     auto num_files = files.num_files();
+
+    //     QHash<int, std::uint64_t> fileSizes; // file index, size in bytes
+
+    //     auto pieces = status.pieces;
+    //     for (auto i = 0; i < num_files; ++i) {
+    //         fileSizes.insert(i, 0);
+
+    //         auto startPieceIndex = files.piece_index_at_file(i);
+    //         auto numPiecesInFile = files.file_num_pieces(i);
+
+    //         qDebug() << startPieceIndex << (int)startPieceIndex + numPiecesInFile << pieces.size();
+    //         for (auto pIdx = startPieceIndex; pIdx < (int)startPieceIndex + numPiecesInFile - 1; ++pIdx) {
+    //             qDebug() << "Pidx" << pIdx << "Size" << pieces.size() << numPiecesInFile;
+
+    //             if (pieces[pIdx]) {
+    //                 fileSizes[i] += files.piece_size(pIdx);
+    //             }
+    //         }
+
+    //         qDebug() << "File" << files.file_path(i) <<  "downloaded:" << fileSizes[i] / 1024 / 1024 << "MB";
+    //     }
+    // }
+
     auto statuses = alert->status;
     for (auto& status : statuses) {
         auto& handle = status.handle;
+
+
 
         if (handle.id() == m_currentTorrentId) {
             updateGeneralProperty(handle);
