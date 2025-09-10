@@ -53,7 +53,7 @@ public:
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);
     void resumeTorrent(const std::uint32_t id);
-    void removeTorrent(const std::uint32_t id, bool removeWithContents);
+    bool removeTorrent(const std::uint32_t id, bool removeWithContents);
 
     void loadResumes();
 
@@ -82,6 +82,7 @@ private:
     void handleMetadataReceived(lt::metadata_received_alert* alert);
     void handleResumeDataAlert(lt::save_resume_data_alert* alert);
     void handleAddTorrentAlert(lt::add_torrent_alert* alert);
+    void handleSessionStatsAlert(lt::session_stats_alert* alert);
 
     void saveResumes();
     bool addTorrent(lt::add_torrent_params params);

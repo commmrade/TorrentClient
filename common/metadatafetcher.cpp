@@ -25,9 +25,9 @@ void MetadataFetcher::run()
 
     while (m_isRunning) {
         std::vector<lt::alert*> alerts;
-
         session.pop_alerts(&alerts);
         for (auto* alert : alerts) {
+            // TODO: Set timeouts in session on startup
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
                 // this->setSize(metadataRecAlert->handle.torrent_file()->total_size());
                 emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());
@@ -36,6 +36,7 @@ void MetadataFetcher::run()
             } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {
                 qWarning() << "Could not fetch metadata for magnet, because" << metadataFailedAlert->message();
                 m_isRunning = false;
+                // TODO: Fail error signal
                 break;
             }
         }

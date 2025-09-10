@@ -70,6 +70,7 @@ void SpeedGraphWidget::addLine(int download, int upload)
         targetScale = 1024.0;
     }
 
+    // Deducing current scale depending on the label format
     QString currentFormat = verticalAxis->labelFormat();
     double currentScale = 1.0;
     if (currentFormat.contains("KB/s")) {
@@ -108,8 +109,11 @@ void SpeedGraphWidget::addLine(int download, int upload)
         if (static_cast<int>(points.size()) <= firstRangePos) return 0.0;
         auto startIt = points.begin() + firstRangePos;
         auto maxIt = std::max_element(startIt, points.end(), [](const QPointF& a, const QPointF& b) { return a.y() < b.y(); });
-        return maxIt->y();
+        return maxIt->y(); // Can't throw, since we have an if statement guard
     };
+
+    // New points are added to the series, no point in including them in max({})
+    // Notice: std::max can accept init_list with as many values as u cant
     double maxY = std::max(maxInSeries(m_downloadSeries), maxInSeries(m_uploadSeries));
     verticalAxis->setMax(maxY * 1.1);
 

@@ -78,7 +78,9 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     QAction* deleteAction = new QAction("Delete", this);
     connect(deleteAction, &QAction::triggered, this, [this, torrentId] {
         bool removeWithContents = true;
-        m_sessionManager.removeTorrent(torrentId, removeWithContents);
+        if (!m_sessionManager.removeTorrent(torrentId, removeWithContents)) {
+            QMessageBox::warning(this, tr("Beware"), tr("Could not delete all torrent files, please finish it manually."));
+        }
     });
     menu.addAction(deleteAction);
 

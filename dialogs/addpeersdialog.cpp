@@ -34,7 +34,6 @@ bool AddPeersDialog::parseEndpoints()
         auto colIndex = colIndexIter - addrPortView.begin();
         auto addrStr = addrPortView.sliced(0, colIndex);
         auto portStr = addrPortView.sliced(colIndex + 1, addrPortView.size() - (colIndex + 1));
-        qDebug() << addrStr << portStr;
 
         boost::system::error_code ec;
         auto addr = boost::asio::ip::make_address(addrStr.toByteArray().constData(), ec);

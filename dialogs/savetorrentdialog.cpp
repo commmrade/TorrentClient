@@ -39,7 +39,9 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     auto saveTorrentFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "torrents" + QDir::separator() + QString::fromStdString(libtorrent::aux::to_hex(params.info_hashes.get_best().to_string()));
     params.save_path = saveTorrentFile.toStdString();
 
+    // Start fetching metadata
     m_fetcher = new MetadataFetcher{params};
+    // TODO: Set not onyl size, but other data
     connect(m_fetcher, &MetadataFetcher::sizeReady, this, &SaveTorrentDialog::setSize);
     m_fetcher->start();
 

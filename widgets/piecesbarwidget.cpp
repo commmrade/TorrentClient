@@ -52,18 +52,19 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
     QSet<int> hashedDownloadingPieces; // idx bool
 
-
     int startPos = startX;
-    int endPos = startX + BAR_WIDTH_PX;
+    int endPos = startX + BAR_WIDTH_PX; // Dimensions of the bar on a widget
     if (piecesPerPixel) { // if pieces per pixel >= 1
         int const chunks = m_pieces.size() / piecesPerPixel;
+
         for (int i = 0; i < chunks; ++i) {
             int finishedPieces = 0;
             bool isDownloading = false;
 
+            // Iterate until where
             int pidxUntil = piecesPerPixel * i + piecesPerPixel;
             if (startPos >= endPos - 1) { // if its the last iteration
-                pidxUntil = m_pieces.size();
+                pidxUntil = m_pieces.size(); // fix the end to the end of pieces, so we wont go over
             }
 
             for (auto pidx = piecesPerPixel * i; pidx < pidxUntil; ++pidx) {
@@ -71,7 +72,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                     ++finishedPieces;
                     continue;
                 }
-
+                // If piece is downloading set the flag, cache the result if its not
                 if (hashedDownloadingPieces.contains(pidx)) {
                     isDownloading = true;
                 } else {
@@ -95,12 +96,9 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             } else if (isDownloading || finishedPieces) {
                 color = QColor::fromRgb(50, 255, 50);
             }
-
-
             painter.fillRect(piece, QBrush{color});
             ++startPos;
-
-            if (pidxUntil == m_pieces.size()) break;
+            if (pidxUntil == m_pieces.size()) break; // Nothing else to do, force exit out of the cycle
         }
     } else {
         int const pixelsInPiece = BAR_WIDTH_PX / m_pieces.size();
@@ -109,7 +107,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             bool isDownloaded = false;
             bool isDownloading = false;
 
-
+            // Edge case, we are getting close to the end
             if (startPos >= endPos - pixelsInPiece) {
                 for (; i < m_pieces.size(); ++i) {
                     if (m_pieces[i]) {

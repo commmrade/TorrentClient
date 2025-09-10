@@ -137,13 +137,13 @@ void SettingsDialog::applyTorrentSettings()
 
     if (m_downloadLimitChanged) {
         auto downloadLimitValue = ui->downloadLimitSpin->value();
-        sessionManager.setDownloadLimit(downloadLimitValue);
+        sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
         m_downloadLimitChanged = false;
     }
 
     if (m_uploadLimitChanged) {
         auto uploadLimitValue = ui->uploadLimitSpin->value();
-        sessionManager.setUploadLimit(uploadLimitValue);
+        sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
         m_uploadLimitChanged = false;
     }
 }
