@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "filestablemodel.h"
 #include "fileitemdelegate.h"
+#include "filestatusdelegate.h"
 
 namespace Ui {
 class FileListWidget;
@@ -25,6 +26,8 @@ private:
     Ui::FileListWidget *ui;
 
     FileTableModel m_fileModel;
+
+    FileStatusDelegate m_statusDelegate;
     FileItemDelegate m_itemDelegate;
 };
 

@@ -1,5 +1,6 @@
 #include "filelistwidget.h"
 #include "ui_filelistwidget.h"
+#include "sessionmanager.h"
 
 FileListWidget::FileListWidget(QWidget *parent)
     : QWidget(parent)
@@ -13,7 +14,17 @@ FileListWidget::FileListWidget(QWidget *parent)
     ui->fileView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->fileView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
+
+    connect(&m_fileModel, &FileTableModel::dataChanged, this, [&](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                                                                  const QList<int> &roles = QList<int>()) {
+        qDebug() << "Topleft row:" << topLeft.row();
+        auto id = m_fileModel.getFileId(topLeft.row());
+        qDebug() << "Updated file id:" << id;
+
+        // SessionManager::instance().
+    });
 
     connect(ui->fileView, &QTableView::customContextMenuRequested, this, &FileListWidget::contextMenuRequested);
 }

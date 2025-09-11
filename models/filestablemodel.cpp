@@ -45,6 +45,28 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
+bool FileTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (role == Qt::EditRole) {
+        auto& file = m_files[index.row()];
+        switch (static_cast<FileFields>(index.column())) {
+        case FileFields::STATUS: {
+            file.isEnabled = value.toBool();
+            // TODO: Change priority to 'dont download' in session manager somehow
+            emit dataChanged(index, index);
+            break;
+        }
+        // ...
+        default: {
+            throw std::runtime_error("Something is wrong");
+            break;
+        }
+        }
+        return true;
+    }
+    return false;
+}
+
 QVariant FileTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole) {

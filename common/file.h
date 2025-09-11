@@ -3,6 +3,7 @@
 #include <QString>
 
 struct File {
+    int id;
     bool isEnabled;
     QString filename;
     std::uint64_t filesize; // in bytes

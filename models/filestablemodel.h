@@ -23,12 +23,13 @@ public:
     }
 
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
-    // bool setData(const QModelIndex& index = QModelIndex{}, const QVariant& value = QVariant{}, int role = Qt::EditRole) override; // Probably will be needed for editing (enabled, disabled, priority)
+    bool setData(const QModelIndex& index = QModelIndex{}, const QVariant& value = QVariant{}, int role = Qt::EditRole) override; // Probably will be needed for editing (enabled, disabled, priority)
 
     QVariant headerData(int section, Qt::Orientation, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
 
+    int getFileId(int index) const { return m_files[index].id; }
     void setFiles(const QList<File>& files);
     void clearFiles();
 private:

@@ -149,6 +149,7 @@ void SessionManager::updateProperties()
             }
 
             File file;
+            file.id = i;
             file.isEnabled = handle.handle().file_priority(i) != lt::dont_download;
             file.filename = QString::fromStdString(files.file_path(i));
             file.filesize = files.file_size(i);
