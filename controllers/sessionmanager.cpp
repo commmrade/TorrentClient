@@ -8,6 +8,7 @@
 #include "settingsvalues.h"
 #include "torrentinfo.h"
 #include "tracker.h"
+#include "utils.h"
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
@@ -270,7 +271,8 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     tInfo.completedTime = status.completed_time;
     tInfo.size = status.total_wanted;
     tInfo.startTime = status.added_time;
-    tInfo.hashBest = QString::fromStdString(lt::aux::to_hex(handle.info_hashes().get_best().to_string()));
+
+    tInfo.hashBest = utils::toHex(handle.info_hashes().get_best().to_string());
     tInfo.savePath = QString::fromStdString(status.save_path);
     tInfo.comment = "Something";
 

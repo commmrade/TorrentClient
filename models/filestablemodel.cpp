@@ -25,11 +25,11 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
                     return {ratio};
                 }
                 case FileFields::DOWNLOADED: {
-                    return {bytesToHigher(file.downloaded)};
+                    return {utils::bytesToHigher(file.downloaded)};
                     // return {static_cast<qreal>(file.downloaded)};
                 }
                 case FileFields::FILESIZE: {
-                    return {bytesToHigher(file.filesize)};
+                    return {utils::bytesToHigher(file.filesize)};
                     // return {static_cast<qreal>(file.filesize)};
                 }
                 case FileFields::PRIORITY: {
@@ -87,6 +87,7 @@ QHash<int, QByteArray> FileTableModel::roleNames() const
 
 void FileTableModel::setFiles(const QList<File> &files)
 {
+    // TODO: Optimize, no point in resetting it every tick
     clearFiles();
     m_files = files;
 }

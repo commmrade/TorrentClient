@@ -108,13 +108,13 @@ void TorrentWidget::on_pushButton_clicked()
         }
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
-        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
     }
 }
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open torrent", "/home/klewy", "Torrents (*.torrent)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open torrent", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }
@@ -128,7 +128,7 @@ void TorrentWidget::on_pushButton_2_clicked()
         }
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
-        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
     }
 }
 

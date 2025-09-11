@@ -130,7 +130,7 @@ inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto stateDirPath = basePath + QDir::separator() + "torrents";
 
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".torrent";
+    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + ".torrent";
     QFile file{stateFilePath};
 
     if (file.open(QIODevice::WriteOnly)) {
@@ -146,7 +146,7 @@ inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
 inline void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto stateDirPath = basePath + QDir::separator() + "state";
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".fastresume";
+    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + ".fastresume";
     QFile file{stateFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         file.write(buf.data(), buf.size());

@@ -3,9 +3,9 @@
 #include <libtorrent/torrent_handle.hpp>
 #include <chrono>
 #include <libtorrent/torrent_status.hpp>
-#include <libtorrent/hex.hpp>
 #include <QString>
 #include <QDebug>
+#include "utils.h"
 
 class TorrentHandle
 {
@@ -42,7 +42,7 @@ public:
     }
 
     QString bestHashAsString() const {
-        return QString::fromStdString(lt::aux::to_hex(m_handle.info_hashes().get_best()));
+        return utils::toHex(m_handle.info_hashes().get_best().to_string());
     }
     lt::sha1_hash bestHash() const {
         return m_handle.info_hashes().get_best();

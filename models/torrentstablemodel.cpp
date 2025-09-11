@@ -24,7 +24,7 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case SIZE: {
                     auto sizeInBytes = torrent.size;
-                    QString sizeStr = bytesToHigher(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PROGRESS: {
@@ -41,16 +41,16 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case DOWN_SPEED: {
                     auto sizeInBytes = torrent.downSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case UP_SPEED: {
                     auto sizeInBytes = torrent.upSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case ETA: {
-                    auto etaStr = secsToFormattedTime(torrent.eta);
+                    auto etaStr = utils::secsToFormattedTime(torrent.eta);
                     return etaStr;
                 }
                 default: {

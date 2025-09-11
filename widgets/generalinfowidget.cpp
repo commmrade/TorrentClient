@@ -50,26 +50,26 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     }
 
 
-    auto downloaded = bytesToHigher(iInfo.downloaded);
+    auto downloaded = utils::bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
 
-    auto downSpeed = bytesToHigherPerSec(iInfo.downSpeed);
+    auto downSpeed = utils::bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.downLimit));
+    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : utils::bytesToHigherPerSec(iInfo.downLimit));
 
     {
-        auto etaStr = secsToFormattedTime(iInfo.eta);
+        auto etaStr = utils::secsToFormattedTime(iInfo.eta);
         ui->etaValue->setText(etaStr);
     }
 
-    auto uploaded = bytesToHigher(iInfo.uploaded);
+    auto uploaded = utils::bytesToHigher(iInfo.uploaded);
     ui->uploadedValue->setText(uploaded);
 
-    auto upSpeed = bytesToHigherPerSec(iInfo.upSpeed);
+    auto upSpeed = utils::bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.upLimit));
+    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? "Unlimited" : utils::bytesToHigherPerSec(iInfo.upLimit));
 
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
@@ -82,7 +82,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
 
     //
 
-    auto torSize = bytesToHigher(tInfo.size);
+    auto torSize = utils::bytesToHigher(tInfo.size);
     ui->torSizeValue->setText(torSize);
 
 
@@ -100,7 +100,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     ui->commentValue->setText(comm);
 
     auto pieces = QString::number(tInfo.piecesCount);
-    auto piecesStr = pieces + " x " + bytesToHigher(tInfo.pieceSize);
+    auto piecesStr = pieces + " x " + utils::bytesToHigher(tInfo.pieceSize);
     ui->piecesValue->setText(piecesStr);
 
     if (tInfo.completedTime != 0) {

@@ -51,22 +51,22 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const
                 }
                 case PeerFields::UP_SPEED: {
                     auto sizeInBytes = peer.upSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::DOWN_SPEED: {
                     auto sizeInBytes = peer.downSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::DOWNLOADED: {
                     auto sizeInBytes = peer.downloaded;
-                    QString sizeStr = bytesToHigher(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PeerFields::UPLOADED: {
                     auto sizeInBytes = peer.uploaded;
-                    QString sizeStr = bytesToHigher(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 default: {

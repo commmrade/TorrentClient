@@ -36,7 +36,12 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     ui->sizeInfo->setText("Fetching...");
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetUri.toStdString());
-    auto saveTorrentFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "torrents" + QDir::separator() + QString::fromStdString(libtorrent::aux::to_hex(params.info_hashes.get_best().to_string()));
+    auto saveTorrentFile =
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+        QDir::separator() + "torrents" +
+        QDir::separator() +
+        utils::toHex(params.info_hashes.get_best().to_string());
+
     params.save_path = saveTorrentFile.toStdString();
 
     // Start fetching metadata
@@ -68,7 +73,7 @@ QString SaveTorrentDialog::getSavePath() const
 
 void SaveTorrentDialog::setSize(int64_t bytes)
 {
-    auto bytesStr = bytesToHigher(bytes);
+    auto bytesStr = utils::bytesToHigher(bytes);
     ui->sizeInfo->setText(bytesStr);
 }
 
