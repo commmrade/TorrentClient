@@ -12,6 +12,7 @@
 #include <libtorrent/hex.hpp>
 #include <QThread>
 #include "utils.h"
+#include <QMessageBox>
 
 SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPath, QWidget *parent)
     : QDialog(parent)
@@ -52,6 +53,11 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
     // Simulating detached (hack)
     connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
+    connect(m_fetcher, &MetadataFetcher::error, this, [this]{
+        ui->sizeInfo->setText("Failed");
+        ui->dateInfo->setText("Failed");
+        QMessageBox::warning(this, "Warning", "Metadata could not be fetched");
+    });
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();

@@ -15,6 +15,8 @@ protected:
     void run() override;
 signals:
     void sizeReady(std::int64_t bytes);
+
+    void error();
 private:
     lt::add_torrent_params m_params;
     bool m_isRunning{true};

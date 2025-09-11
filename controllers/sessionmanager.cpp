@@ -149,7 +149,7 @@ void SessionManager::updateProperties()
             }
 
             File file;
-            file.isEnabled = true; // TODO: Figure out if a file is disabled
+            file.isEnabled = handle.handle().file_priority(i) != lt::dont_download;
             file.filename = QString::fromStdString(files.file_path(i));
             file.filesize = files.file_size(i);
             file.downloaded = fileSizeBytes;
@@ -283,7 +283,11 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     tInfo.hashV2 = utils::toHex(hashV2.is_all_zeros() ? "" : hashV2.to_string());
 
     tInfo.savePath = QString::fromStdString(status.save_path);
-    tInfo.comment = "Something"; // TODO: Fix
+
+    {
+        auto t_file = handle.torrent_file();
+        tInfo.comment = t_file ? QString::fromStdString(t_file->comment()) : "";
+    }
 
     tInfo.piecesCount = status.pieces.size();
 
@@ -318,15 +322,15 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         handle.id(),
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
-        static_cast<std::uint64_t>(status.total_wanted),
+        status.total_wanted,
         std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0,
         !IsPaused ? torrentStateToString(status.state) : "Stopped",
         status.num_seeds,
         status.num_peers,
         // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        static_cast<std::uint64_t>(status.download_rate), // TODO: Replace uint64_t with int, since it is used by torrent_status
+        status.download_rate, // TODO: Replace uint64_t with int, since it is used by torrent_status
         // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        static_cast<std::uint64_t>(status.upload_rate),
+        status.upload_rate,
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
