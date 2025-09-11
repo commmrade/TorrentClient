@@ -328,7 +328,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.num_seeds,
         status.num_peers,
         // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.download_rate, // TODO: Replace uint64_t with int, since it is used by torrent_status
+        status.download_rate,
         // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
         status.upload_rate,
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
@@ -489,7 +489,7 @@ void SessionManager::resumeTorrent(const uint32_t id)
     m_torrentHandles[id].resume();
 }
 
-bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents) // TODO ability to change removeWithContents
+bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
     if (id == m_currentTorrentId) {
         m_currentTorrentId = -1;
