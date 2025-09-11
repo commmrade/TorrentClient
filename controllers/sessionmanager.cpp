@@ -107,8 +107,12 @@ void SessionManager::eventLoop()
 
 void SessionManager::updateProperties()
 {
-    auto trackersFromLtTrackers = [](const std::vector<lt::announce_entry>& trackers) -> QList<Tracker> {
+    auto trackersFromLtTrackers = [](const TorrentHandle& handle, const std::vector<lt::announce_entry>& trackers) -> QList<Tracker> {
         QList<Tracker> tracks;
+
+        const bool hasV2 = handle.handle().info_hashes().has_v2();
+        const auto version = hasV2 ? lt::protocol_version::V2 : lt::protocol_version::V1;
+
         for (const auto& tracker : trackers) {
             Tracker tr{};
             tr.url = QString::fromStdString(tracker.url);
@@ -117,7 +121,7 @@ void SessionManager::updateProperties()
                 if (ep.enabled) {
                     tr.isWorking = true;
                 }
-                const auto& ihash = ep.info_hashes[lt::protocol_version::V1];
+                const lt::announce_infohash ihash = ep.info_hashes[version];
                 tr.seeds = ihash.scrape_complete == -1 ? 0 : ihash.scrape_complete;
                 tr.leeches = ihash.scrape_incomplete == -1 ? 0 : ihash.scrape_incomplete;
                 tr.message = QString::fromStdString(ihash.message);
@@ -164,7 +168,7 @@ void SessionManager::updateProperties()
 
                 // Update trackers
                 auto ltTrackers = handle.getTrackers();
-                QList<Tracker> trackers = trackersFromLtTrackers(ltTrackers);
+                QList<Tracker> trackers = trackersFromLtTrackers(handle, ltTrackers);
                 emit trackersInfo(trackers);
 
 
@@ -272,9 +276,14 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     tInfo.size = status.total_wanted;
     tInfo.startTime = status.added_time;
 
-    tInfo.hashBest = utils::toHex(handle.info_hashes().get_best().to_string());
+    // tInfo.hashBest = utils::toHex(handle.info_hashes().get_best().to_string());
+    tInfo.hashV1 = utils::toHex(handle.info_hashes().v1.to_string());
+
+    auto hashV2 = handle.info_hashes().v2;
+    tInfo.hashV2 = utils::toHex(hashV2.is_all_zeros() ? "" : hashV2.to_string());
+
     tInfo.savePath = QString::fromStdString(status.save_path);
-    tInfo.comment = "Something";
+    tInfo.comment = "Something"; // TODO: Fix
 
     tInfo.piecesCount = status.pieces.size();
 

@@ -41,12 +41,27 @@ public:
         return peers;
     }
 
-    QString bestHashAsString() const {
+    QString bestHashAsString() const { // truncates sha256
         return utils::toHex(m_handle.info_hashes().get_best().to_string());
     }
-    lt::sha1_hash bestHash() const {
+    QString hashV1AsString() const {
+        return utils::toHex(m_handle.info_hashes().v1.to_string());
+    }
+
+    lt::sha1_hash hashV1() const {
+        return m_handle.info_hashes().v1;
+    }
+    lt::sha256_hash hashV2() const {
+        return m_handle.info_hashes().v2;
+    }
+
+    lt::sha1_hash bestHash() const { // may return truncated sha256
         return m_handle.info_hashes().get_best();
     }
+
+
+
+
 
     void pause() {
         m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle

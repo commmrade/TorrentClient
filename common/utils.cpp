@@ -69,6 +69,7 @@ QString secsToFormattedTime(std::int64_t secs)
 QString toHex(std::span<const char> data, bool to_upper /* = false */)
 {
     QString result;
+    result.reserve(data.size() * 2);
 
     uint8_t into_letter = to_upper ? 55 : 87; // (65 ('A') - 10 ('hex letters')) and  (97 ('a) - 10 ('hex letters'))
 

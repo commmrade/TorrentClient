@@ -27,7 +27,10 @@ struct TorrentInfo {
 
     std::int64_t completedTime; // -1 for not completed yet
 
-    QString hashBest;
+    // QString hashBest;
+    QString hashV1;
+    QString hashV2;
+
     QString savePath;
     QString comment;
 

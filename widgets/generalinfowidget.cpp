@@ -23,7 +23,7 @@ GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
 
     ui->torSizeValue->setText("-");
     ui->startTimeValue->setText("-");
-    ui->infoHashValue->setText("-");
+    ui->infoHashV1Value->setText("-");
     ui->savePathValue->setText("-");
     ui->piecesValue->setText("-");
     ui->completionValue->setText("-");
@@ -90,8 +90,11 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     timestamp.setSecsSinceEpoch(tInfo.startTime);
     ui->startTimeValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
 
-    auto infoHash = tInfo.hashBest;
-    ui->infoHashValue->setText(infoHash);
+    auto infoHashV1 = tInfo.hashV1;
+    ui->infoHashV1Value->setText(infoHashV1);
+
+    auto infoHashV2 = tInfo.hashV2;
+    ui->infoHashV2Value->setText(infoHashV2.isEmpty() ? "N/A" : infoHashV2);
 
     auto savePath = tInfo.savePath;
     ui->savePathValue->setText(savePath);
@@ -131,7 +134,7 @@ void GeneralInfoWidget::clearGeneralInfo()
 
     ui->torSizeValue->setText("-");
     ui->startTimeValue->setText("-");
-    ui->infoHashValue->setText("-");
+    ui->infoHashV1Value->setText("-");
     ui->savePathValue->setText("-");
     ui->piecesValue->setText("-");
     ui->completionValue->setText("-");
