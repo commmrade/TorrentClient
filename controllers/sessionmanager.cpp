@@ -136,36 +136,28 @@ void SessionManager::updateProperties()
         auto num_files = files.num_files();
 
         QList<File> result;
+        auto fileProgresses = handle.handle().file_progress();
         for (auto i = 0; i < num_files; ++i) {
-            std::uint64_t fileSizeBytes = 0;
-            auto startPieceIndex = files.piece_index_at_file(i);
-            auto numPiecesInFile = files.file_num_pieces(i);
-
-            auto pieces = m_torrentHandles[m_currentTorrentId].handle().status().pieces;
-            for (auto pidx = startPieceIndex; pidx < static_cast<int>(startPieceIndex) + numPiecesInFile; ++pidx) {
-                if (pieces[pidx]) {
-                    fileSizeBytes += files.piece_size(pidx);
-                }
-            }
-
+            auto fileSize = files.file_size(i);
             File file;
             file.id = i;
             file.isEnabled = handle.handle().file_priority(i) != lt::dont_download;
             file.filename = QString::fromStdString(files.file_path(i));
             file.filesize = files.file_size(i);
-            file.downloaded = fileSizeBytes;
+            file.downloaded = fileProgresses[i];
             file.priority = handle.handle().file_priority(i);
             result.append(std::move(file));
         }
         return result;
     };
-    if (m_currentTorrentId != -1) {
-        auto& handle = m_torrentHandles[m_currentTorrentId];
+    if (m_currentTorrentId.has_value()) {
+        auto currentTorrentId = m_currentTorrentId.value();
+        auto& handle = m_torrentHandles[currentTorrentId];
         {
             if (handle.isValid()) {
                 // Update peers
-                std::vector<lt::peer_info> peers = m_torrentHandles[m_currentTorrentId].getPeerInfo();
-                emit peerInfo(m_currentTorrentId, std::move(peers));
+                std::vector<lt::peer_info> peers = m_torrentHandles[currentTorrentId].getPeerInfo();
+                emit peerInfo(currentTorrentId, std::move(peers));
 
                 // Update trackers
                 auto ltTrackers = handle.getTrackers();
@@ -174,17 +166,16 @@ void SessionManager::updateProperties()
 
 
                 // Update files
-
-                if (auto tinfo = m_torrentHandles[m_currentTorrentId].handle().torrent_file()) {
+                if (auto tinfo = m_torrentHandles[currentTorrentId].handle().torrent_file()) {
                     auto files = fileListFromTorrentInfo(handle, tinfo);
                     emit filesInfo(files);
                 }
 
                 // update url seeds
-                auto urlSeeds = m_torrentHandles[m_currentTorrentId].handle().url_seeds();
+                auto urlSeeds = m_torrentHandles[currentTorrentId].handle().url_seeds();
                 emit urlSeedsInfo(urlSeeds);
             } else { // if its not valid something is wrong
-                m_currentTorrentId = -1;
+                m_currentTorrentId = std::nullopt;
             }
         }
     } else {
@@ -212,39 +203,11 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
-    // if (auto tinfo = status.torrent_file.lock()) {
-    //     const auto& files = tinfo->files();
-    //     auto num_files = files.num_files();
-
-    //     QHash<int, std::uint64_t> fileSizes; // file index, size in bytes
-
-    //     auto pieces = status.pieces;
-    //     for (auto i = 0; i < num_files; ++i) {
-    //         fileSizes.insert(i, 0);
-
-    //         auto startPieceIndex = files.piece_index_at_file(i);
-    //         auto numPiecesInFile = files.file_num_pieces(i);
-
-    //         qDebug() << startPieceIndex << (int)startPieceIndex + numPiecesInFile << pieces.size();
-    //         for (auto pIdx = startPieceIndex; pIdx < (int)startPieceIndex + numPiecesInFile - 1; ++pIdx) {
-    //             qDebug() << "Pidx" << pIdx << "Size" << pieces.size() << numPiecesInFile;
-
-    //             if (pieces[pIdx]) {
-    //                 fileSizes[i] += files.piece_size(pIdx);
-    //             }
-    //         }
-
-    //         qDebug() << "File" << files.file_path(i) <<  "downloaded:" << fileSizes[i] / 1024 / 1024 << "MB";
-    //     }
-    // }
-
     auto statuses = alert->status;
     for (auto& status : statuses) {
         auto& handle = status.handle;
 
-
-
-        if (handle.id() == m_currentTorrentId) {
+        if (m_currentTorrentId.has_value() && handle.id() == m_currentTorrentId.value()) {
             updateGeneralProperty(handle);
         }
         handleStatusUpdate(status, handle);
@@ -319,12 +282,17 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 {
     bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
 
+    double progress = std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0;
+    if (progress > 100.0) {
+        progress = 100.0;
+    }
+
     Torrent torrent = {
         handle.id(),
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,
-        std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0,
+        progress,
         !IsPaused ? torrentStateToString(status.state) : "Stopped",
         status.num_seeds,
         status.num_peers,
@@ -426,6 +394,13 @@ void SessionManager::setUploadLimit(int value)
     settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{value});
 }
 
+void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
+{
+    auto& handle = m_torrentHandles[id];
+    // No need to unset auto_managed, since it onyl takes care of pausing/unpausing and some other stuff, but definitely not files' priorities
+    handle.setFilePriority(fileIndex, priority);
+}
+
 void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bannablePeers)
 {
     lt::ip_filter filter = m_session->get_ip_filter();
@@ -436,20 +411,25 @@ void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bann
     m_session->set_ip_filter(filter);
 }
 
-void SessionManager::addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoint &ep)
+void SessionManager::addPeerToTorrent(std::uint32_t id, const boost::asio::ip::tcp::endpoint &ep)
 {
-    if (m_currentTorrentId == -1) {
-        return;
-    }
-    m_torrentHandles[m_currentTorrentId].connectToPeer(ep);
+    // if (!m_currentTorrentId.has_value()) {
+    //     return;
+    // }
+    // m_torrentHandles[m_currentTorrentId.value()].connectToPeer(ep);
+    m_torrentHandles[id].connectToPeer(ep);
 }
 
-void SessionManager::addPeersToCurrentTorrent(const QList<boost::asio::ip::tcp::endpoint> &eps)
+void SessionManager::addPeersToTorrent(std::uint32_t id, const QList<boost::asio::ip::tcp::endpoint> &eps)
 {
-    if (m_currentTorrentId == -1) {
-        return;
-    }
-    auto& torrentHandle = m_torrentHandles[m_currentTorrentId];
+    // if (m_currentTorrentId == -1) {
+    //     return;
+    // }
+    // auto& torrentHandle = m_torrentHandles[m_currentTorrentId];
+    // for (const auto& ep : eps) {
+    //     torrentHandle.connectToPeer(ep);
+    // }
+    auto& torrentHandle = m_torrentHandles[id];
     for (const auto& ep : eps) {
         torrentHandle.connectToPeer(ep);
     }
@@ -492,8 +472,9 @@ void SessionManager::resumeTorrent(const uint32_t id)
 
 bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
-    if (id == m_currentTorrentId) {
-        m_currentTorrentId = -1;
+    if (m_currentTorrentId.has_value() && id == m_currentTorrentId.value()) {
+        qDebug() << "Current torrent set to null";
+        m_currentTorrentId = std::nullopt;
     }
 
     if (removeWithContents) {

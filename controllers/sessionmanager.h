@@ -31,8 +31,8 @@ class SessionManager : public QObject
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
 
-    std::int64_t m_currentTorrentId{-1};
-
+    // std::int64_t m_currentTorrentId{-1};
+    std::optional<std::uint32_t> m_currentTorrentId{std::nullopt};
 
     std::int64_t lastSessionRecvPayloadBytes{0};
     std::int64_t lastSessionUploadPayloadBytes{0};
@@ -62,14 +62,21 @@ public:
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
 
+    // Files
+    void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
+
 
     // Peer
     void banPeers(const QList<QPair<QString, unsigned short>>& bannablePeers);
-    void addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoint& ep);
-    void addPeersToCurrentTorrent(const QList<boost::asio::ip::tcp::endpoint>& eps);
+    void addPeerToTorrent(std::uint32_t torrentId, const boost::asio::ip::tcp::endpoint& ep);
+    void addPeersToTorrent(std::uint32_t torrentId, const QList<boost::asio::ip::tcp::endpoint>& eps);
 
-    void setCurrentTorrentId(std::int64_t value) {
+    // Notice: this kinda feels wrong to track current torrent in here, so maybe i can come up with something better
+    void setCurrentTorrentId(std::optional<std::uint32_t> value) {
         m_currentTorrentId = value;
+    }
+    std::optional<std::uint32_t> getCurrentTorrentId() const {
+        return m_currentTorrentId;
     }
 private:
     lt::session_params loadSessionParams();

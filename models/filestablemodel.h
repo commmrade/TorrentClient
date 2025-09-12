@@ -30,8 +30,12 @@ public:
 
 
     int getFileId(int index) const { return m_files[index].id; }
+    bool getIsEnabled(int index) const { return m_files[index].isEnabled; }
+
     void setFiles(const QList<File>& files);
     void clearFiles();
+signals:
+    void statusChanged(int index, bool value);
 private:
     QList<File> m_files;
 };

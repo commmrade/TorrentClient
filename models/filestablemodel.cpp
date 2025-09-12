@@ -52,8 +52,8 @@ bool FileTableModel::setData(const QModelIndex &index, const QVariant &value, in
         switch (static_cast<FileFields>(index.column())) {
         case FileFields::STATUS: {
             file.isEnabled = value.toBool();
-            // TODO: Change priority to 'dont download' in session manager somehow
-            emit dataChanged(index, index);
+            emit statusChanged(file.id, file.isEnabled);
+            // emit dataChanged(index, index);
             break;
         }
         // ...
@@ -109,9 +109,52 @@ QHash<int, QByteArray> FileTableModel::roleNames() const
 
 void FileTableModel::setFiles(const QList<File> &files)
 {
-    // TODO: Optimize, no point in resetting it every tick
-    clearFiles();
-    m_files = files;
+    // TODO: Optimize it, since it is suitable for torrents list, but i guess i can do it easier for (almost) static files
+    QHash<int, int> newTrackersMap; // key - index in trackers
+    QHash<int, int> oldTrackersMap; // key - index in m_trackers
+
+    // Cache trackers
+    for (int i = 0; i < files.size(); ++i) {
+        newTrackersMap.insert(files[i].id, i);
+    }
+    for (int i = 0; i < m_files.size(); ++i) {
+        oldTrackersMap.insert(m_files[i].id, i);
+    }
+
+    for (int i = 0; i < files.size(); ++i) {
+        auto const newKey = files[i].id;
+        if (oldTrackersMap.contains(newKey)) {
+            // Tracker exists, check for updates
+            int row = oldTrackersMap[newKey];
+            auto& oldFile = m_files[row];
+
+            // Change properties
+            // if (oldFile.downloaded != files[i].downloaded) {
+            //     oldFile.isEnabled = files[i].isEnabled;
+            // }
+            oldFile.downloaded = files[i].downloaded;
+            oldFile.priority = files[i].priority;
+        } else {
+            int row = m_files.size();
+            beginInsertRows(QModelIndex(), row, row);
+            m_files.append(files[i]);
+            endInsertRows();
+        }
+    }
+
+    // Handle deletions
+    for (int i = m_files.size() - 1; i >= 0; --i) {
+        auto const key = m_files[i].id;
+        if (!newTrackersMap.contains(key)) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_files.removeAt(i);
+            endRemoveRows();
+        }
+    }
+
+    if (!m_files.isEmpty()) {
+        emit dataChanged(index(0, 1), index(m_files.size() - 1, columnCount() - 1));
+    }
 }
 
 void FileTableModel::clearFiles()

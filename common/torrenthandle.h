@@ -60,7 +60,7 @@ public:
     }
 
 
-
+    void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
 
 
     void pause() {

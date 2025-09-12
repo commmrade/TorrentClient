@@ -17,13 +17,12 @@ FileListWidget::FileListWidget(QWidget *parent)
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
 
-    connect(&m_fileModel, &FileTableModel::dataChanged, this, [&](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                                                                  const QList<int> &roles = QList<int>()) {
-        qDebug() << "Topleft row:" << topLeft.row();
-        auto id = m_fileModel.getFileId(topLeft.row());
-        qDebug() << "Updated file id:" << id;
-
-        // SessionManager::instance().
+    connect(&m_fileModel, &FileTableModel::statusChanged, this, [&](int index, bool value) {
+        auto& sessionManager = SessionManager::instance();
+        auto currentTorrentOpt = sessionManager.getCurrentTorrentId();
+        if (currentTorrentOpt.has_value()) {
+            sessionManager.changeFilePriority(currentTorrentOpt.value(), index, value ? lt::default_priority : lt::dont_download);
+        }
     });
 
     connect(ui->fileView, &QTableView::customContextMenuRequested, this, &FileListWidget::contextMenuRequested);

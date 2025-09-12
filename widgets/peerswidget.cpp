@@ -68,7 +68,11 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
         if (dialog.exec() == QDialog::Accepted) {
             auto eps = dialog.getAddrs();
             auto& sessionManager = SessionManager::instance();
-            sessionManager.addPeersToCurrentTorrent(eps);
+            auto currentTorrentId = sessionManager.getCurrentTorrentId();
+
+            if (currentTorrentId.has_value()) {
+                sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
+            }
         }
     });
 
