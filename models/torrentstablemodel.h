@@ -44,6 +44,7 @@ public:
     std::uint32_t getTorrentId(const int row) {
         return m_torrents[row].id;
     }
+
 private:
     QList<Torrent> m_torrents;
 };

@@ -33,7 +33,7 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
                     // return {static_cast<qreal>(file.filesize)};
                 }
                 case FileFields::PRIORITY: {
-                    // TODO: Handle this
+                    // TODO: display it nicely
                     return {file.priority};
                 }
                 default: {

@@ -35,14 +35,14 @@ TorrentWidget::TorrentWidget(QWidget *parent)
         m_tableModel.removeTorrent(id);
     });
 
-    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
+    connect(ui->torrentsView, &QTableView::clicked, this, [this](const QModelIndex& index) {
         auto torrentId = m_tableModel.getTorrentId(index.row());
         m_sessionManager.setCurrentTorrentId(torrentId);
     });
 
     // Context Menu Stuff
-    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
+    ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->torrentsView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }
@@ -54,7 +54,7 @@ TorrentWidget::~TorrentWidget()
 
 void TorrentWidget::customContextMenu(const QPoint& pos)
 {
-    auto index = ui->tableView->indexAt(pos);
+    auto index = ui->torrentsView->indexAt(pos);
 
     if (index.row() == -1) return; /// indexAt() returns -1 when out of bounds
     auto torrentId = m_tableModel.getTorrentId(index.row());
@@ -89,17 +89,17 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     });
     menu.addAction(deleteAction);
 
-    menu.exec(ui->tableView->viewport()->mapToGlobal(pos));
+    menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));
 }
 
 void TorrentWidget::setupTableView()
 {
-    ui->tableView->setModel(&m_tableModel);
-    ui->tableView->setItemDelegateForColumn(2, &m_tableDelegate);
+    ui->torrentsView->setModel(&m_tableModel);
+    ui->torrentsView->setItemDelegateForColumn(2, &m_tableDelegate);
 
-    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->torrentsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->torrentsView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->torrentsView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void TorrentWidget::on_pushButton_clicked()

@@ -15,7 +15,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QListWidget" name="categoriesList">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -24,17 +24,27 @@
      </property>
      <item>
       <property name="text">
-       <string>favourite</string>
+       <string>All</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>downloaded</string>
+       <string>Downloading</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>started</string>
+       <string>Seeding</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Stopped</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Failed</string>
       </property>
      </item>
     </widget>
@@ -42,7 +52,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QTableView" name="tableView">
+      <widget class="QTableView" name="torrentsView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
