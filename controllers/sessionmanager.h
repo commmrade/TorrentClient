@@ -72,14 +72,15 @@ public:
     void addPeersToTorrent(std::uint32_t torrentId, const QList<boost::asio::ip::tcp::endpoint>& eps);
 
     // Notice: this kinda feels wrong to track current torrent in here, so maybe i can come up with something better
-    void setCurrentTorrentId(std::optional<std::uint32_t> value) {
-        m_currentTorrentId = value;
-    }
+    void setCurrentTorrentId(std::optional<std::uint32_t> value);
     std::optional<std::uint32_t> getCurrentTorrentId() const {
         return m_currentTorrentId;
     }
 private:
     lt::session_params loadSessionParams();
+
+    // Utils
+    void emitClearSignals();
 
     // Event loop and alert functions
     void eventLoop();

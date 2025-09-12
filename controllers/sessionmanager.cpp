@@ -180,11 +180,7 @@ void SessionManager::updateProperties()
         }
     } else {
         // clear stats
-        emit clearPeerInfo();
-        emit clearGeneralInfo();
-        emit clearTrackers();
-        emit clearUrlSeeds();
-        emit clearFiles();
+        emitClearSignals();
     }
 
 }
@@ -413,26 +409,32 @@ void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bann
 
 void SessionManager::addPeerToTorrent(std::uint32_t id, const boost::asio::ip::tcp::endpoint &ep)
 {
-    // if (!m_currentTorrentId.has_value()) {
-    //     return;
-    // }
-    // m_torrentHandles[m_currentTorrentId.value()].connectToPeer(ep);
+    assert(id < m_torrentHandles.size());
     m_torrentHandles[id].connectToPeer(ep);
 }
 
 void SessionManager::addPeersToTorrent(std::uint32_t id, const QList<boost::asio::ip::tcp::endpoint> &eps)
 {
-    // if (m_currentTorrentId == -1) {
-    //     return;
-    // }
-    // auto& torrentHandle = m_torrentHandles[m_currentTorrentId];
-    // for (const auto& ep : eps) {
-    //     torrentHandle.connectToPeer(ep);
-    // }
+    assert(id < m_torrentHandles.size());
     auto& torrentHandle = m_torrentHandles[id];
     for (const auto& ep : eps) {
         torrentHandle.connectToPeer(ep);
     }
+}
+
+void SessionManager::setCurrentTorrentId(std::optional<uint32_t> value)
+{
+    m_currentTorrentId = value;
+    emitClearSignals(); // We need to clear everything since we are switching current torrent most likely
+}
+
+void SessionManager::emitClearSignals()
+{
+    emit clearPeerInfo();
+    emit clearGeneralInfo();
+    emit clearTrackers();
+    emit clearUrlSeeds();
+    emit clearFiles();
 }
 
 bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outputDir)
