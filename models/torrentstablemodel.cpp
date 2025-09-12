@@ -15,10 +15,13 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
             // return {};
             auto& torrent = m_torrents[index.row()];
 
-            auto id = index.column() + 1;
+            auto id = index.column() + 2;
             switch (id) {
                 case ID: {
                     return torrent.id;
+                }
+                case CATEGORY: {
+                    return torrent.category;
                 }
                 case NAME: {
                     return torrent.name;
@@ -59,6 +62,17 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
             }
         }
+    } else { // For getting unseen data from sort filter proxy
+        auto& torrent = m_torrents[index.row()];
+        auto id = index.column();
+        switch (id) {
+            case ID: {
+                return torrent.id;
+            }
+            case CATEGORY: {
+                return torrent.category;
+            }
+        }
     }
     return {};
 }
@@ -67,10 +81,13 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
 {
     if (role == Qt::EditRole) {
         auto& torrent = m_torrents[index.row()];
-        switch (index.column() + 1) {
+        switch (index.column() + 2) {
             case ID: {
                 torrent.id = value.toUInt();
                 break;
+            }
+            case CATEGORY: {
+                torrent.category = value.toString();
             }
             case NAME: {
                 torrent.name = value.toString();
@@ -124,10 +141,11 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
         return {};
     }
     if (orientation == Qt::Horizontal) {
-        switch (section + 1) {
+        switch (section + 2) {
             // case ID: {
             //     return QVariant{"ID"};
             // }
+            // case CATEGORY
             case NAME: {
                 return QVariant{"Name"};
             }
@@ -160,7 +178,7 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
             }
         }
     } else {
-        return QVariant{section + 1};
+        return QVariant{};
     }
     return {};
 }

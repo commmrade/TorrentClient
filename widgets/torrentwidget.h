@@ -6,6 +6,7 @@
 #include "torrentstablemodel.h"
 #include "torrentitemdelegate.h"
 #include <QPointer>
+#include "categorysortfilter.h"
 
 namespace Ui {
 class TorrentWidget;
@@ -34,6 +35,8 @@ private slots:
 
     void closeAllTabs();
 
+    void on_categoriesList_currentTextChanged(const QString &currentText);
+
 private:
     void setupTableView();
 
@@ -45,7 +48,7 @@ private:
 
     TorrentsTableModel m_tableModel;
     TorrentItemDelegate m_tableDelegate;
-
+    CategorySortFIlter m_categoryFilter;
 };
 
 #endif // TORRENTWIDGET_H

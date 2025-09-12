@@ -285,6 +285,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 
     Torrent torrent = {
         handle.id(),
+         "All", // Default category is All, TODO: This may fuck up category changing
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,
@@ -323,6 +324,7 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
     // No point setting status fields, since they are zeroed and will be filled on status alert
     Torrent torrent = {
         torrent_handle.id(),
+        "All",
         QString::fromStdString(torrent_handle.status().name),
         0,
         0.0,

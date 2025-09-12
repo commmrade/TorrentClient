@@ -14,6 +14,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     , ui(new Ui::TorrentWidget)
     , m_sessionManager(SessionManager::instance())
     , m_speedGraph(new SpeedGraphWidget{})
+    , m_categoryFilter(this)
 {
     ui->setupUi(this);
 
@@ -94,7 +95,8 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
 
 void TorrentWidget::setupTableView()
 {
-    ui->torrentsView->setModel(&m_tableModel);
+    m_categoryFilter.setSourceModel(&m_tableModel);
+    ui->torrentsView->setModel(&m_categoryFilter);
     ui->torrentsView->setItemDelegateForColumn(2, &m_tableDelegate);
 
     ui->torrentsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
@@ -165,5 +167,11 @@ void TorrentWidget::closeAllTabs()
 {
     ui->stackedWidget->setVisible(false);
     ui->stackedWidget->setEnabled(false);
+}
+
+
+void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentText)
+{
+    m_categoryFilter.setCategory(currentText);
 }
 

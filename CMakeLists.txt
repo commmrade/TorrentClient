@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(controllers widgets models delegates dialogs common)
+include_directories(controllers widgets models delegates dialogs common proxy)
 
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -60,6 +60,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/filelistwidget.h widgets/filelistwidget.cpp widgets/filelistwidget.ui
         dialogs/deletetorrentdialog.h dialogs/deletetorrentdialog.cpp dialogs/deletetorrentdialog.ui
         delegates/filestatusdelegate.h delegates/filestatusdelegate.cpp
+        proxy/categorysortfilter.h proxy/categorysortfilter.cpp
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

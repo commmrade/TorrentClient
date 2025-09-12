@@ -23,7 +23,7 @@ public:
     }
     int columnCount(const QModelIndex& index = QModelIndex{}) const override {
         // return TORRENT_FIELD_COUNT;
-        return TORRENT_FIELD_COUNT - 1; // where -1 is remove id
+        return TORRENT_FIELD_COUNT - 2; // where -1 is remove id and category
     }
 
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
