@@ -5,6 +5,7 @@
 #include "filestablemodel.h"
 #include "fileitemdelegate.h"
 #include "filestatusdelegate.h"
+#include "fileprioritydelegate.h"
 
 namespace Ui {
 class FileListWidget;
@@ -29,6 +30,7 @@ private:
 
     FileStatusDelegate m_statusDelegate;
     FileItemDelegate m_itemDelegate;
+    FilePriorityDelegate m_priorityDelegate;
 };
 
 #endif // FILELISTWIDGET_H

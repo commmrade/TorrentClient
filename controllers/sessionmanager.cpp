@@ -418,6 +418,12 @@ void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int pri
     handle.setFilePriority(fileIndex, priority);
 }
 
+void SessionManager::renameFile(uint32_t id, int fileIndex, const QString& newName)
+{
+    auto& handle = m_torrentHandles[id];
+    handle.renameFile(fileIndex, newName);
+}
+
 void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bannablePeers)
 {
     lt::ip_filter filter = m_session->get_ip_filter();

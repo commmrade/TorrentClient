@@ -22,6 +22,8 @@ public:
         return FILE_FIELD_COUNT;
     }
 
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index = QModelIndex{}, const QVariant& value = QVariant{}, int role = Qt::EditRole) override; // Probably will be needed for editing (enabled, disabled, priority)
 
@@ -36,6 +38,7 @@ public:
     void clearFiles();
 signals:
     void statusChanged(int index, bool value);
+    void priorityChanged(int index, int priority);
 private:
     QList<File> m_files;
 };

@@ -14,12 +14,15 @@ void FileStatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
     QStyleOptionButton checkBoxOption;
     checkBoxOption.state |= QStyle::State_Enabled;
-    if (checked)
-        checkBoxOption.state |= QStyle::State_On;
-    else
-        checkBoxOption.state |= QStyle::State_Off;
-    checkBoxOption.rect = option.rect;
-
+    checkBoxOption.state |= checked ? QStyle::State_On : QStyle::State_Off;
+    QSize checkBoxSize = QApplication::style()->sizeFromContents(
+        QStyle::CT_CheckBox, &checkBoxOption, QSize(), nullptr);
+    // center the checkbox rect in the item rect
+    checkBoxOption.rect = QStyle::alignedRect(
+        option.direction,
+        Qt::AlignCenter,
+        checkBoxSize,
+        option.rect);
     QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkBoxOption, painter);
 }
 

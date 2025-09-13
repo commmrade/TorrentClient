@@ -6,6 +6,14 @@ FileTableModel::FileTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
 }
 
+Qt::ItemFlags FileTableModel::flags(const QModelIndex &index) const
+{
+    if (index.column() == static_cast<int>(FileFields::PRIORITY)) {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
+    return QAbstractItemModel::flags(index);
+}
+
 QVariant FileTableModel::data(const QModelIndex &index, int role) const
 {
     if (role < Qt::UserRole) {
@@ -13,7 +21,7 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
             auto& file =  m_files[index.row()];
             switch (static_cast<FileFields>(index.column())) {
                 case FileFields::STATUS: {
-                    return {file.isEnabled}; // TODO!!!
+                    return {file.isEnabled}; // TODO: center it somehow
                 }
                 case FileFields::FILENAME: {
                     return {file.filename};
@@ -34,7 +42,38 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
                 }
                 case FileFields::PRIORITY: {
                     // TODO: display it nicely
-                    return {file.priority};
+                    auto priorityToString = [](int const priority) -> QString {
+                        /* From libtorrent source code
+                        constexpr download_priority_t dont_download{0};
+
+                        // The default priority for files and pieces.
+                        constexpr download_priority_t default_priority{4};
+
+                        // The lowest priority for files and pieces.
+                        constexpr download_priority_t low_priority{1};
+
+                        // The highest priority for files and pieces.
+                        constexpr download_priority_t top_priority{7};
+                            */
+                        switch (priority) {
+                            case 0: {
+                                return {"Don't download"};
+                            }
+                            case 4: {
+                                return {"Default"};
+                            }
+                            case 1: {
+                                return {"Low"};
+                            }
+                            case 7: {
+                                return {"High"};
+                            }
+                            default: {
+                                throw std::runtime_error("Cant be here");
+                            }
+                        }
+                    };
+                    return {priorityToString(file.priority)};
                 }
                 default: {
                     throw std::runtime_error("TF u doing here?");
@@ -54,6 +93,12 @@ bool FileTableModel::setData(const QModelIndex &index, const QVariant &value, in
             file.isEnabled = value.toBool();
             emit statusChanged(file.id, file.isEnabled);
             // emit dataChanged(index, index);
+            break;
+        }
+        case FileFields::PRIORITY: {
+            qDebug() << "Priority set data";
+            file.priority = value.toInt();
+            emit priorityChanged(file.id, file.priority);
             break;
         }
         // ...
@@ -132,6 +177,7 @@ void FileTableModel::setFiles(const QList<File> &files)
             // if (oldFile.downloaded != files[i].downloaded) {
             //     oldFile.isEnabled = files[i].isEnabled;
             // }
+            oldFile.filename = files[i].filename; // Since files can be renamed
             oldFile.downloaded = files[i].downloaded;
             oldFile.priority = files[i].priority;
         } else {

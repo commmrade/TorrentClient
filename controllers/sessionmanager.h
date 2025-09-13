@@ -64,7 +64,7 @@ public:
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
-
+    void renameFile(std::uint32_t id, int fileIndex, const QString& newName);
 
     // Peer
     void banPeers(const QList<QPair<QString, unsigned short>>& bannablePeers);

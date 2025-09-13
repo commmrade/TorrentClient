@@ -65,6 +65,7 @@ public:
 
 
     void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
+    void renameFile(lt::file_index_t index, const QString& newName);
 
     void pause();
     bool isPaused() const {
