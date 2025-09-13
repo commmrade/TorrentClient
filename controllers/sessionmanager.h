@@ -92,6 +92,7 @@ private:
     void handleResumeDataAlert(lt::save_resume_data_alert* alert);
     void handleAddTorrentAlert(lt::add_torrent_alert* alert);
     void handleSessionStatsAlert(lt::session_stats_alert* alert);
+    void handleTorrentErrorAlert(lt::torrent_error_alert* alert);
 
     void saveResumes();
     bool addTorrent(lt::add_torrent_params params);

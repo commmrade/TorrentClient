@@ -64,7 +64,7 @@ libtorrent::session_params SessionManager::loadSessionParams()
 void SessionManager::saveResumes()
 {
     for (auto& torrent : m_torrentHandles) {
-        if (torrent.isNeedSaveData() && torrent.isValid()) {
+        if (torrent.isValid() && torrent.isNeedSaveData()) {
             // torrent.save_resume_data();
             torrent.saveResumeData();
         }
@@ -81,21 +81,18 @@ void SessionManager::eventLoop()
     for (auto* alert : alerts) {
         if (auto* finished_alert = lt::alert_cast<lt::torrent_finished_alert>(alert)) {
             handleFinishedAlert(finished_alert);
-        }
-        if (auto* statusAlert = lt::alert_cast<lt::state_update_alert>(alert)) {
+        } else if (auto* statusAlert = lt::alert_cast<lt::state_update_alert>(alert)) {
             handleStateUpdateAlert(statusAlert);
-        }
-        if (auto* metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
+        } else if (auto* metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
             handleMetadataReceived(metadataReceivedAlert);
-        }
-        if (auto* resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert)) {
+        } else if (auto* resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert)) {
             handleResumeDataAlert(resumeDataAlert);
-        }
-        if (auto* addTorrentAlert = lt::alert_cast<lt::add_torrent_alert>(alert)) {
+        } else if (auto* addTorrentAlert = lt::alert_cast<lt::add_torrent_alert>(alert)) {
             handleAddTorrentAlert(addTorrentAlert);
-        }
-        if (auto* stateAlert = lt::alert_cast<lt::session_stats_alert>(alert)) { // if happens every second so i think i wont use chrono stuff
+        } else if (auto* stateAlert = lt::alert_cast<lt::session_stats_alert>(alert)) { // if happens every second so i think i wont use chrono stuff
             handleSessionStatsAlert(stateAlert);
+        } else if (auto* torrentErrorAlert = lt::alert_cast<lt::torrent_error_alert>(alert)) {
+            handleTorrentErrorAlert(torrentErrorAlert);
         }
     }
 
@@ -193,6 +190,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
     });
 
     pos->saveResumeData();
+    pos->setCategory("Seeding");
     // Otherwise it's behaving kinda weird
     emit torrentFinished(alert->handle.id(), alert->handle.status());
 }
@@ -276,7 +274,10 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
 
 void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)
 {
-    bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+    auto& torrentHandle = m_torrentHandles[handle.id()];
+    if (!torrentHandle.isValid()) return;
+    // bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+    bool isPaused = torrentHandle.isPaused();
 
     double progress = std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0;
     if (progress > 100.0) {
@@ -284,23 +285,23 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
     }
 
     // TODO: Finish categories
-    QString category = "All";
-    if (status.is_seeding || status.is_finished) { // they are kinda the same
-        category = "Seeding";
-    } else if ((handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false) {
-        category = "Stopped";
-    } else { // not seeding and not finished and not paused
-        category = "Downloading";
-    }
+    // QString category;
+    // if (status.is_seeding || status.is_finished) { // they are kinda the same
+    //     category = "Seeding";
+    // } else if ((handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false) {
+    //     category = "Stopped";
+    // } else { // not seeding and not finished and not paused
+    //     category = "Running";
+    // }
 
     Torrent torrent = {
         handle.id(),
-        category, // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
+        torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,
         progress,
-        !IsPaused ? torrentStateToString(status.state) : "Stopped",
+        !isPaused ? torrentStateToString(status.state) : "Stopped",
         status.num_seeds,
         status.num_peers,
         // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
@@ -334,7 +335,7 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
     // No point setting status fields, since they are zeroed and will be filled on status alert
     Torrent torrent = {
         torrent_handle.id(),
-        "All",
+        QString{},
         QString::fromStdString(torrent_handle.status().name),
         0,
         0.0,
@@ -360,6 +361,14 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
     emit chartPoint(newRecv, newUpload);
+}
+
+void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *alert)
+{
+    qDebug() << "Torrent Error Alert:" << alert->message();
+    auto id = alert->handle.id();
+    auto& torrentHandle = m_torrentHandles[id];
+    torrentHandle.setCategory("Failed");
 }
 
 void SessionManager::loadResumes()
@@ -436,6 +445,9 @@ void SessionManager::addPeersToTorrent(std::uint32_t id, const QList<boost::asio
 
 void SessionManager::setCurrentTorrentId(std::optional<uint32_t> value)
 {
+    if (m_currentTorrentId.has_value() && m_currentTorrentId.value() == value) {
+        return;
+    }
     m_currentTorrentId = value;
     emitClearSignals(); // We need to clear everything since we are switching current torrent most likely
 }

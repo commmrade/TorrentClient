@@ -10,8 +10,12 @@
 class TorrentHandle
 {
     lt::torrent_handle m_handle;
+
+    QString m_category{"Running"}; // by default torrent is supposed to be running (check later)
+    // QStringList m_categories; // TODO: May be use a list
+    void resetCategory();
 public:
-    explicit TorrentHandle(lt::torrent_handle handle) : m_handle(handle) {};
+    explicit TorrentHandle(lt::torrent_handle handle);;
     TorrentHandle() = default;
 
     std::uint32_t id() const {
@@ -62,18 +66,12 @@ public:
 
     void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
 
-
-    void pause() {
-        m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle
-        m_handle.pause();
-    }
+    void pause();
     bool isPaused() const {
         bool IsPaused = (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
         return IsPaused;
     }
-    void resume() {
-        m_handle.resume();
-    }
+    void resume();
 
     void saveResumeData() {
         m_handle.save_resume_data();
@@ -81,6 +79,14 @@ public:
 
     std::uint64_t activeDur() {
         return m_handle.status().active_duration.count();
+    }
+
+
+    void setCategory(const QString& category) {
+        m_category = category;
+    }
+    QString getCategory() const {
+        return m_category;
     }
 };
 
