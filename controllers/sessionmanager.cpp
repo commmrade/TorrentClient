@@ -17,7 +17,7 @@ SessionManager::SessionManager(QObject *parent)
     m_session = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(1000);
+    m_alertTimer.start(500);
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(2000); // Check if torrent handles need save_resume, and then save .fastresume
 }
@@ -99,6 +99,8 @@ void SessionManager::eventLoop()
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
     updateProperties(); // Hits performance quite a bit, if a torrent is chose, mb FIX
+
+    qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
 

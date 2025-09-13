@@ -11,7 +11,7 @@ void TorrentHandle::resetCategory()
     auto status = m_handle.status();
     if (status.is_seeding || status.is_finished) { // they are kinda the same
         m_category = "Seeding";
-    } else if ((m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false) {
+    } else if (isPaused()) {
         m_category = "Stopped";
     } else { // not seeding and not finished and not paused
         m_category = "Running";
@@ -39,6 +39,6 @@ void TorrentHandle::pause() {
 }
 
 void TorrentHandle::resume() {
-    resetCategory();
     m_handle.resume();
+    resetCategory();
 }
