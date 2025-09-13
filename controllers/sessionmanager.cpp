@@ -283,9 +283,19 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         progress = 100.0;
     }
 
+    // TODO: Finish categories
+    QString category = "All";
+    if (status.is_seeding || status.is_finished) { // they are kinda the same
+        category = "Seeding";
+    } else if ((handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false) {
+        category = "Stopped";
+    } else { // not seeding and not finished and not paused
+        category = "Downloading";
+    }
+
     Torrent torrent = {
         handle.id(),
-         "All", // Default category is All, TODO: This may fuck up category changing
+        category, // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,

@@ -27,8 +27,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("klewy.com");
     QCoreApplication::setApplicationName("TorrentClient");
 
-
-
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     if (!QDir().mkpath(basePath)) {

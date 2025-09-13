@@ -248,3 +248,8 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
     return true;
 }
 
+void TorrentsTableModel::setTorrentCategory(const uint32_t id, const QString &category)
+{
+    m_torrents[id].category = category;
+}
+

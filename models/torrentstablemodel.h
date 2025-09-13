@@ -40,6 +40,7 @@ public:
     bool updateTorrent(const Torrent& torrent);
     bool finishTorrent(const std::uint32_t id, const lt::torrent_status& status);
     bool removeTorrent(const std::uint32_t id);
+    void setTorrentCategory(const std::uint32_t id, const QString& category);
 
     std::uint32_t getTorrentId(const int row) {
         return m_torrents[row].id;
