@@ -147,28 +147,28 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
             // }
             // case CATEGORY
             case NAME: {
-                return QVariant{"Name"};
+                return QVariant{tr("Name")};
             }
             case SIZE: {
-                return QVariant{"Size"};
+                return QVariant{tr("Size")};
             }
             case PROGRESS: {
-                return QVariant{"Progress"};
+                return QVariant{tr("Progress")};
             }
             case STATUS: {
-                return QVariant{"Status"};
+                return QVariant{tr("Status")};
             }
             case SEEDS: {
-                return QVariant{"Seeds"};
+                return QVariant{tr("Seeds")};
             }
             case PEERS: {
-                return QVariant{"Peers"};
+                return QVariant{tr("Peers")};
             }
             case DOWN_SPEED: {
-                return QVariant{"Down Speed"};
+                return QVariant{tr("Down Speed")};
             }
             case UP_SPEED: {
-                return QVariant{"Up Speed"};
+                return QVariant{tr("Up Speed")};
             }
             case ETA: {
                 return QVariant{"ETA"};

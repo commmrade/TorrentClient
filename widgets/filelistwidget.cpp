@@ -1,4 +1,5 @@
 #include "filelistwidget.h"
+#include "priority.h"
 #include "ui_filelistwidget.h"
 #include "sessionmanager.h"
 #include <QAction>
@@ -32,7 +33,6 @@ FileListWidget::FileListWidget(QWidget *parent)
         auto& sessionManager = SessionManager::instance();
         auto currentIdOpt = sessionManager.getCurrentTorrentId();
         if (currentIdOpt.has_value()) {
-            qDebug() << "session mnager change priority" << priority;
             sessionManager.changeFilePriority(currentIdOpt.value(), index, priority);
         }
     });
@@ -65,7 +65,7 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     auto fileId = m_fileModel.getFileId(index.row());
     auto& sessionManager = SessionManager::instance();
     QMenu mainMenu(this);
-    QAction* renameAction = new QAction("Rename", this);
+    QAction* renameAction = new QAction(tr("Rename"), this);
     connect(renameAction, &QAction::triggered, this, [this, &sessionManager, fileId] {\
         bool ok{};
         QString text = QInputDialog::getText(this, tr("Renaming"),
@@ -80,8 +80,8 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     });
     mainMenu.addAction(renameAction);
 
-    QMenu* priorityMenu = mainMenu.addMenu("Priority");
-    QAction* dontDownloadPriority = new QAction("Don't download", this);
+    QMenu* priorityMenu = mainMenu.addMenu(tr("Priority"));
+    QAction* dontDownloadPriority = new QAction(Priorities::DONT_DOWNLOAD, this);
     connect(dontDownloadPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
         auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
         if (currentTorrentIdOpt.has_value()) {
@@ -90,7 +90,7 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     });
     priorityMenu->addAction(dontDownloadPriority);
 
-    QAction* defaultPriority = new QAction("Default", this);
+    QAction* defaultPriority = new QAction(Priorities::DEFAULT, this);
     connect(defaultPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
         auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
         if (currentTorrentIdOpt.has_value()) {
@@ -99,7 +99,7 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     });
     priorityMenu->addAction(defaultPriority);
 
-    QAction* lowPriority = new QAction("Low", this);
+    QAction* lowPriority = new QAction(Priorities::LOW, this);
     connect(lowPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
         auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
         if (currentTorrentIdOpt.has_value()) {
@@ -108,7 +108,7 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     });
     priorityMenu->addAction(lowPriority);
 
-    QAction* topPriority = new QAction("High", this);
+    QAction* topPriority = new QAction(Priorities::HIGH, this);
     connect(topPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
         auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
         if (currentTorrentIdOpt.has_value()) {

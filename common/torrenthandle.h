@@ -6,16 +6,17 @@
 #include <QString>
 #include <QDebug>
 #include "utils.h"
+#include "category.h"
 
 class TorrentHandle
 {
     lt::torrent_handle m_handle;
 
-    QString m_category{"Running"}; // by default torrent is supposed to be running (check later)
+    QString m_category{Categories::RUNNING};
     // QStringList m_categories; // TODO: May be use a list
     void resetCategory();
 public:
-    explicit TorrentHandle(lt::torrent_handle handle);;
+    explicit TorrentHandle(lt::torrent_handle handle);
     TorrentHandle() = default;
 
     std::uint32_t id() const {

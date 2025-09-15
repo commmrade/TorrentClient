@@ -7,7 +7,7 @@
 class CategorySortFIlter : public QSortFilterProxyModel
 {
     Q_OBJECT
-    QString m_category{"All"};
+    QString m_category{};
 public:
     CategorySortFIlter(QObject* parent);
 

@@ -42,7 +42,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
         auto secs = iInfo.activeTime % 60;
         QString timeStr;
         if (iInfo.activeTime == -1) {
-            timeStr = "infinity";
+            timeStr = tr("infinity");
         } else {
             timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
         }
@@ -56,7 +56,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto downSpeed = utils::bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : utils::bytesToHigherPerSec(iInfo.downLimit));
+    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.downLimit));
 
     {
         auto etaStr = utils::secsToFormattedTime(iInfo.eta);
@@ -69,7 +69,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto upSpeed = utils::bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? "Unlimited" : utils::bytesToHigherPerSec(iInfo.upLimit));
+    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.upLimit));
 
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
@@ -111,7 +111,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
         timestamp.setSecsSinceEpoch(tInfo.completedTime);
         ui->completionValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
     } else {
-        ui->completionValue->setText("Not finished");
+        ui->completionValue->setText(tr("Not finished"));
     }
 
 

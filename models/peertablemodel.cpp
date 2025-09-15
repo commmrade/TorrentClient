@@ -87,34 +87,34 @@ QVariant PeerTableModel::headerData(int section, Qt::Orientation orientation, in
     if (orientation == Qt::Horizontal) {
         switch ((PeerFields)section) {
             case PeerFields::COUNTRY: {
-                return QVariant{"Country"};
+                return QVariant{tr("Country")};
             }
             case PeerFields::IP: {
-                return QVariant{"IP"};
+                return QVariant{tr("IP")};
             }
             case PeerFields::PORT: {
-                return QVariant{"Port"};
+                return QVariant{tr("Port")};
             }
             case PeerFields::CONNECTION: {
-                return QVariant{"Connection"};
+                return QVariant{tr("Connection")};
             }
             case PeerFields::CLIENT: {
-                return QVariant{"Client"};
+                return QVariant{tr("Client")};
             }
             case PeerFields::PROGRESS: {
-                return QVariant{"Progress"};
+                return QVariant{tr("Progress")};
             }
             case PeerFields::UP_SPEED: {
-                return QVariant{"Up Speed"};
+                return QVariant{tr("Up Speed")};
             }
             case PeerFields::DOWN_SPEED: {
-                return QVariant{"Down Speed"};
+                return QVariant{tr("Down Speed")};
             }
             case PeerFields::DOWNLOADED: {
-                return QVariant{"Downloaded"};
+                return QVariant{tr("Downloaded")};
             }
             case PeerFields::UPLOADED: {
-                return QVariant{"Uploaded"};
+                return QVariant{tr("Uploaded")};
             }
             default: {
                 throw std::runtime_error{"Something is wrong"};

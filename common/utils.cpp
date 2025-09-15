@@ -10,6 +10,15 @@ constexpr int SECONDS_IN_HOUR = 3600;
 constexpr int SECONDS_IN_MINUTE = 60;
 constexpr int SECONDS_IN_WEEK = 604800;
 constexpr int SECONDS_IN_YEAR = 31449600;
+
+static constexpr auto BYTES_IN_KB = 1024;
+static constexpr auto BYTES_IN_MB = 1024 * 1024;
+static constexpr auto BYTES_IN_GB = 1024 * 1024 * 1024;
+
+static constexpr auto DBYTES_IN_KB = 1024.0;
+static constexpr auto DBYTES_IN_MB = 1024.0 * 1024.0;
+static constexpr auto DBYTES_IN_GB = 1024.0 * 1024.0 * 1024.0;
+
 double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
 }
@@ -17,12 +26,13 @@ double ceilTwoAfterComa(double number) {
 QString bytesToHigher(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B"};
-    if (bytes < 1024 * 1024) { // < mb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0)) + " KB";
-    } else if (bytes < 1024 * 1024 * 1024) { // < gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0)) + " MB";
-    } else if (bytes >= 1024 * 1024 * 1024) { // >= gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
+    if (bytes < BYTES_IN_KB) { }
+    else if (bytes < BYTES_IN_MB) { // < mb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB";
+    } else if (bytes < BYTES_IN_GB) { // < gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB";
+    } else { // >= gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB";
     }
     return sizeStr;
 }
@@ -30,12 +40,13 @@ QString bytesToHigher(const std::uint64_t bytes)
 QString bytesToHigherPerSec(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B/s"};
-    if (bytes < 1024 * 1024) { // < mb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0)) + " KB/s";
-    } else if (bytes < 1024 * 1024 * 1024) { // < gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0)) + " MB/s";
-    } else if (bytes >= 1024 * 1024 * 1024) { // >= gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
+    if (bytes < BYTES_IN_KB) {}
+    else if (bytes < BYTES_IN_MB) { // < mb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB/s";
+    } else if (bytes < BYTES_IN_GB) { // < gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB/s";
+    } else { // >= gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB/s";
     }
     return sizeStr;
 }

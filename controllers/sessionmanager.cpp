@@ -9,6 +9,9 @@
 #include "torrentinfo.h"
 #include "tracker.h"
 #include "utils.h"
+#include "category.h"
+#include "dirs.h"
+
 
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
@@ -100,7 +103,7 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties(); // Hits performance quite a bit, if a torrent is chose, mb FIX
 
-    qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
+    // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
 
@@ -192,7 +195,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
     });
 
     pos->saveResumeData();
-    pos->setCategory("Seeding");
+    pos->setCategory(Categories::SEEDING);
     // Otherwise it's behaving kinda weird
     emit torrentFinished(alert->handle.id(), alert->handle.status());
 }
@@ -281,20 +284,8 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
     // bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
     bool isPaused = torrentHandle.isPaused();
 
-    double progress = std::ceil(((status.total_done / 1024.0 / 1024.0) / (status.total_wanted / 1024.0 / 1024.0) * 100.0) * 100) / 100.0;
-    if (progress > 100.0) {
-        progress = 100.0;
-    }
-
-    // TODO: Finish categories
-    // QString category;
-    // if (status.is_seeding || status.is_finished) { // they are kinda the same
-    //     category = "Seeding";
-    // } else if ((handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false) {
-    //     category = "Stopped";
-    // } else { // not seeding and not finished and not paused
-    //     category = "Running";
-    // }
+    double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
+    qDebug() << status.total_wanted_done << status.total_wanted;
 
     Torrent torrent = {
         handle.id(),
@@ -333,6 +324,7 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
 {
     auto& torrent_handle = alert->handle;
     m_torrentHandles.insert(torrent_handle.id(), TorrentHandle{torrent_handle});
+    m_torrentHandles[torrent_handle.id()].setCategory(Categories::RUNNING); // this is gonna be handy if im ever gonna let user add torrents as paused
 
     // No point setting status fields, since they are zeroed and will be filled on status alert
     Torrent torrent = {
@@ -370,13 +362,13 @@ void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *al
     qDebug() << "Torrent Error Alert:" << alert->message();
     auto id = alert->handle.id();
     auto& torrentHandle = m_torrentHandles[id];
-    torrentHandle.setCategory("Failed");
+    torrentHandle.setCategory(Categories::FAILED);
 }
 
 void SessionManager::loadResumes()
 {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + "state";
+    auto stateDirPath = basePath + QDir::separator() + Dirs::STATE;
     QDir dir{stateDirPath};
     auto entries = dir.entryList(QDir::Filter::Files);
     for (auto& entry : entries) {
@@ -520,18 +512,18 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 
     // Delete .fastresume and .torrent
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto torrentsPath = basePath + QDir::separator() + "torrents";
+    auto torrentsPath = basePath + QDir::separator() + Dirs::TORRENTS;
 
     auto hashString = torrentHandle.bestHashAsString();
-    auto torrentFile = torrentsPath + QDir::separator() + hashString + ".torrent";
+    auto torrentFile = torrentsPath + QDir::separator() + hashString + FileEnding::DOT_TORRENT;
 
     if (!QFile::remove(torrentFile)) {
         qDebug() << "Could not remove .torrent file";
         return false;
     }
 
-    auto statePath = basePath + QDir::separator() + "state";
-    auto stateFile = statePath + QDir::separator() + hashString + ".fastresume";
+    auto statePath = basePath + QDir::separator() + Dirs::STATE;
+    auto stateFile = statePath + QDir::separator() + hashString + FileEnding::DOT_FASTRESUME;
     if (!QFile::remove(stateFile)) {
         qDebug() << "Could not remove .fastresume file";
         return false;

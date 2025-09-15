@@ -15,7 +15,7 @@ QVariant TrackerTableModel::data(const QModelIndex &index, int role) const
                     return QVariant{tracker.tier};
                 }
                 case TrackerFields::STATUS: {
-                    QString r = tracker.isWorking ? "Working" : "Stopped";
+                    QString r = tracker.isWorking ? tr("Working") : tr("Stopped");
                     return QVariant{r};
                 }
                 case TrackerFields::SEEDS: {
@@ -47,28 +47,28 @@ QVariant TrackerTableModel::headerData(int section, Qt::Orientation orientation,
     if (orientation == Qt::Horizontal) {
         switch ((TrackerFields)section) {
             case TrackerFields::URL: {
-                return QVariant{"Url"};
+                return QVariant{tr("Url")};
             }
             case TrackerFields::TIER: {
-                return QVariant{"Tier"};
+                return QVariant{tr("Tier")};
             }
             case TrackerFields::STATUS: {
-                return QVariant{"Status"};
+                return QVariant{tr("Status")};
             }
             case TrackerFields::SEEDS: {
-                return QVariant{"Seeds"};
+                return QVariant{tr("Seeds")};
             }
             case TrackerFields::LEECHES: {
-                return QVariant{"Leeches"};
+                return QVariant{tr("Leeches")};
             }
             case TrackerFields::MESSAGE: {
-                return QVariant{"Message"};
+                return QVariant{tr("Message")};
             }
             case TrackerFields::NEXT_ANNOUNCE: {
-                return QVariant{"Next Announce"};
+                return QVariant{tr("Next Announce")};
             }
             case TrackerFields::MIN_ANNOUNCE: {
-                return QVariant{"Min. Announce"};
+                return QVariant{tr("Min. Announce")};
             }
             default: {
                 throw std::runtime_error("How did u get here");

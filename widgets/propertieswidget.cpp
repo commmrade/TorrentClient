@@ -3,6 +3,12 @@
 #include <libtorrent/peer_info.hpp>
 #include "sessionmanager.h"
 
+static constexpr int GENERAL_TAB_INDEX = 0;
+static constexpr int TRACKERS_TAB_INDEX = 1;
+static constexpr int PEERS_TAB_INDEX = 2;
+static constexpr int SOURCES_TAB_INDEX = 3;
+static constexpr int FILES_TAB_INDEX = 4;
+
 PropertiesWidget::PropertiesWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::PropertiesWidget)
@@ -10,11 +16,11 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
     ui->setupUi(this);
 
     ui->propertiesTab->setCurrentIndex(0);
-    ui->propertiesTab->setTabText(0, "General");
-    ui->propertiesTab->setTabText(1, "Trackers");
-    ui->propertiesTab->setTabText(2, "Peers");
-    ui->propertiesTab->setTabText(3, "HTTP Sources");
-    ui->propertiesTab->setTabText(4, "Files");
+    ui->propertiesTab->setTabText(GENERAL_TAB_INDEX, tr("General"));
+    ui->propertiesTab->setTabText(TRACKERS_TAB_INDEX, tr("Trackers"));
+    ui->propertiesTab->setTabText(PEERS_TAB_INDEX, tr("Peers"));
+    ui->propertiesTab->setTabText(SOURCES_TAB_INDEX, tr("HTTP Sources"));
+    ui->propertiesTab->setTabText(FILES_TAB_INDEX, tr("Files"));
 
     ui->sourcesList->clear();
 
@@ -45,49 +51,49 @@ PropertiesWidget::~PropertiesWidget()
 
 void PropertiesWidget::setPeers(const std::uint32_t id, const std::vector<lt::peer_info>& peers)
 {
-    if (ui->propertiesTab->currentIndex() == 2 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == PEERS_TAB_INDEX && isEnabled()) {
         ui->peerTable->setPeers(id, peers);
     }
 }
 
 void PropertiesWidget::clearPeers()
 {
-    if (ui->propertiesTab->currentIndex() == 2 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == PEERS_TAB_INDEX && isEnabled()) {
         ui->peerTable->clearPeers();
     }
 }
 
 void PropertiesWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
-    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == GENERAL_TAB_INDEX && isEnabled()) {
         ui->infoWidget->setGeneralInfo(tInfo, iInfo);
     }
 }
 
 void PropertiesWidget::clearGeneralInfo()
 {
-    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == GENERAL_TAB_INDEX && isEnabled()) {
         ui->infoWidget->clearGeneralInfo();
     }
 }
 
 void PropertiesWidget::setTrackers(const QList<Tracker> &trackers)
 {
-    if (ui->propertiesTab->currentIndex() == 1 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == TRACKERS_TAB_INDEX && isEnabled()) {
         ui->trackersTable->setTrackers(trackers);
     }
 }
 
 void PropertiesWidget::clearTrackers()
 {
-    if (ui->propertiesTab->currentIndex() == 1 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == TRACKERS_TAB_INDEX && isEnabled()) {
         ui->trackersTable->clearTrackers();
     }
 }
 
 void PropertiesWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces, const std::vector<int>& downloadingPiecesIndices)
 {
-    if (ui->propertiesTab->currentIndex() == 0 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == GENERAL_TAB_INDEX && isEnabled()) {
         ui->infoWidget->setPieces(pieces, downloadingPiecesIndices);
     }
 }
@@ -108,14 +114,14 @@ void PropertiesWidget::clearUrlSeeds()
 
 void PropertiesWidget::setFiles(const QList<File> &files)
 {
-    if (ui->propertiesTab->currentIndex() == 4 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == FILES_TAB_INDEX && isEnabled()) {
         ui->filesList->setFiles(files);
     }
 }
 
 void PropertiesWidget::clearFiles()
 {
-    if (ui->propertiesTab->currentIndex() == 4 && isEnabled()) {
+    if (ui->propertiesTab->currentIndex() == FILES_TAB_INDEX && isEnabled()) {
         ui->filesList->clearFiles();
     }
 }

@@ -1,6 +1,8 @@
 #include "filestablemodel.h"
 #include "ui_filestablemodel.h"
 #include "utils.h"
+#include <libtorrent/download_priority.hpp>
+#include "priority.h"
 
 FileTableModel::FileTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -43,30 +45,18 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
                 case FileFields::PRIORITY: {
                     // TODO: display it nicely
                     auto priorityToString = [](int const priority) -> QString {
-                        /* From libtorrent source code
-                        constexpr download_priority_t dont_download{0};
-
-                        // The default priority for files and pieces.
-                        constexpr download_priority_t default_priority{4};
-
-                        // The lowest priority for files and pieces.
-                        constexpr download_priority_t low_priority{1};
-
-                        // The highest priority for files and pieces.
-                        constexpr download_priority_t top_priority{7};
-                            */
                         switch (priority) {
-                            case 0: {
-                                return {"Don't download"};
+                            case lt::dont_download: {
+                                return {Priorities::DONT_DOWNLOAD};
                             }
-                            case 4: {
-                                return {"Default"};
+                            case lt::default_priority: {
+                                return {Priorities::DEFAULT};
                             }
-                            case 1: {
-                                return {"Low"};
+                            case lt::low_priority: {
+                                return {Priorities::LOW};
                             }
-                            case 7: {
-                                return {"High"};
+                            case lt::top_priority: {
+                                return {Priorities::HIGH};
                             }
                             default: {
                                 throw std::runtime_error("Cant be here");
@@ -121,22 +111,22 @@ QVariant FileTableModel::headerData(int section, Qt::Orientation orientation, in
     if (orientation == Qt::Horizontal) {
         switch (static_cast<FileFields>(section)) {
             case FileFields::STATUS: {
-                return {"Status"};
+                return {tr("Status")};
             }
             case FileFields::FILENAME: {
-                return {"Name"};
+                return {tr("Name")};
             }
             case FileFields::PROGRESS: {
-                return {"Progress"};
+                return {tr("Progress")};
             }
             case FileFields::DOWNLOADED: {
-                return {"Downloaded"};
+                return {tr("Downloaded")};
             }
             case FileFields::FILESIZE: {
-                return {"Size"};
+                return {tr("Size")};
             }
             case FileFields::PRIORITY: {
-                return {"Priority"};
+                return {tr("Priority")};
             }
             default: {
                 throw std::runtime_error("TF u doing here?");

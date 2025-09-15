@@ -1,5 +1,5 @@
 #include "torrenthandle.h"
-
+#include "category.h"
 
 std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 {
@@ -9,12 +9,13 @@ std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 void TorrentHandle::resetCategory()
 {
     auto status = m_handle.status();
+    qDebug() << isPaused();
     if (status.is_seeding || status.is_finished) { // they are kinda the same
-        m_category = "Seeding";
+        m_category = Categories::SEEDING;
     } else if (isPaused()) {
-        m_category = "Stopped";
+        m_category = Categories::STOPPED;
     } else { // not seeding and not finished and not paused
-        m_category = "Running";
+        m_category = Categories::RUNNING;
     }
 }
 
@@ -33,7 +34,7 @@ void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString& ne
     m_handle.rename_file(index, newName.toStdString());
 }
 void TorrentHandle::pause() {
-    setCategory("Stopped");
+    setCategory(Categories::STOPPED);
     m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle
     m_handle.pause();
 }

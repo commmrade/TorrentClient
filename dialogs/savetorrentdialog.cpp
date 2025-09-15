@@ -1,4 +1,5 @@
 #include "savetorrentdialog.h"
+#include "dirs.h"
 #include "ui_savetorrentdialog.h"
 #include <libtorrent/torrent_info.hpp>
 #include <QSettings>
@@ -21,8 +22,8 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPat
     ui->setupUi(this);
 
     lt::torrent_info info{torrentPath.toStdString()};
-    auto totalSize = info.total_size() / 1024.0 / 1024.0;
-    ui->sizeInfo->setText(QString::number(totalSize) + " MB");
+    auto totalSize = info.total_size();
+    ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
@@ -34,12 +35,13 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     , ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
-    ui->sizeInfo->setText("Fetching...");
+    ui->sizeInfo->setText(tr("Fetching..."));
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetUri.toStdString());
     auto saveTorrentFile =
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-        QDir::separator() + "torrents" +
+        QDir::separator() +
+        Dirs::TORRENTS +
         QDir::separator() +
         utils::toHex(params.info_hashes.get_best().to_string());
 
@@ -54,9 +56,9 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     // Simulating detached (hack)
     connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
     connect(m_fetcher, &MetadataFetcher::error, this, [this]{
-        ui->sizeInfo->setText("Failed");
-        ui->dateInfo->setText("Failed");
-        QMessageBox::warning(this, "Warning", "Metadata could not be fetched");
+        ui->sizeInfo->setText(tr("Failed"));
+        ui->dateInfo->setText(tr("Failed"));
+        QMessageBox::warning(this, tr("Warning"), tr("Metadata could not be fetched"));
     });
 
     QSettings settings;
@@ -80,18 +82,19 @@ QString SaveTorrentDialog::getSavePath() const
 void SaveTorrentDialog::setSize(int64_t bytes)
 {
     auto bytesStr = utils::bytesToHigher(bytes);
+    qDebug() << "Size bytes:" << bytes << "; Bytes Str:" << bytesStr << __PRETTY_FUNCTION__;
     ui->sizeInfo->setText(bytesStr);
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
 {
-    QString saveDir = QFileDialog::getExistingDirectory(this, "Choose a directory to save torrent in");
+    QString saveDir = QFileDialog::getExistingDirectory(this, tr("Choose a directory to save torrent in"));
     if (!saveDir.isEmpty()) {
         ui->savePathLineEdit->setText(saveDir);
     }
 }
 
-void SaveTorrentDialog::tryLoadData()
+void SaveTorrentDialog::tryLoadData() // TODO: For what?
 {
 
 }

@@ -3,11 +3,12 @@
 
 #include <QString>
 #include <libtorrent/torrent_status.hpp>
+#include "category.h"
 
 // All int fields are in bytes
 struct Torrent {
     std::uint32_t id;
-    QString category{"All"};
+    QString category{Categories::ALL};
     QString name;
     // QString size;
     std::int64_t size;

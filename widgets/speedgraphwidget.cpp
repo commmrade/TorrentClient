@@ -18,9 +18,9 @@ SpeedGraphWidget::SpeedGraphWidget(QWidget *parent)
 
     m_chartView = new QChartView(this);
     m_downloadSeries = new QLineSeries{};
-    m_downloadSeries->setName("Download speed B/s");
+    m_downloadSeries->setName(tr("Download speed B/s"));
     m_uploadSeries = new QLineSeries{};
-    m_uploadSeries->setName("Upload speed B/s");
+    m_uploadSeries->setName(tr("Upload speed B/s"));
 
 
 

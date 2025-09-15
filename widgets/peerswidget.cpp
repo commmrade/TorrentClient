@@ -37,7 +37,7 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
     auto index = ui->peerTable->indexAt(pos);
 
     QMenu menu(this);
-    QAction* banAction = new QAction("Ban peers", this);
+    QAction* banAction = new QAction(tr("Ban peers"), this);
     connect(banAction, &QAction::triggered, this, [this] {
         const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
         QList<QPair<QString, unsigned short>> banPeers;
@@ -49,7 +49,7 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
         sessionManager.banPeers(banPeers);
     });
 
-    QAction* copyAction = new QAction("Copy ip:port", this);
+    QAction* copyAction = new QAction(tr("Copy ip:port"), this);
     connect(copyAction, &QAction::triggered, this, [this] {
         const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
 
@@ -61,7 +61,7 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
         QApplication::clipboard()->setText(toCopyStr);
     });
 
-    QAction* addPeerAction = new QAction("Add a peer", this);
+    QAction* addPeerAction = new QAction(tr("Add a peer"), this);
     connect(addPeerAction, &QAction::triggered, this, [this] {
         AddPeersDialog dialog(this);
 

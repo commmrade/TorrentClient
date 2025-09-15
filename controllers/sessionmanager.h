@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
+#include "dirs.h"
 #include "torrenthandle.h"
 #include "tracker.h"
 #include "file.h"
@@ -40,7 +41,7 @@ class SessionManager : public QObject
 
     explicit SessionManager(QObject *parent = nullptr);
 public:
-    Q_DISABLE_COPY_MOVE(SessionManager);
+    // Q_DISABLE_COPY_MOVE(SessionManager); // Can't copy and move QObjects
     ~SessionManager();
 
     static SessionManager& instance() {
@@ -137,10 +138,10 @@ inline std::vector<char> readFile(const char *filename)
 
 inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + "torrents";
+    auto stateDirPath = basePath + QDir::separator() + Dirs::TORRENTS;
 
-    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + ".torrent";
-    QFile file{stateFilePath};
+    auto torrentFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_TORRENT;
+    QFile file{torrentFilePath};
 
     if (file.open(QIODevice::WriteOnly)) {
         lt::create_torrent ci{*ti};
@@ -154,8 +155,8 @@ inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
 
 inline void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + "state";
-    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + ".fastresume";
+    auto stateDirPath = basePath + QDir::separator() + Dirs::STATE;
+    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_FASTRESUME;
     QFile file{stateFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         file.write(buf.data(), buf.size());

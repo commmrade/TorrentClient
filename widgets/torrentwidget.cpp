@@ -64,19 +64,19 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
     QMenu menu(this);
     if (isPaused) {
-        QAction* resumeAction = new QAction("Resume", this);
+        QAction* resumeAction = new QAction(tr("Resume"), this);
         connect(resumeAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.resumeTorrent(torrentId);
         });
         menu.addAction(resumeAction);
     } else {
-        QAction* pauseAction = new QAction("Pause", this);
+        QAction* pauseAction = new QAction(tr("Pause"), this);
         connect(pauseAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.pauseTorrent(torrentId);
         });
         menu.addAction(pauseAction);
     }
-    QAction* deleteAction = new QAction("Delete", this);
+    QAction* deleteAction = new QAction(tr("Delete"), this);
     connect(deleteAction, &QAction::triggered, this, [this, torrentId] {
         bool removeWithContents = true;
 
@@ -97,7 +97,7 @@ void TorrentWidget::setupTableView()
 {
     m_categoryFilter.setSourceModel(&m_tableModel);
     ui->torrentsView->setModel(&m_categoryFilter);
-    ui->torrentsView->setItemDelegateForColumn(2, &m_tableDelegate);
+    ui->torrentsView->setItemDelegateForColumn(2, &m_tableDelegate); // Delegate for QSlider progress
 
     ui->torrentsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     ui->torrentsView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -121,7 +121,7 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open torrent", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent")d, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }

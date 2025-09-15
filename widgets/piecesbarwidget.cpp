@@ -31,6 +31,8 @@ void PiecesBarWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index
 
 void PiecesBarWidget::paintEvent(QPaintEvent *event)
 {
+
+
     QPainter painter(this);
 
     // Dimensions of bar
@@ -54,6 +56,10 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
     int startPos = startX;
     int endPos = startX + BAR_WIDTH_PX; // Dimensions of the bar on a widget
+
+    constexpr QColor backgroundColor = QColor{199, 199, 199};
+    constexpr QColor finishedColor = QColor{50, 50, 255};
+    constexpr QColor downloadingColor = QColor{50, 255, 50};
     if (piecesPerPixel) { // if pieces per pixel >= 1
         int const chunks = m_pieces.size() / piecesPerPixel;
 
@@ -90,11 +96,14 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             QColor color;/* isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199, 199);*/
 
             if (finishedPieces == 0 && !isDownloading) {
-                color = QColor::fromRgb(199, 199, 199);
+                // color = QColor::fromRgb(199, 199, 199);
+                color = backgroundColor;
             } else if (finishedPieces == piecesPerPixel) {
-                color = QColor::fromRgb(50, 50, 255);
+                // color = QColor::fromRgb(50, 50, 255);
+                color = finishedColor;
             } else if (isDownloading || finishedPieces) {
-                color = QColor::fromRgb(50, 255, 50);
+                // color = QColor::fromRgb(50, 255, 50);
+                color = downloadingColor;
             }
             painter.fillRect(piece, QBrush{color});
             ++startPos;
@@ -128,12 +137,16 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 }
                 QColor color;
 
+                // TODO: Убраь это дебильное дублирование кода
                 if (!isDownloaded && !isDownloading) {
-                    color = QColor::fromRgb(199, 199, 199);
+                    // color = QColor::fromRgb(199, 199, 199);
+                    color = backgroundColor;
                 } else if (isDownloaded && !isDownloading) {
-                    color = QColor::fromRgb(50, 50, 255);
+                    // color = QColor::fromRgb(50, 50, 255);
+                    color = finishedColor;
                 } else if (!isDownloaded && isDownloading) {
-                    color = QColor::fromRgb(50, 255, 50);
+                    // color = QColor::fromRgb(50, 255, 50);
+                    color = downloadingColor;
                 } // Cant be both isDownloaded and isDownloading (hope so)
 
                 QRect rect{startPos, startY, pixelsInPiece, barHeight};
@@ -158,11 +171,14 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             QRect rect{startPos, startY, pixelsInPiece, barHeight};
             QColor color;
             if (!isDownloaded && !isDownloading) {
-                color = QColor::fromRgb(199, 199, 199);
+                // color = QColor::fromRgb(199, 199, 199);
+                color = backgroundColor;
             } else if (isDownloaded && !isDownloading) {
-                color = QColor::fromRgb(50, 50, 255);
+                // color = QColor::fromRgb(50, 50, 255);
+                color = finishedColor;
             } else if (!isDownloaded && isDownloading) {
-                color = QColor::fromRgb(50, 255, 50);
+                // color = QColor::fromRgb(50, 255, 50);
+                color = downloadingColor;
             } // Cant be both isDownloaded and isDownloading (hope so)
 
             painter.fillRect(rect, QBrush{color});
