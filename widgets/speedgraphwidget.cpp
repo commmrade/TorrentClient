@@ -112,9 +112,8 @@ void SpeedGraphWidget::addLine(int download, int upload)
         return maxIt->y(); // Can't throw, since we have an if statement guard
     };
 
-    // New points are added to the series, no point in including them in max({})
     // Notice: std::max can accept init_list with as many values as u cant
-    double maxY = std::max(maxInSeries(m_downloadSeries), maxInSeries(m_uploadSeries));
+    double maxY = std::max({newDownloadY, newUploadY, maxInSeries(m_downloadSeries), maxInSeries(m_uploadSeries)});
     verticalAxis->setMax(maxY * 1.1);
 
     horizontalAxis->setRange(firstRangePos, lastRangePos);

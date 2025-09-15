@@ -20,7 +20,7 @@ SessionManager::SessionManager(QObject *parent)
     m_session = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(500);
+    m_alertTimer.start(1000); // !!!!: Dont change, breaks graphs and other stuff that require something per second
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(2000); // Check if torrent handles need save_resume, and then save .fastresume
 }
@@ -285,7 +285,6 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
     bool isPaused = torrentHandle.isPaused();
 
     double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
-    qDebug() << status.total_wanted_done << status.total_wanted;
 
     Torrent torrent = {
         handle.id(),
@@ -298,9 +297,10 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.num_seeds,
         status.num_peers,
         // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.download_rate,
+        status.download_payload_rate, // count only pieces, without protocol stuff
+        // status.download_rate,
         // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.upload_rate,
+        status.upload_payload_rate,
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
@@ -346,11 +346,11 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
 void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *alert)
 {
     const auto& counters = alert->counters();
-    auto recvPayloadBytes = counters[lt::counters::recv_bytes];
+    auto recvPayloadBytes = counters[lt::counters::recv_payload_bytes];
     auto newRecv = recvPayloadBytes - lastSessionRecvPayloadBytes;
     lastSessionRecvPayloadBytes = recvPayloadBytes;
 
-    auto uploadPayloadBytes = counters[lt::counters::sent_bytes];
+    auto uploadPayloadBytes = counters[lt::counters::sent_payload_bytes];
     auto newUpload = uploadPayloadBytes - lastSessionUploadPayloadBytes;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 

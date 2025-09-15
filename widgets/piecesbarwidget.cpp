@@ -98,7 +98,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             if (finishedPieces == 0 && !isDownloading) {
                 // color = QColor::fromRgb(199, 199, 199);
                 color = backgroundColor;
-            } else if (finishedPieces == piecesPerPixel) {
+            } else if (finishedPieces == pidxUntil - piecesPerPixel * i) {
                 // color = QColor::fromRgb(50, 50, 255);
                 color = finishedColor;
             } else if (isDownloading || finishedPieces) {
@@ -107,7 +107,11 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             }
             painter.fillRect(piece, QBrush{color});
             ++startPos;
-            if (pidxUntil == m_pieces.size()) break; // Nothing else to do, force exit out of the cycle
+            // qDebug() << "finished Pieces" << finishedPieces << piecesPerPixel;
+            if (pidxUntil == m_pieces.size()) { // finished
+                qDebug() << "Last piece" << m_pieces[m_pieces.end_index()] << "Finished" << finishedPieces << pidxUntil - piecesPerPixel * i;
+                break;
+            }
         }
     } else {
         int const pixelsInPiece = BAR_WIDTH_PX / m_pieces.size();

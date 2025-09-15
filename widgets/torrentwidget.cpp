@@ -121,7 +121,7 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent")d, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }
@@ -141,7 +141,6 @@ void TorrentWidget::on_pushButton_2_clicked()
 
 void TorrentWidget::on_togglePropertiesBtn_clicked()
 {
-
     if (!ui->stackedWidget->isEnabled()) {
         ui->stackedWidget->setEnabled(true);
         ui->stackedWidget->setVisible(true);
