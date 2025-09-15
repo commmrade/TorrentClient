@@ -45,6 +45,104 @@ SpeedGraphWidget::~SpeedGraphWidget()
 }
 
 
+
+void SpeedGraphWidget::addLineTest(int download, int upload)
+{
+
+
+    auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());
+    auto* horizontalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Horizontal).first());
+
+    // Next x pos of graph
+    qreal lastX = m_downloadSeries->points().isEmpty() ? 0 : m_downloadSeries->points().constLast().x() + 1;
+
+    int seriesSize = m_downloadSeries->points().size();
+    // Graph is 60 points wide
+    int firstRangePos = seriesSize > 60 ? seriesSize - 60 : 0;
+    int lastRangePos = seriesSize > 60 ? seriesSize : 60;
+    auto maxInSeries = [firstRangePos](const QLineSeries* series) -> double {
+        const auto& points = series->points();
+        if (static_cast<int>(points.size()) <= firstRangePos) return 0.0;
+        auto startIt = points.begin() + firstRangePos;
+        auto maxIt = std::max_element(startIt, points.end(), [](const QPointF& a, const QPointF& b) { return a.y() < b.y(); });
+        return maxIt->y(); // Can't throw, since we have an if statement guard
+    };
+
+    double maxSpeedInRange = maxInSeries(m_downloadSeries);
+    QString maxFormat = verticalAxis->labelFormat();
+    double maxSpeed = verticalAxis->max();
+
+    if (maxSpeed < maxSpeedInRange) {
+        // Find out current format and scale
+        QString currentFormat;
+        double currentScale;
+        if (maxFormat.contains(" B/s")) {
+            currentFormat = "%.0f B/s";
+        } else if (maxFormat.contains("KB/s")) {
+            currentFormat = "%.0f KB/s";
+        } else if (maxFormat.contains("MB/s")) {
+            currentFormat = "%.0f MB/s";
+        }
+    }
+
+    // ----- Stopped here
+
+
+    // We are converting into format of newly added point (TODO: Change to max)
+    // int maxSpeed = std::max(download, upload);
+    // QString targetFormat = "%.0f B/s";
+    // double targetScale = 1.0;
+    // if (maxSpeed >= 1024 * 1024) {
+    //     targetFormat = "%.0f MB/s";
+    //     targetScale = 1024.0 * 1024.0;
+    // } else if (maxSpeed >= 1024) {
+    //     targetFormat = "%.0f KB/s";
+    //     targetScale = 1024.0;
+    // }
+
+    // // Deducing current scale depending on the label format
+    // QString currentFormat = verticalAxis->labelFormat();
+    // double currentScale = 1.0;
+    // if (currentFormat.contains("KB/s")) {
+    //     currentScale = 1024.0;
+    // } else if (currentFormat.contains("MB/s")) {
+    //     currentScale = 1024.0 * 1024.0;
+    // }
+
+    // // Use this to scale series to target scale
+    // double factor = currentScale / targetScale;
+    // bool unitChanged = currentFormat != targetFormat; // Scale series only if something is changed
+
+    // auto scaleSeries = [factor](QLineSeries* series) {
+    //     auto points = series->points();
+    //     for (auto& p : points) {
+    //         p.setY(p.y() * factor);
+    //     }
+    //     series->replace(points);
+    // };
+
+    // if (unitChanged) {
+    //     scaleSeries(m_downloadSeries);
+    //     scaleSeries(m_uploadSeries);
+    //     // Update series and change label format
+    //     verticalAxis->setLabelFormat(targetFormat);
+    // }
+
+    // // Append new points
+    // qreal newDownloadY = download / targetScale;
+    // qreal newUploadY = upload / targetScale;
+    // m_downloadSeries->append(lastX, newDownloadY);
+    // m_uploadSeries->append(lastX, newUploadY);
+
+
+
+    // // Notice: std::max can accept init_list with as many values as u cant
+    // double maxY = std::max({newDownloadY, newUploadY, maxInSeries(m_downloadSeries), maxInSeries(m_uploadSeries)});
+    // verticalAxis->setMax(maxY * 1.1);
+
+    // horizontalAxis->setRange(firstRangePos, lastRangePos);
+}
+
 void SpeedGraphWidget::addLine(int download, int upload)
 {
     auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());

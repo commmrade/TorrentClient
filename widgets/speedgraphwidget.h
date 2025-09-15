@@ -27,6 +27,7 @@ private:
     QLineSeries* m_uploadSeries{nullptr};
 
     void addLine(int download, int upload); // should pass in mb/s i think
+    void addLineTest(int download, int upload);
 };
 
 #endif // SPEEDGRAPHWIDGET_H
