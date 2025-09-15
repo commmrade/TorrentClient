@@ -49,6 +49,10 @@ SpeedGraphWidget::~SpeedGraphWidget()
 void SpeedGraphWidget::addLineTest(int download, int upload)
 {
 
+    // 1. Находим current format
+    // 2. находим таргет формат с помощью разницы между глоабльным max() и maxInRange
+    // 3. Допустим current format = kb/s, если maxInrange > max(0) на 1024, то нужно перевести series в mb/s, а также новые значения (сам макс переводить не нужно, т.к он в series)
+
 
     auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());
     auto* horizontalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Horizontal).first());
@@ -83,6 +87,22 @@ void SpeedGraphWidget::addLineTest(int download, int upload)
         } else if (maxFormat.contains("MB/s")) {
             currentFormat = "%.0f MB/s";
         }
+
+        double diff = maxSpeedInRange - maxSpeed;
+        if (diff > 1024) {
+            // ..
+        } else if (diff > 1024 * 1024) {
+            // ...
+        }
+
+        if (diff < -1024) {
+            // ...
+        } else if (diff < -1024 * 1024) {
+            // ...
+        }
+
+        // scale Series
+        // add new points
     }
 
     // ----- Stopped here
