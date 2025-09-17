@@ -34,7 +34,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     QString theme = settings.value(SettingsValues::GUI_THEME, QString{"Dark"}).toString();
     ui->themeBox->setCurrentText(theme);
     if (theme == "Custom") { // if theme is custom set custom theme edit, if empty set to dark (default)
-        QString customTheme = settings.value("gui/customTheme").toString();
+        QString customTheme = settings.value(SettingsValues::GUI_CUSTOM_THEME).toString();
         qDebug() << "Custom theme found";
         if (!customTheme.isEmpty()) { // Weird
             ui->customThemeEdit->setText(customTheme);
@@ -67,27 +67,6 @@ void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
     ui->stackedWidget->setCurrentIndex(currentRow);
 }
 
-// void SettingsDialog::on_customizeButton_clicked()
-// {
-//     QSettings settings;
-//     auto themeString = settings.value(SettingsValues::GUI_THEME, "Dark");
-
-//     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-//     if (themeString == "Dark") {
-//         // open dark.qss or whatevuh
-//         auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
-//         if (!QDesktopServices::openUrl("file:" + darkThemePath)) {
-//             qCritical("Could not open .qss file");
-//         }
-//     } else {
-//         // open light.qss or whatever
-//         auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
-//         if (!QDesktopServices::openUrl("file:" + lightThemePath)) {
-//             qCritical("Could not open .qss file");
-//         }
-//     }
-// }
 
 void SettingsDialog::on_applyButton_clicked()
 {
@@ -97,7 +76,7 @@ void SettingsDialog::on_applyButton_clicked()
     // Prompt for restart after applied all the settings
     if (m_restartRequired) {
         // Prompt
-        int ret = QMessageBox::information(this, "Restart required", "You may need to restart the app to apply new settings, do it now?", QMessageBox::Apply | QMessageBox::Cancel);
+        int ret = QMessageBox::information(this, tr("Restart required"), tr("You may need to restart the app to apply new settings, do it now?"), QMessageBox::Apply | QMessageBox::Cancel);
         if (ret == QMessageBox::Apply) {
             QString const binaryPath = QCoreApplication::applicationFilePath();
             QProcess::startDetached(binaryPath);
@@ -120,9 +99,8 @@ void SettingsDialog::applyApplicationSettings()
     if (m_themeChanged) {
         auto theme = ui->themeBox->currentText();
         if (theme == "Custom") {
-            qDebug() << "CUstom theme";
             settings.setValue(SettingsValues::GUI_THEME, theme); // Remove theme
-            settings.setValue("gui/customTheme", ui->customThemeEdit->text());
+            settings.setValue(SettingsValues::GUI_CUSTOM_THEME, ui->customThemeEdit->text());
         } else {
             settings.setValue(SettingsValues::GUI_THEME, theme);
         }
@@ -137,13 +115,13 @@ void SettingsDialog::applyTorrentSettings()
 
     if (m_downloadLimitChanged) {
         auto downloadLimitValue = ui->downloadLimitSpin->value();
-        sessionManager.setDownloadLimit(downloadLimitValue);
+        sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
         m_downloadLimitChanged = false;
     }
 
     if (m_uploadLimitChanged) {
         auto uploadLimitValue = ui->uploadLimitSpin->value();
-        sessionManager.setUploadLimit(uploadLimitValue);
+        sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
         m_uploadLimitChanged = false;
     }
 }
@@ -151,7 +129,7 @@ void SettingsDialog::applyTorrentSettings()
 
 void SettingsDialog::on_savePathButton_clicked()
 {
-    QString defaultSavePath = QFileDialog::getExistingDirectory(this, "Choose a new default save directory");
+    QString defaultSavePath = QFileDialog::getExistingDirectory(this, tr("Choose a new default save directory"));
     if (!defaultSavePath.isEmpty()) {
         QSettings settings;
         settings.setValue(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
@@ -205,7 +183,7 @@ void SettingsDialog::on_closeButton_clicked()
 void SettingsDialog::on_chooseThemeBtn_clicked()
 {
     auto homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    QString themePath = QFileDialog::getOpenFileName(this, "Style file", homePath, "Style (*.qss)");
+    QString themePath = QFileDialog::getOpenFileName(this, tr("Style file"), homePath, tr("Style (*.qss)"));
 
     if (!themePath.isEmpty()) {
         ui->customThemeEdit->setText(themePath);

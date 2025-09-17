@@ -15,7 +15,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QListWidget" name="categoriesList">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -24,17 +24,27 @@
      </property>
      <item>
       <property name="text">
-       <string>favourite</string>
+       <string>All</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>downloaded</string>
+       <string>Running</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>started</string>
+       <string>Seeding</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Stopped</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Failed</string>
       </property>
      </item>
     </widget>
@@ -42,7 +52,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QTableView" name="tableView">
+      <widget class="QTableView" name="torrentsView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -52,25 +62,63 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="togglePropertiesBtn">
-       <property name="text">
-        <string>Hide properties</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="PropertiesWidget" name="propertiesTab" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QStackedWidget" name="stackedWidget">
        <property name="minimumSize">
         <size>
          <width>0</width>
          <height>200</height>
         </size>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="page">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="PropertiesWidget" name="propertiesTab" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>200</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_2">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="SpeedGraphWidget" name="graphWidget" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>200</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="togglePropertiesBtn">
+       <property name="text">
+        <string>Properties</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="toggleGraphsButton">
+       <property name="text">
+        <string>Graphs</string>
        </property>
       </widget>
      </item>
@@ -107,6 +155,12 @@
    <class>PropertiesWidget</class>
    <extends>QWidget</extends>
    <header location="global">propertieswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SpeedGraphWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">speedgraphwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -3,27 +3,30 @@
 
 #include <QString>
 #include <libtorrent/torrent_status.hpp>
+#include "category.h"
 
 // All int fields are in bytes
 struct Torrent {
     std::uint32_t id;
+    QString category{Categories::ALL};
     QString name;
     // QString size;
-    std::uint64_t size;
+    std::int64_t size;
     double progress; // 0.0% to 100.0%
     QString status;
     int seeds;
     int peers;
     // QString downSpeed;
-    std::uint64_t downSpeed;
+    int downSpeed; // Int is sufficient enough
     // QString upSpeed;
-    std::uint64_t upSpeed;
+    int upSpeed;
     // int eta; // In seconds
     std::int64_t eta; // signed for -1 if inf
 };
 
 enum TorrentsFields {
     ID = 0,
+    CATEGORY,
     NAME,
     SIZE,
     PROGRESS,

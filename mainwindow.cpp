@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setCentralWidget(m_torrentWidget);
+
+    // test
 }
 
 MainWindow::~MainWindow()
@@ -22,4 +24,3 @@ void MainWindow::on_actionSettings_triggered()
     SettingsDialog dialog(this);
     dialog.exec(); // idc if it is accepted or rejected
 }
-

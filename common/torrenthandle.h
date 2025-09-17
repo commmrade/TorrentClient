@@ -3,16 +3,20 @@
 #include <libtorrent/torrent_handle.hpp>
 #include <chrono>
 #include <libtorrent/torrent_status.hpp>
-#include <libtorrent/hex.hpp>
 #include <QString>
 #include <QDebug>
-// #include <libtorrent/libtorrent.hpp>
+#include "utils.h"
+#include "category.h"
 
 class TorrentHandle
 {
     lt::torrent_handle m_handle;
+
+    QString m_category{Categories::RUNNING};
+    // QStringList m_categories; // TODO: May be use a list
+    void resetCategory();
 public:
-    explicit TorrentHandle(lt::torrent_handle handle) : m_handle(handle) {};
+    explicit TorrentHandle(lt::torrent_handle handle);
     TorrentHandle() = default;
 
     std::uint32_t id() const {
@@ -42,24 +46,34 @@ public:
         return peers;
     }
 
-    QString bestHashAsString() const {
-        return QString::fromStdString(lt::aux::to_hex(m_handle.info_hashes().get_best()));
+    QString bestHashAsString() const { // truncates sha256
+        return utils::toHex(m_handle.info_hashes().get_best().to_string());
     }
-    lt::sha1_hash bestHash() const {
+    QString hashV1AsString() const {
+        return utils::toHex(m_handle.info_hashes().v1.to_string());
+    }
+
+    lt::sha1_hash hashV1() const {
+        return m_handle.info_hashes().v1;
+    }
+    lt::sha256_hash hashV2() const {
+        return m_handle.info_hashes().v2;
+    }
+
+    lt::sha1_hash bestHash() const { // may return truncated sha256
         return m_handle.info_hashes().get_best();
     }
 
-    void pause() {
-        m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle
-        m_handle.pause();
-    }
+
+    void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
+    void renameFile(lt::file_index_t index, const QString& newName);
+
+    void pause();
     bool isPaused() const {
         bool IsPaused = (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
         return IsPaused;
     }
-    void resume() {
-        m_handle.resume();
-    }
+    void resume();
 
     void saveResumeData() {
         m_handle.save_resume_data();
@@ -67,6 +81,14 @@ public:
 
     std::uint64_t activeDur() {
         return m_handle.status().active_duration.count();
+    }
+
+
+    void setCategory(const QString& category) {
+        m_category = category;
+    }
+    QString getCategory() const {
+        return m_category;
     }
 };
 

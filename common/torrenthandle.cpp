@@ -1,32 +1,45 @@
 #include "torrenthandle.h"
-
+#include "category.h"
 
 std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 {
-    // im gonna display:
-    // 1. url
-    // 2. tier
-    // 3. status (if any endpoint is true, then true "working")
-    // 4. seeds (scrape_completed)
-    // 5. leeches (scrape_incomplete)
-    // 6. message
-    // const auto trackers = m_handle.trackers();
-
-    // qDebug() << "Trackers size" << trackers.size();
-    // for (const lt::announce_entry& tracker : trackers) {
-    //     qDebug() << "URL" << tracker.url << "Trackerid" << tracker.trackerid << "Endpoint cnt" << tracker.endpoints.size() << "Verified" << tracker.verified << "tier" << tracker.tier;
-    //     qDebug() << "-------";
-
-    //     // Use protocol V1 for now
-    //     for (const auto& endpoint : tracker.endpoints) {
-    //         auto& ihash =  endpoint.info_hashes[lt::protocol_version::V1];
-    //         // qDebug() << "
-    //         // qDebug() << "Endpoint enabled" << endpoint.enabled;
-    //         // for (const auto& ihash : endpoint.info_hashes) {
-    //         //     qDebug() << "Leeches" << ihash.scrape_incomplete << "Seeds" << ihash.scrape_complete;
-    //         // }
-    //     }
-
-    // }
     return m_handle.trackers();
+}
+
+void TorrentHandle::resetCategory()
+{
+    auto status = m_handle.status();
+    qDebug() << isPaused();
+    if (status.is_seeding || status.is_finished) { // they are kinda the same
+        m_category = Categories::SEEDING;
+    } else if (isPaused()) {
+        m_category = Categories::STOPPED;
+    } else { // not seeding and not finished and not paused
+        m_category = Categories::RUNNING;
+    }
+}
+
+TorrentHandle::TorrentHandle(libtorrent::torrent_handle handle) : m_handle(handle) {
+    resetCategory();
+}
+
+void TorrentHandle::setFilePriority(libtorrent::file_index_t index, libtorrent::download_priority_t priority) {
+    m_handle.file_priority(index, priority);
+}
+
+void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString& newName)
+{
+    // File is renamed asynchronously, so should probably get an alert
+    // TODO: Handle alerts or not?
+    m_handle.rename_file(index, newName.toStdString());
+}
+void TorrentHandle::pause() {
+    setCategory(Categories::STOPPED);
+    m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle
+    m_handle.pause();
+}
+
+void TorrentHandle::resume() {
+    m_handle.resume();
+    resetCategory();
 }

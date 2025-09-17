@@ -6,16 +6,21 @@
 #include "savetorrentdialog.h"
 #include <QElapsedTimer>
 #include <QMessageBox>
+#include "speedgraphwidget.h"
+#include "deletetorrentdialog.h"
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TorrentWidget)
     , m_sessionManager(SessionManager::instance())
+    , m_speedGraph(new SpeedGraphWidget{})
+    , m_categoryFilter(this)
 {
     ui->setupUi(this);
 
-    // QElapsedTimer perfTimer;
-    // perfTimer.start();
+    closeAllTabs();
+
+
     setupTableView();
 
     connect(&m_sessionManager, &SessionManager::torrentAdded, this, [this](const Torrent& torrent) {
@@ -31,15 +36,14 @@ TorrentWidget::TorrentWidget(QWidget *parent)
         m_tableModel.removeTorrent(id);
     });
 
-    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex& index) {
+    connect(ui->torrentsView, &QTableView::clicked, this, [this](const QModelIndex& index) {
         auto torrentId = m_tableModel.getTorrentId(index.row());
         m_sessionManager.setCurrentTorrentId(torrentId);
     });
 
     // Context Menu Stuff
-    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->tableView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
-
+    ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->torrentsView, &QTableView::customContextMenuRequested, this, &TorrentWidget::customContextMenu);
 
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't get torrentAdded signal
 }
@@ -51,7 +55,7 @@ TorrentWidget::~TorrentWidget()
 
 void TorrentWidget::customContextMenu(const QPoint& pos)
 {
-    auto index = ui->tableView->indexAt(pos);
+    auto index = ui->torrentsView->indexAt(pos);
 
     if (index.row() == -1) return; /// indexAt() returns -1 when out of bounds
     auto torrentId = m_tableModel.getTorrentId(index.row());
@@ -60,36 +64,44 @@ void TorrentWidget::customContextMenu(const QPoint& pos)
     bool isPaused = m_sessionManager.isTorrentPaused(torrentId);
     QMenu menu(this);
     if (isPaused) {
-        QAction* resumeAction = new QAction("Resume", this);
+        QAction* resumeAction = new QAction(tr("Resume"), this);
         connect(resumeAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.resumeTorrent(torrentId);
         });
         menu.addAction(resumeAction);
     } else {
-        QAction* pauseAction = new QAction("Pause", this);
+        QAction* pauseAction = new QAction(tr("Pause"), this);
         connect(pauseAction, &QAction::triggered, this, [this, torrentId] {
             m_sessionManager.pauseTorrent(torrentId);
         });
         menu.addAction(pauseAction);
     }
-    QAction* deleteAction = new QAction("Delete", this);
+    QAction* deleteAction = new QAction(tr("Delete"), this);
     connect(deleteAction, &QAction::triggered, this, [this, torrentId] {
         bool removeWithContents = true;
-        m_sessionManager.removeTorrent(torrentId, removeWithContents);
+
+        DeleteTorrentDialog dialog{this};
+        if (dialog.exec() == QDialog::Accepted) {
+            if (!m_sessionManager.removeTorrent(torrentId, dialog.getRemoveWithContens())) {
+                QMessageBox::warning(this, tr("Beware"), tr("Could not delete all torrent files, please finish it manually."));
+            }
+        }
+
     });
     menu.addAction(deleteAction);
 
-    menu.exec(ui->tableView->viewport()->mapToGlobal(pos));
+    menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));
 }
 
 void TorrentWidget::setupTableView()
 {
-    ui->tableView->setModel(&m_tableModel);
-    ui->tableView->setItemDelegateForColumn(2, &m_tableDelegate);
+    m_categoryFilter.setSourceModel(&m_tableModel);
+    ui->torrentsView->setModel(&m_categoryFilter);
+    ui->torrentsView->setItemDelegateForColumn(2, &m_tableDelegate); // Delegate for QSlider progress
 
-    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->torrentsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->torrentsView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->torrentsView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void TorrentWidget::on_pushButton_clicked()
@@ -103,13 +115,13 @@ void TorrentWidget::on_pushButton_clicked()
         }
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
-        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
     }
 }
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open torrent", "/home/klewy", "Torrents (*.torrent)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }
@@ -123,13 +135,42 @@ void TorrentWidget::on_pushButton_2_clicked()
         }
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
-        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
     }
 }
 
 void TorrentWidget::on_togglePropertiesBtn_clicked()
 {
-    ui->propertiesTab->setEnabled(!ui->propertiesTab->isEnabled());
-    ui->propertiesTab->setVisible(!ui->propertiesTab->isVisible());
+    if (!ui->stackedWidget->isEnabled()) {
+        ui->stackedWidget->setEnabled(true);
+        ui->stackedWidget->setVisible(true);
+        ui->stackedWidget->setCurrentIndex(0);
+    } else {
+        closeAllTabs();
+    }
+}
+
+
+void TorrentWidget::on_toggleGraphsButton_clicked()
+{
+    if (!ui->stackedWidget->isEnabled()) {
+        ui->stackedWidget->setEnabled(true);
+        ui->stackedWidget->setVisible(true);
+        ui->stackedWidget->setCurrentIndex(1);
+    } else {
+        closeAllTabs();
+    }
+}
+
+void TorrentWidget::closeAllTabs()
+{
+    ui->stackedWidget->setVisible(false);
+    ui->stackedWidget->setEnabled(false);
+}
+
+
+void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentText)
+{
+    m_categoryFilter.setCategory(currentText);
 }
 

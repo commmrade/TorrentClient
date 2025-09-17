@@ -11,20 +11,24 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
 {
     if (role < Qt::UserRole) {
         if (role == Qt::DisplayRole) {
-            if (std::abs(index.row()) >= m_torrents.size()) return {};
+            // if (std::abs(index.row()) >= m_torrents.size()) return {}; // TODO: what is this for
+            // return {};
             auto& torrent = m_torrents[index.row()];
 
-            auto id = index.column() + 1;
+            auto id = index.column() + 2;
             switch (id) {
                 case ID: {
                     return torrent.id;
+                }
+                case CATEGORY: {
+                    return torrent.category;
                 }
                 case NAME: {
                     return torrent.name;
                 }
                 case SIZE: {
                     auto sizeInBytes = torrent.size;
-                    QString sizeStr = bytesToHigher(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigher(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case PROGRESS: {
@@ -41,22 +45,32 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
                 }
                 case DOWN_SPEED: {
                     auto sizeInBytes = torrent.downSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case UP_SPEED: {
                     auto sizeInBytes = torrent.upSpeed;
-                    QString sizeStr = bytesToHigherPerSec(sizeInBytes);
+                    QString sizeStr = utils::bytesToHigherPerSec(sizeInBytes);
                     return QVariant{sizeStr};
                 }
                 case ETA: {
-                    auto etaStr = secsToFormattedTime(torrent.eta);
+                    auto etaStr = utils::secsToFormattedTime(torrent.eta);
                     return etaStr;
                 }
                 default: {
                     throw std::runtime_error("Something is wrong");
-                    break;
                 }
+            }
+        }
+    } else { // For getting unseen data from sort filter proxy
+        auto& torrent = m_torrents[index.row()];
+        auto id = index.column();
+        switch (id) {
+            case ID: {
+                return torrent.id;
+            }
+            case CATEGORY: {
+                return torrent.category;
             }
         }
     }
@@ -67,10 +81,13 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
 {
     if (role == Qt::EditRole) {
         auto& torrent = m_torrents[index.row()];
-        switch (index.column() + 1) {
+        switch (index.column() + 2) {
             case ID: {
                 torrent.id = value.toUInt();
                 break;
+            }
+            case CATEGORY: {
+                torrent.category = value.toString();
             }
             case NAME: {
                 torrent.name = value.toString();
@@ -124,33 +141,34 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
         return {};
     }
     if (orientation == Qt::Horizontal) {
-        switch (section + 1) {
+        switch (section + 2) {
             // case ID: {
             //     return QVariant{"ID"};
             // }
+            // case CATEGORY
             case NAME: {
-                return QVariant{"Name"};
+                return QVariant{tr("Name")};
             }
             case SIZE: {
-                return QVariant{"Size"};
+                return QVariant{tr("Size")};
             }
             case PROGRESS: {
-                return QVariant{"Progress"};
+                return QVariant{tr("Progress")};
             }
             case STATUS: {
-                return QVariant{"Status"};
+                return QVariant{tr("Status")};
             }
             case SEEDS: {
-                return QVariant{"Seeds"};
+                return QVariant{tr("Seeds")};
             }
             case PEERS: {
-                return QVariant{"Peers"};
+                return QVariant{tr("Peers")};
             }
             case DOWN_SPEED: {
-                return QVariant{"Down Speed"};
+                return QVariant{tr("Down Speed")};
             }
             case UP_SPEED: {
-                return QVariant{"Up Speed"};
+                return QVariant{tr("Up Speed")};
             }
             case ETA: {
                 return QVariant{"ETA"};
@@ -160,7 +178,7 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
             }
         }
     } else {
-        return QVariant{section + 1};
+        return QVariant{};
     }
     return {};
 }
@@ -228,5 +246,10 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
     endRemoveRows();
 
     return true;
+}
+
+void TorrentsTableModel::setTorrentCategory(const uint32_t id, const QString &category)
+{
+    m_torrents[id].category = category;
 }
 

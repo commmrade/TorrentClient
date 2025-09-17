@@ -5,12 +5,11 @@
 #include <QSettings>
 #include "settingsvalues.h"
 #include <QDebug>
-#include <QDateTime>
-
+#include "dirs.h"
 
 void fallToDefaultTheme(QApplication& a, QSettings& settings) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
+    auto darkThemePath = basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
     QFile file(darkThemePath);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         a.setStyleSheet(file.readAll());
@@ -18,7 +17,7 @@ void fallToDefaultTheme(QApplication& a, QSettings& settings) {
     }
 
     settings.setValue(SettingsValues::GUI_THEME, "Dark"); // reset to default theme (factor out in a function)
-    settings.remove("gui/customTheme");
+    settings.remove(SettingsValues::GUI_CUSTOM_THEME);
 }
 
 
@@ -28,17 +27,15 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("klewy.com");
     QCoreApplication::setApplicationName("TorrentClient");
 
-
-
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     if (!QDir().mkpath(basePath)) {
         qDebug() << "Could not create base path for torrent client";
     }
-    QDir().mkdir(basePath + QDir::separator() + "torrents"); // Directory for downloads by default
-    QDir().mkdir(basePath + QDir::separator() + "state"); // Directory for storing state of torrent
-    QDir().mkdir(basePath + QDir::separator() + "metadata"); // Options and this kinda stuff maybe?
-    QDir().mkdir(basePath + QDir::separator() + "themes");
+    QDir().mkdir(basePath + QDir::separator() + Dirs::TORRENTS); // Directory for downloads by default
+    QDir().mkdir(basePath + QDir::separator() + Dirs::TORRENTS); // Directory for storing state of torrent
+    QDir().mkdir(basePath + QDir::separator() + Dirs::METADATA); // Options and this kinda stuff maybe?
+    QDir().mkdir(basePath + QDir::separator() + Dirs::THEMES);
 
 
     QApplication a(argc, argv);
@@ -46,21 +43,21 @@ int main(int argc, char *argv[])
     // Set theme
     QString theme = settings.value(SettingsValues::GUI_THEME, "Dark").toString();
     if (theme == "Dark") {
-        auto darkThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "dark.qss";
+        auto darkThemePath = basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
         QFile file(darkThemePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             a.setStyleSheet(file.readAll());
             file.close();
         }
     } else if (theme == "Light") {
-        auto lightThemePath = basePath + QDir::separator() + "themes" + QDir::separator() + "light.qss";
+        auto lightThemePath = basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "light.qss";
         QFile file(lightThemePath);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             a.setStyleSheet(file.readAll());
             file.close();
         }
     } else if (theme == "Custom") {
-        QString customThemePath = settings.value("gui/customTheme").toString();
+        QString customThemePath = settings.value(SettingsValues::GUI_CUSTOM_THEME).toString();
         if (!customThemePath.isEmpty()) {
             QFile file(customThemePath);
             if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {

@@ -91,150 +91,172 @@
          <property name="title">
           <string>Info</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_8">
-              <item>
-               <widget class="QLabel" name="torSizeLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Torrent size:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="startTimeLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Started time:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="infoHashLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Info hash best:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="savePathLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Save path:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="commentLabel">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Comment:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="torSizeLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Torrent size:</string>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_9">
-              <item>
-               <widget class="QLabel" name="torSizeValue">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Value</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="startTimeValue">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Value</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="infoHashValue">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Value</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="savePathValue">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Value</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="commentValue">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Value</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="startTimeLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Started time:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashV1Label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Info hash v1:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashV2Label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Info hash v2:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="savePathLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Save path:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="commentLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Comment:</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
-          <item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <widget class="QLabel" name="torSizeValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="startTimeValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashV1Value">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashV2Value">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="savePathValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="commentValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="2">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_10">

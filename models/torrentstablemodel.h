@@ -23,7 +23,7 @@ public:
     }
     int columnCount(const QModelIndex& index = QModelIndex{}) const override {
         // return TORRENT_FIELD_COUNT;
-        return TORRENT_FIELD_COUNT - 1; // where -1 is remove id
+        return TORRENT_FIELD_COUNT - 2; // where -1 is remove id and category
     }
 
     QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
@@ -40,10 +40,12 @@ public:
     bool updateTorrent(const Torrent& torrent);
     bool finishTorrent(const std::uint32_t id, const lt::torrent_status& status);
     bool removeTorrent(const std::uint32_t id);
+    void setTorrentCategory(const std::uint32_t id, const QString& category);
 
     std::uint32_t getTorrentId(const int row) {
         return m_torrents[row].id;
     }
+
 private:
     QList<Torrent> m_torrents;
 };

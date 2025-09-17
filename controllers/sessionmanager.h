@@ -2,7 +2,6 @@
 #define SESSIONMANAGER_H
 
 #include <QObject>
-#include <fstream>
 #include <vector>
 #include <libtorrent/session.hpp>
 #include <libtorrent/create_torrent.hpp>
@@ -10,8 +9,10 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
+#include "dirs.h"
 #include "torrenthandle.h"
 #include "tracker.h"
+#include "file.h"
 
 constexpr const char* SESSION_FILENAME = ".session";
 
@@ -31,11 +32,16 @@ class SessionManager : public QObject
     QTimer m_alertTimer;
     QTimer m_resumeDataTimer;
 
-    std::int64_t m_currentTorrentId{-1};
+    // std::int64_t m_currentTorrentId{-1};
+    std::optional<std::uint32_t> m_currentTorrentId{std::nullopt};
+
+    std::int64_t lastSessionRecvPayloadBytes{0};
+    std::int64_t lastSessionUploadPayloadBytes{0};
+
 
     explicit SessionManager(QObject *parent = nullptr);
 public:
-    Q_DISABLE_COPY_MOVE(SessionManager);
+    // Q_DISABLE_COPY_MOVE(SessionManager); // Can't copy and move QObjects
     ~SessionManager();
 
     static SessionManager& instance() {
@@ -49,7 +55,7 @@ public:
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);
     void resumeTorrent(const std::uint32_t id);
-    void removeTorrent(const std::uint32_t id, bool removeWithContents);
+    bool removeTorrent(const std::uint32_t id, bool removeWithContents);
 
     void loadResumes();
 
@@ -57,17 +63,25 @@ public:
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
 
+    // Files
+    void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
+    void renameFile(std::uint32_t id, int fileIndex, const QString& newName);
 
     // Peer
     void banPeers(const QList<QPair<QString, unsigned short>>& bannablePeers);
-    void addPeerToCurrentTorrent(const boost::asio::ip::tcp::endpoint& ep);
-    void addPeersToCurrentTorrent(const QList<boost::asio::ip::tcp::endpoint>& eps);
+    void addPeerToTorrent(std::uint32_t torrentId, const boost::asio::ip::tcp::endpoint& ep);
+    void addPeersToTorrent(std::uint32_t torrentId, const QList<boost::asio::ip::tcp::endpoint>& eps);
 
-    void setCurrentTorrentId(std::int64_t value) {
-        m_currentTorrentId = value;
+    // Notice: this kinda feels wrong to track current torrent in here, so maybe i can come up with something better
+    void setCurrentTorrentId(std::optional<std::uint32_t> value);
+    std::optional<std::uint32_t> getCurrentTorrentId() const {
+        return m_currentTorrentId;
     }
 private:
     lt::session_params loadSessionParams();
+
+    // Utils
+    void emitClearSignals();
 
     // Event loop and alert functions
     void eventLoop();
@@ -78,6 +92,8 @@ private:
     void handleMetadataReceived(lt::metadata_received_alert* alert);
     void handleResumeDataAlert(lt::save_resume_data_alert* alert);
     void handleAddTorrentAlert(lt::add_torrent_alert* alert);
+    void handleSessionStatsAlert(lt::session_stats_alert* alert);
+    void handleTorrentErrorAlert(lt::torrent_error_alert* alert);
 
     void saveResumes();
     bool addTorrent(lt::add_torrent_params params);
@@ -103,6 +119,11 @@ signals:
     void clearUrlSeeds();
 
     void pieceBarInfo(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIdx);
+
+    void chartPoint(int download, int upload);
+
+    void filesInfo(const QList<File>& files);
+    void clearFiles();
 };
 
 inline std::vector<char> readFile(const char *filename)
@@ -117,10 +138,10 @@ inline std::vector<char> readFile(const char *filename)
 
 inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + "torrents";
+    auto stateDirPath = basePath + QDir::separator() + Dirs::TORRENTS;
 
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".torrent";
-    QFile file{stateFilePath};
+    auto torrentFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_TORRENT;
+    QFile file{torrentFilePath};
 
     if (file.open(QIODevice::WriteOnly)) {
         lt::create_torrent ci{*ti};
@@ -134,8 +155,8 @@ inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
 
 inline void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + "state";
-    auto stateFilePath = stateDirPath + QDir::separator() + QString{lt::aux::to_hex(ti->info_hashes().get_best().to_string()).c_str()} + ".fastresume";
+    auto stateDirPath = basePath + QDir::separator() + Dirs::STATE;
+    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_FASTRESUME;
     QFile file{stateFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         file.write(buf.data(), buf.size());

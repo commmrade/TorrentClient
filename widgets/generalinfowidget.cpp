@@ -23,7 +23,7 @@ GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
 
     ui->torSizeValue->setText("-");
     ui->startTimeValue->setText("-");
-    ui->infoHashValue->setText("-");
+    ui->infoHashV1Value->setText("-");
     ui->savePathValue->setText("-");
     ui->piecesValue->setText("-");
     ui->completionValue->setText("-");
@@ -42,7 +42,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
         auto secs = iInfo.activeTime % 60;
         QString timeStr;
         if (iInfo.activeTime == -1) {
-            timeStr = "infinity";
+            timeStr = tr("infinity");
         } else {
             timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
         }
@@ -50,26 +50,26 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     }
 
 
-    auto downloaded = bytesToHigher(iInfo.downloaded);
+    auto downloaded = utils::bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
 
-    auto downSpeed = bytesToHigherPerSec(iInfo.downSpeed);
+    auto downSpeed = utils::bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.downLimit));
+    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.downLimit));
 
     {
-        auto etaStr = secsToFormattedTime(iInfo.eta);
+        auto etaStr = utils::secsToFormattedTime(iInfo.eta);
         ui->etaValue->setText(etaStr);
     }
 
-    auto uploaded = bytesToHigher(iInfo.uploaded);
+    auto uploaded = utils::bytesToHigher(iInfo.uploaded);
     ui->uploadedValue->setText(uploaded);
 
-    auto upSpeed = bytesToHigherPerSec(iInfo.upSpeed);
+    auto upSpeed = utils::bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? "Unlimited" : bytesToHigherPerSec(iInfo.upLimit));
+    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.upLimit));
 
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
@@ -82,7 +82,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
 
     //
 
-    auto torSize = bytesToHigher(tInfo.size);
+    auto torSize = utils::bytesToHigher(tInfo.size);
     ui->torSizeValue->setText(torSize);
 
 
@@ -90,8 +90,11 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     timestamp.setSecsSinceEpoch(tInfo.startTime);
     ui->startTimeValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
 
-    auto infoHash = tInfo.hashBest;
-    ui->infoHashValue->setText(infoHash);
+    auto infoHashV1 = tInfo.hashV1;
+    ui->infoHashV1Value->setText(infoHashV1);
+
+    auto infoHashV2 = tInfo.hashV2;
+    ui->infoHashV2Value->setText(infoHashV2.isEmpty() ? "N/A" : infoHashV2);
 
     auto savePath = tInfo.savePath;
     ui->savePathValue->setText(savePath);
@@ -100,7 +103,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     ui->commentValue->setText(comm);
 
     auto pieces = QString::number(tInfo.piecesCount);
-    auto piecesStr = pieces + " x " + bytesToHigher(tInfo.pieceSize);
+    auto piecesStr = pieces + " x " + utils::bytesToHigher(tInfo.pieceSize);
     ui->piecesValue->setText(piecesStr);
 
     if (tInfo.completedTime != 0) {
@@ -108,7 +111,7 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
         timestamp.setSecsSinceEpoch(tInfo.completedTime);
         ui->completionValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
     } else {
-        ui->completionValue->setText("Not finished");
+        ui->completionValue->setText(tr("Not finished"));
     }
 
 
@@ -131,7 +134,7 @@ void GeneralInfoWidget::clearGeneralInfo()
 
     ui->torSizeValue->setText("-");
     ui->startTimeValue->setText("-");
-    ui->infoHashValue->setText("-");
+    ui->infoHashV1Value->setText("-");
     ui->savePathValue->setText("-");
     ui->piecesValue->setText("-");
     ui->completionValue->setText("-");

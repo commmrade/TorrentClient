@@ -1,12 +1,23 @@
 #include "utils.h"
 #include <cmath>
 
+
+
+namespace utils {
+
 constexpr int SECONDS_IN_DAY = 86400;
 constexpr int SECONDS_IN_HOUR = 3600;
 constexpr int SECONDS_IN_MINUTE = 60;
 constexpr int SECONDS_IN_WEEK = 604800;
 constexpr int SECONDS_IN_YEAR = 31449600;
 
+static constexpr auto BYTES_IN_KB = 1024;
+static constexpr auto BYTES_IN_MB = 1024 * 1024;
+static constexpr auto BYTES_IN_GB = 1024 * 1024 * 1024;
+
+static constexpr auto DBYTES_IN_KB = 1024.0;
+static constexpr auto DBYTES_IN_MB = 1024.0 * 1024.0;
+static constexpr auto DBYTES_IN_GB = 1024.0 * 1024.0 * 1024.0;
 
 double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
@@ -15,12 +26,13 @@ double ceilTwoAfterComa(double number) {
 QString bytesToHigher(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B"};
-    if (bytes < 1024 * 1024) { // < mb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0)) + " KB";
-    } else if (bytes < 1024 * 1024 * 1024) { // < gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0)) + " MB";
-    } else if (bytes >= 1024 * 1024 * 1024) { // >= gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0 / 1024.0)) + " GB";
+    if (bytes < BYTES_IN_KB) { }
+    else if (bytes < BYTES_IN_MB) { // < mb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB";
+    } else if (bytes < BYTES_IN_GB) { // < gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB";
+    } else { // >= gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB";
     }
     return sizeStr;
 }
@@ -28,12 +40,13 @@ QString bytesToHigher(const std::uint64_t bytes)
 QString bytesToHigherPerSec(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B/s"};
-    if (bytes < 1024 * 1024) { // < mb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0)) + " KB/s";
-    } else if (bytes < 1024 * 1024 * 1024) { // < gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0)) + " MB/s";
-    } else if (bytes >= 1024 * 1024 * 1024) { // >= gb
-        sizeStr = QString::number(ceilTwoAfterComa(bytes / 1024.0 / 1024.0 / 1024.0)) + " GB/s";
+    if (bytes < BYTES_IN_KB) {}
+    else if (bytes < BYTES_IN_MB) { // < mb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB/s";
+    } else if (bytes < BYTES_IN_GB) { // < gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB/s";
+    } else { // >= gb
+        sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB/s";
     }
     return sizeStr;
 }
@@ -63,3 +76,22 @@ QString secsToFormattedTime(std::int64_t secs)
 
     return etaStr;
 }
+
+QString toHex(std::span<const char> data, bool to_upper /* = false */)
+{
+    QString result;
+    result.reserve(data.size() * 2);
+
+    uint8_t into_letter = to_upper ? 55 : 87; // (65 ('A') - 10 ('hex letters')) and  (97 ('a) - 10 ('hex letters'))
+
+    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(data.data());
+    for (auto i = 0; i < data.size(); ++i) {
+        uint8_t byte_first = (bytes[i] >> 4);
+        uint8_t byte_second = (0x0F) & bytes[i];
+        result += (byte_first < 10) ? static_cast<char>(byte_first + 48) : static_cast<char>(byte_first + into_letter);
+        result += (byte_second < 10) ? static_cast<char>(byte_second + 48) : static_cast<char>(byte_second + into_letter);
+    }
+    return result;
+}
+
+} // namespace utils

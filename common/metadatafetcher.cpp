@@ -25,20 +25,19 @@ void MetadataFetcher::run()
 
     while (m_isRunning) {
         std::vector<lt::alert*> alerts;
-
         session.pop_alerts(&alerts);
         for (auto* alert : alerts) {
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
-                // this->setSize(metadataRecAlert->handle.torrent_file()->total_size());
                 emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());
                 m_isRunning = false;
                 break;
             } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {
                 qWarning() << "Could not fetch metadata for magnet, because" << metadataFailedAlert->message();
                 m_isRunning = false;
+                emit error();
                 break;
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }

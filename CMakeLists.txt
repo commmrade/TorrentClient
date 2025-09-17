@@ -6,17 +6,17 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(controllers widgets models delegates dialogs common)
+include_directories(controllers widgets models delegates dialogs common proxy)
 
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBTORRENT REQUIRED libtorrent-rasterbar)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Charts)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Charts)
 
 find_library(MAXMINDDB_LIBRARY maxminddb)
 
@@ -53,18 +53,30 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/trackerswidget.h widgets/trackerswidget.cpp widgets/trackerswidget.ui
         widgets/piecesbarwidget.h widgets/piecesbarwidget.cpp widgets/piecesbarwidget.ui
         dialogs/addpeersdialog.h dialogs/addpeersdialog.cpp dialogs/addpeersdialog.ui
+        widgets/speedgraphwidget.h widgets/speedgraphwidget.cpp widgets/speedgraphwidget.ui
+        models/filestablemodel.h models/filestablemodel.cpp models/filestablemodel.ui
+        common/file.h
+        delegates/fileitemdelegate.h delegates/fileitemdelegate.cpp
+        widgets/filelistwidget.h widgets/filelistwidget.cpp widgets/filelistwidget.ui
+        dialogs/deletetorrentdialog.h dialogs/deletetorrentdialog.cpp dialogs/deletetorrentdialog.ui
+        delegates/filestatusdelegate.h delegates/filestatusdelegate.cpp
+        proxy/categorysortfilter.h proxy/categorysortfilter.cpp
+        delegates/fileprioritydelegate.h delegates/fileprioritydelegate.cpp
+        common/category.h
+        common/dirs.h
+        common/priority.h
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+    # Define target properties for Android with Qt 6 as:
+    #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
         add_library(torrent-client SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+        # Define properties for Android with Qt 5 after find_package() calls as:
+        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(torrent-client
             ${PROJECT_SOURCES}
@@ -72,14 +84,14 @@ else()
     endif()
 endif()
 
-target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY})
+target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY} Qt${QT_VERSION_MAJOR}::Charts)
 target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${MAXMINDDB_INCLUDE_DIR})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.torrent-client)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.torrent-client)
 endif()
 set_target_properties(torrent-client PROPERTIES
     ${BUNDLE_ID_OPTION}

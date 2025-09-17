@@ -5,11 +5,14 @@
 #include "sessionmanager.h"
 #include "torrentstablemodel.h"
 #include "torrentitemdelegate.h"
-
+#include <QPointer>
+#include "categorysortfilter.h"
 
 namespace Ui {
 class TorrentWidget;
 }
+
+class SpeedGraphWidget;
 
 class TorrentWidget : public QWidget
 {
@@ -28,15 +31,24 @@ private slots:
 
     void on_togglePropertiesBtn_clicked();
 
+    void on_toggleGraphsButton_clicked();
+
+    void closeAllTabs();
+
+    void on_categoriesList_currentTextChanged(const QString &currentText);
+
 private:
     void setupTableView();
 
     Ui::TorrentWidget *ui;
+
+    QPointer<SpeedGraphWidget> m_speedGraph;
+
     SessionManager& m_sessionManager;
 
     TorrentsTableModel m_tableModel;
     TorrentItemDelegate m_tableDelegate;
-
+    CategorySortFIlter m_categoryFilter;
 };
 
 #endif // TORRENTWIDGET_H
