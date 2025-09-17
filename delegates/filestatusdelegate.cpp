@@ -5,7 +5,6 @@
 FileStatusDelegate::FileStatusDelegate(QObject *parent)
     : QStyledItemDelegate{parent}
 {
-    qDebug() << "FIle status created";
 }
 
 void FileStatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const

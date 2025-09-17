@@ -48,7 +48,7 @@ private:
 
     TorrentsTableModel m_tableModel;
     TorrentItemDelegate m_tableDelegate;
-    CategorySortFIlter m_categoryFilter;
+    CategorySortFilter m_categoryFilter;
 };
 
 #endif // TORRENTWIDGET_H

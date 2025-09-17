@@ -19,13 +19,16 @@ void MetadataFetcher::run()
             lt::alert_category::error |
             lt::alert_category::storage
         );
+    m_session = std::make_unique<lt::session>(std::move(sessParams));
+    m_session->add_torrent(std::move(m_params));
+    sessionLoop();
+}
 
-    lt::session session{sessParams};
-    auto torrentHandle = session.add_torrent(std::move(m_params));
-
+void MetadataFetcher::sessionLoop()
+{
     while (m_isRunning) {
         std::vector<lt::alert*> alerts;
-        session.pop_alerts(&alerts);
+        m_session->pop_alerts(&alerts);
         for (auto* alert : alerts) {
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
                 emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());

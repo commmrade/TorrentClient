@@ -15,12 +15,7 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->propertiesTab->setCurrentIndex(0);
-    ui->propertiesTab->setTabText(GENERAL_TAB_INDEX, tr("General"));
-    ui->propertiesTab->setTabText(TRACKERS_TAB_INDEX, tr("Trackers"));
-    ui->propertiesTab->setTabText(PEERS_TAB_INDEX, tr("Peers"));
-    ui->propertiesTab->setTabText(SOURCES_TAB_INDEX, tr("HTTP Sources"));
-    ui->propertiesTab->setTabText(FILES_TAB_INDEX, tr("Files"));
+    setupPropertiesTabs();
 
     ui->sourcesList->clear();
 
@@ -47,6 +42,16 @@ PropertiesWidget::PropertiesWidget(QWidget *parent)
 PropertiesWidget::~PropertiesWidget()
 {
     delete ui;
+}
+
+void PropertiesWidget::setupPropertiesTabs()
+{
+    ui->propertiesTab->setCurrentIndex(0);
+    ui->propertiesTab->setTabText(GENERAL_TAB_INDEX, tr("General"));
+    ui->propertiesTab->setTabText(TRACKERS_TAB_INDEX, tr("Trackers"));
+    ui->propertiesTab->setTabText(PEERS_TAB_INDEX, tr("Peers"));
+    ui->propertiesTab->setTabText(SOURCES_TAB_INDEX, tr("HTTP Sources"));
+    ui->propertiesTab->setTabText(FILES_TAB_INDEX, tr("Files"));
 }
 
 void PropertiesWidget::setPeers(const std::uint32_t id, const std::vector<lt::peer_info>& peers)

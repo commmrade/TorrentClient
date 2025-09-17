@@ -1,11 +1,9 @@
 #ifndef TORRENTHANDLE_H
 #define TORRENTHANDLE_H
 #include <libtorrent/torrent_handle.hpp>
-#include <chrono>
 #include <libtorrent/torrent_status.hpp>
 #include <QString>
 #include <QDebug>
-#include "utils.h"
 #include "category.h"
 
 class TorrentHandle
@@ -14,8 +12,9 @@ class TorrentHandle
 
     QString m_category{Categories::RUNNING};
     // QStringList m_categories; // TODO: May be use a list
-    void resetCategory();
+
 public:
+    void resetCategory();
     explicit TorrentHandle(lt::torrent_handle handle);
     TorrentHandle() = default;
 
@@ -27,9 +26,7 @@ public:
         return m_handle;
     }
 
-    void connectToPeer(const boost::asio::ip::tcp::endpoint& ep) {
-        m_handle.connect_peer(ep);
-    }
+    void connectToPeer(const boost::asio::ip::tcp::endpoint &ep);
 
     bool isNeedSaveData() const {
         return m_handle.need_save_resume_data();
@@ -39,19 +36,10 @@ public:
     }
 
     std::vector<lt::announce_entry> getTrackers() const;
+    std::vector<lt::peer_info> getPeerInfo() const;
 
-    std::vector<lt::peer_info> getPeerInfo() const {
-        std::vector<lt::peer_info> peers;
-        m_handle.get_peer_info(peers);
-        return peers;
-    }
-
-    QString bestHashAsString() const { // truncates sha256
-        return utils::toHex(m_handle.info_hashes().get_best().to_string());
-    }
-    QString hashV1AsString() const {
-        return utils::toHex(m_handle.info_hashes().v1.to_string());
-    }
+    QString bestHashAsString() const;
+    QString hashV1AsString() const;
 
     lt::sha1_hash hashV1() const {
         return m_handle.info_hashes().v1;

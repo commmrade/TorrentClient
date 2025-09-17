@@ -225,8 +225,8 @@ bool TorrentsTableModel::finishTorrent(const std::uint32_t id, const lt::torrent
         return false;
     }
 
-    torrentIterator->progress = 100.0;
-    torrentIterator->status = torrentStateToString(status.state);
+    // torrentIterator->progress = 100.0;
+    // torrentIterator->status = torrentStateToString(status.state);
     return true;
 }
 

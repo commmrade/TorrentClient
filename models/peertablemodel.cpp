@@ -166,6 +166,7 @@ QString PeerTableModel::countryFromIp(QByteArrayView ip)
 
 void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info>& peers)
 {
+    // TODO: Maybe some optimizations like cache country names from ips
     auto conToStr = [](lt::connection_type_t t) -> QString {
         switch (t) {
         case lt::peer_info::standard_bittorrent: return "BT";

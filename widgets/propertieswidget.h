@@ -14,6 +14,7 @@ class PropertiesWidget : public QWidget
 {
     Q_OBJECT
 
+    void setupPropertiesTabs();
 public:
     explicit PropertiesWidget(QWidget *parent = nullptr);
     ~PropertiesWidget();

@@ -30,7 +30,7 @@ private:
     Ui::SaveTorrentDialog *ui;
     QPointer<MetadataFetcher> m_fetcher{nullptr};
 
-    void tryLoadData();
+    void startFetchingMetadata(const lt::add_torrent_params& params);
 };
 
 #endif // SAVETORRENTDIALOG_H

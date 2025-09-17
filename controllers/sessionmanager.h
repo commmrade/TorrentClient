@@ -26,6 +26,7 @@ class SessionManager : public QObject
     Q_OBJECT
 
     std::unique_ptr<lt::session> m_session;
+    void loadSessionSettingsFromSettings(lt::session_params& sessParams);
     // QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
     QHash<std::uint32_t, TorrentHandle> m_torrentHandles;
 
@@ -85,7 +86,13 @@ private:
 
     // Event loop and alert functions
     void eventLoop();
+
     void updateProperties();
+    void updatePeersProp(TorrentHandle& handle);
+    void updateTrackersProp(TorrentHandle& handle);
+    void updateFilesProp(TorrentHandle& handle);
+    void updateUrlProp(TorrentHandle& handle);
+
     void updateGeneralProperty(const lt::torrent_handle& handle);
     void handleFinishedAlert(lt::torrent_finished_alert* alert);
     void handleStateUpdateAlert(lt::state_update_alert* alert);
@@ -126,44 +133,11 @@ signals:
     void clearFiles();
 };
 
-inline std::vector<char> readFile(const char *filename)
-{
-    QFile file{filename};
-    if (file.open(QIODevice::ReadOnly)) {
-        auto bytes = file.readAll();
-        return std::vector<char>{bytes.begin(), bytes.end()};
-    }
-    return {};
-}
+namespace detail {
+void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti);
+void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf);
+std::vector<char> readFile(const char *filename);
+} // namespace detail
 
-inline void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti) {
-    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + Dirs::TORRENTS;
-
-    auto torrentFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_TORRENT;
-    QFile file{torrentFilePath};
-
-    if (file.open(QIODevice::WriteOnly)) {
-        lt::create_torrent ci{*ti};
-        auto buf = ci.generate_buf();
-        file.write(buf.data(), buf.size());
-
-        file.flush();
-        file.close();
-    }
-}
-
-inline void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char>& buf) {
-    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto stateDirPath = basePath + QDir::separator() + Dirs::STATE;
-    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_FASTRESUME;
-    QFile file{stateFilePath};
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(buf.data(), buf.size());
-
-        file.flush();
-        file.close();
-    }
-}
 
 #endif // SESSIONMANAGER_H

@@ -82,7 +82,6 @@ void SettingsDialog::on_applyButton_clicked()
             QProcess::startDetached(binaryPath);
             QApplication::exit(); // Kill old app process and start a detached new one
         }
-
         m_restartRequired = false;
     }
 }

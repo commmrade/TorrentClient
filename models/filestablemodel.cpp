@@ -30,20 +30,16 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
                 }
                 case FileFields::PROGRESS: {
                     auto ratio = static_cast<double>(file.downloaded) / file.filesize;
-                    ratio *= 100.0; // ration was 0.0 to 1.0, scale it
                     ratio = std::round(ratio * 100.0) / 100.0;
                     return {ratio};
                 }
                 case FileFields::DOWNLOADED: {
                     return {utils::bytesToHigher(file.downloaded)};
-                    // return {static_cast<qreal>(file.downloaded)};
                 }
                 case FileFields::FILESIZE: {
                     return {utils::bytesToHigher(file.filesize)};
-                    // return {static_cast<qreal>(file.filesize)};
                 }
                 case FileFields::PRIORITY: {
-                    // TODO: display it nicely
                     auto priorityToString = [](int const priority) -> QString {
                         switch (priority) {
                             case lt::dont_download: {
@@ -82,7 +78,6 @@ bool FileTableModel::setData(const QModelIndex &index, const QVariant &value, in
         case FileFields::STATUS: {
             file.isEnabled = value.toBool();
             emit statusChanged(file.id, file.isEnabled);
-            // emit dataChanged(index, index);
             break;
         }
         case FileFields::PRIORITY: {

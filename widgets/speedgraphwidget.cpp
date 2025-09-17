@@ -47,17 +47,17 @@ SpeedGraphWidget::~SpeedGraphWidget()
 
 static double toBytesfromFormat(double value, const QString& format) {
     if (format.contains("KB/s")) {
-        return value * 1024.0;
+        return value * utils::DBYTES_IN_KB;
     } else if (format.contains("MB/s")) {
-        return value * 1024.0 * 1024.0;
+        return value * utils::DBYTES_IN_MB;
     }
     return value;
 }
 static double toValueByFormat(double bytes, const QString& format) {
     if (format.contains("KB/s")) {
-        return bytes / 1024.0;
+        return bytes / utils::DBYTES_IN_KB;
     } else if (format.contains("MB/s")) {
-        return bytes / 1024.0 / 1024.0;
+        return bytes / utils::DBYTES_IN_MB;
     }
     return bytes;
 }
@@ -104,9 +104,9 @@ void SpeedGraphWidget::addLine(int download, int upload)
     // Figure out current scale
     double currentScale = 1.0;
     if (currentFormat.contains("KB/s")) {
-        currentScale = 1024.0;
+        currentScale = utils::DBYTES_IN_KB;
     } else if (currentFormat.contains("MB/s")) {
-        currentScale = 1024.0 * 1024.0;
+        currentScale = utils::DBYTES_IN_MB;
     }
 
 
@@ -118,12 +118,12 @@ void SpeedGraphWidget::addLine(int download, int upload)
 
     // scale all series only if difference is big enough, why waste resources?
     double targetScale = 1.0;
-    if (maxSpeedInRangeBytes >= 1024 * 1024) {
+    if (maxSpeedInRangeBytes >= utils::DBYTES_IN_MB) {
         targetFormat = "%.1f MB/s";
-        targetScale = 1024.0 * 1024.0;
-    } else if (maxSpeedInRangeBytes >= 1024) {
+        targetScale = utils::DBYTES_IN_MB;
+    } else if (maxSpeedInRangeBytes >= utils::DBYTES_IN_KB) {
         targetFormat = "%.1f KB/s";
-        targetScale = 1024.0;
+        targetScale = utils::DBYTES_IN_KB;
     }
     double factor = currentScale / targetScale;
 

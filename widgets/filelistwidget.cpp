@@ -12,15 +12,7 @@ FileListWidget::FileListWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->fileView->setModel(&m_fileModel);
-    ui->fileView->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->fileView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->fileView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->fileView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
-    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
-    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PRIORITY), &m_priorityDelegate);
+    setupTableView();
 
     connect(&m_fileModel, &FileTableModel::statusChanged, this, [&](int index, bool value) {
         auto& sessionManager = SessionManager::instance();
@@ -118,4 +110,17 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     priorityMenu->addAction(topPriority);
 
     mainMenu.exec(ui->fileView->viewport()->mapToGlobal(pos));
+}
+
+void FileListWidget::setupTableView()
+{
+    ui->fileView->setModel(&m_fileModel);
+    ui->fileView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->fileView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->fileView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->fileView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
+    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
+    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PRIORITY), &m_priorityDelegate);
 }

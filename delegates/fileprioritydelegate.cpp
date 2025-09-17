@@ -15,16 +15,10 @@ QWidget *FilePriorityDelegate::createEditor(QWidget *parent, const QStyleOptionV
     comboBox->addItem(Priorities::DEFAULT);
     comboBox->addItem(Priorities::LOW);
     comboBox->addItem(Priorities::HIGH);
-    // TODO: Remove these magic values
 
     auto priorityStr = index.data().toString();
     comboBox->setCurrentText(priorityStr);
     return comboBox;
-}
-
-void FilePriorityDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
-{
-    QStyledItemDelegate::setEditorData(editor, index);
 }
 
 void FilePriorityDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const

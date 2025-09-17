@@ -5,20 +5,6 @@
 
 namespace utils {
 
-constexpr int SECONDS_IN_DAY = 86400;
-constexpr int SECONDS_IN_HOUR = 3600;
-constexpr int SECONDS_IN_MINUTE = 60;
-constexpr int SECONDS_IN_WEEK = 604800;
-constexpr int SECONDS_IN_YEAR = 31449600;
-
-static constexpr auto BYTES_IN_KB = 1024;
-static constexpr auto BYTES_IN_MB = 1024 * 1024;
-static constexpr auto BYTES_IN_GB = 1024 * 1024 * 1024;
-
-static constexpr auto DBYTES_IN_KB = 1024.0;
-static constexpr auto DBYTES_IN_MB = 1024.0 * 1024.0;
-static constexpr auto DBYTES_IN_GB = 1024.0 * 1024.0 * 1024.0;
-
 double ceilTwoAfterComa(double number) {
     return std::ceil(number * 100.0) / 100.0;
 }

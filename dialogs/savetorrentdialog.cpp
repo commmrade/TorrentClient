@@ -47,19 +47,7 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
     params.save_path = saveTorrentFile.toStdString();
 
-    // Start fetching metadata
-    m_fetcher = new MetadataFetcher{params};
-    // TODO: Set not onyl size, but other data
-    connect(m_fetcher, &MetadataFetcher::sizeReady, this, &SaveTorrentDialog::setSize);
-    m_fetcher->start();
-
-    // Simulating detached (hack)
-    connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
-    connect(m_fetcher, &MetadataFetcher::error, this, [this]{
-        ui->sizeInfo->setText(tr("Failed"));
-        ui->dateInfo->setText(tr("Failed"));
-        QMessageBox::warning(this, tr("Warning"), tr("Metadata could not be fetched"));
-    });
+    startFetchingMetadata(params);
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
@@ -94,8 +82,20 @@ void SaveTorrentDialog::on_changeSavePathButton_clicked()
     }
 }
 
-void SaveTorrentDialog::tryLoadData() // TODO: For what?
+void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& params)
 {
+    // Start fetching metadata
+    m_fetcher = new MetadataFetcher{params};
+    // TODO: Set not onyl size, but other data
+    connect(m_fetcher, &MetadataFetcher::sizeReady, this, &SaveTorrentDialog::setSize);
+    m_fetcher->start();
 
+    // Simulating detached (hack)
+    connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
+    connect(m_fetcher, &MetadataFetcher::error, this, [this]{
+        ui->sizeInfo->setText(tr("Failed"));
+        ui->dateInfo->setText(tr("Failed"));
+        QMessageBox::warning(this, tr("Warning"), tr("Metadata could not be fetched"));
+    });
 }
 

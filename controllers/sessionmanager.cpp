@@ -13,6 +13,8 @@
 #include "dirs.h"
 
 
+
+
 SessionManager::SessionManager(QObject *parent)
     : QObject{parent}
 {
@@ -28,12 +30,11 @@ SessionManager::SessionManager(QObject *parent)
 SessionManager::~SessionManager()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
+
     QFile file{sessionFilePath};
     if (file.open(QIODevice::WriteOnly)) {
         auto sessionData = lt::write_session_params_buf(m_session->session_state());
-        if (!sessionData.empty()) {
-            file.write(sessionData.data(), sessionData.size());
-        }
+        file.write(sessionData.data(), sessionData.size());
         file.flush();
         file.close();
     }
@@ -42,7 +43,7 @@ SessionManager::~SessionManager()
 libtorrent::session_params SessionManager::loadSessionParams()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + SESSION_FILENAME;
-    auto sessionFileContents = readFile(sessionFilePath.toUtf8().constData());
+    auto sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
     lt::session_params sessParams;
     if (sessionFileContents.empty()) {
         sessParams.settings.set_int(
@@ -52,23 +53,26 @@ libtorrent::session_params SessionManager::loadSessionParams()
             lt::alert_category::storage
         );
 
-        QSettings settings;
-        int downloadSpeedLimit = settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
-        int uploadSpeedLimit = settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
-        sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
-        sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
+        loadSessionSettingsFromSettings(sessParams);
     } else {
         sessParams = std::move(lt::read_session_params(sessionFileContents));
     }
     return sessParams;
 }
 
+void SessionManager::loadSessionSettingsFromSettings(lt::session_params& sessParams)
+{
+    QSettings settings;
+    int downloadSpeedLimit = settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+    int uploadSpeedLimit = settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+    sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
+    sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
+}
 
 void SessionManager::saveResumes()
 {
     for (auto& torrent : m_torrentHandles) {
         if (torrent.isValid() && torrent.isNeedSaveData()) {
-            // torrent.save_resume_data();
             torrent.saveResumeData();
         }
     }
@@ -101,38 +105,76 @@ void SessionManager::eventLoop()
 
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
-    updateProperties(); // Hits performance quite a bit, if a torrent is chose, mb FIX
+    updateProperties();
 
-    qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
+    // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
-
+// HERE: Separate function for each emit thingy
 void SessionManager::updateProperties()
 {
-    auto trackersFromLtTrackers = [](const TorrentHandle& handle, const std::vector<lt::announce_entry>& trackers) -> QList<Tracker> {
-        QList<Tracker> tracks;
+    if (m_currentTorrentId.has_value()) {
+        auto currentTorrentId = m_currentTorrentId.value();
+        auto& handle = m_torrentHandles[currentTorrentId];
+        {
+            if (handle.isValid()) {
+                // Update peers
+                updatePeersProp(handle);
 
-        const bool hasV2 = handle.handle().info_hashes().has_v2();
-        const auto version = hasV2 ? lt::protocol_version::V2 : lt::protocol_version::V1;
+                // Update trackers
+                updateTrackersProp(handle);
 
-        for (const auto& tracker : trackers) {
-            Tracker tr{};
-            tr.url = QString::fromStdString(tracker.url);
-            tr.tier = tracker.tier;
-            for (const auto& ep : tracker.endpoints) {
-                if (ep.enabled) {
-                    tr.isWorking = true;
-                }
-                const lt::announce_infohash ihash = ep.info_hashes[version];
-                tr.seeds = ihash.scrape_complete == -1 ? 0 : ihash.scrape_complete;
-                tr.leeches = ihash.scrape_incomplete == -1 ? 0 : ihash.scrape_incomplete;
-                tr.message = QString::fromStdString(ihash.message);
+                // Update files
+                updateFilesProp(handle);
+
+                // update url seeds
+                updateUrlProp(handle);
+            } else { // if its not valid something is wrong
+                m_currentTorrentId = std::nullopt;
             }
-
-            tracks.append(std::move(tr));
         }
-        return tracks;
-    };
+    } else {
+        // clear stats
+        emitClearSignals();
+    }
+
+}
+
+void SessionManager::updatePeersProp(TorrentHandle& handle)
+{
+    std::vector<lt::peer_info> peers = handle.getPeerInfo();
+    emit peerInfo(handle.id(), std::move(peers));
+}
+
+void SessionManager::updateTrackersProp(TorrentHandle &handle)
+{
+    auto ltTrackers = handle.getTrackers();
+    QList<Tracker> trackers;
+
+    const bool hasV2 = handle.handle().info_hashes().has_v2();
+    const auto version = hasV2 ? lt::protocol_version::V2 : lt::protocol_version::V1;
+
+    for (const auto& tracker : ltTrackers) {
+        Tracker tr{};
+        tr.url = QString::fromStdString(tracker.url);
+        tr.tier = tracker.tier;
+        for (const auto& ep : tracker.endpoints) {
+            if (ep.enabled) {
+                tr.isWorking = true;
+            }
+            const lt::announce_infohash ihash = ep.info_hashes[version];
+            tr.seeds = ihash.scrape_complete == -1 ? 0 : ihash.scrape_complete;
+            tr.leeches = ihash.scrape_incomplete == -1 ? 0 : ihash.scrape_incomplete;
+            tr.message = QString::fromStdString(ihash.message);
+        }
+
+        trackers.append(std::move(tr));
+    }
+    emit trackersInfo(trackers);
+}
+
+void SessionManager::updateFilesProp(TorrentHandle &handle)
+{
     auto fileListFromTorrentInfo = [this](const TorrentHandle& handle, std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File> {
         const auto& files = tinfo->files();
         auto num_files = files.num_files();
@@ -152,39 +194,17 @@ void SessionManager::updateProperties()
         }
         return result;
     };
-    if (m_currentTorrentId.has_value()) {
-        auto currentTorrentId = m_currentTorrentId.value();
-        auto& handle = m_torrentHandles[currentTorrentId];
-        {
-            if (handle.isValid()) {
-                // Update peers
-                std::vector<lt::peer_info> peers = m_torrentHandles[currentTorrentId].getPeerInfo();
-                emit peerInfo(currentTorrentId, std::move(peers));
 
-                // Update trackers
-                auto ltTrackers = handle.getTrackers();
-                QList<Tracker> trackers = trackersFromLtTrackers(handle, ltTrackers);
-                emit trackersInfo(trackers);
-
-
-                // Update files
-                if (auto tinfo = m_torrentHandles[currentTorrentId].handle().torrent_file()) {
-                    auto files = fileListFromTorrentInfo(handle, tinfo);
-                    emit filesInfo(files);
-                }
-
-                // update url seeds
-                auto urlSeeds = m_torrentHandles[currentTorrentId].handle().url_seeds();
-                emit urlSeedsInfo(urlSeeds);
-            } else { // if its not valid something is wrong
-                m_currentTorrentId = std::nullopt;
-            }
-        }
-    } else {
-        // clear stats
-        emitClearSignals();
+    if (auto tinfo = handle.handle().torrent_file()) {
+        auto files = fileListFromTorrentInfo(handle, tinfo);
+        emit filesInfo(files);
     }
+}
 
+void SessionManager::updateUrlProp(TorrentHandle &handle)
+{
+    auto urlSeeds = handle.handle().url_seeds();
+    emit urlSeedsInfo(urlSeeds);
 }
 
 void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
@@ -194,19 +214,20 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
         return handle.id() == alert->handle.id();
     });
 
-    pos->saveResumeData();
+    pos->saveResumeData(); // Without it it does weird stuff
     pos->setCategory(Categories::SEEDING);
-    // Otherwise it's behaving kinda weird
     emit torrentFinished(alert->handle.id(), alert->handle.status());
 }
 
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
     auto statuses = alert->status;
+    int currentId = m_currentTorrentId.has_value() ? m_currentTorrentId.value() : -1;
     for (auto& status : statuses) {
         auto& handle = status.handle;
+        auto& h = m_torrentHandles[handle.id()];
 
-        if (m_currentTorrentId.has_value() && handle.id() == m_currentTorrentId.value()) {
+        if (handle.id() == currentId) {
             updateGeneralProperty(handle);
         }
         handleStatusUpdate(status, handle);
@@ -233,7 +254,6 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     iInfo.peers = status.num_peers;
 
     TorrentInfo tInfo;
-
     // qDebug() << "Compl time:" << status.completed_time;
     tInfo.completedTime = status.completed_time;
     tInfo.size = status.total_wanted;
@@ -286,6 +306,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 
     double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
 
+    torrentHandle.resetCategory(); // sync category justin case
     Torrent torrent = {
         handle.id(),
         torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
@@ -309,14 +330,14 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
 
 void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert *alert)
 {
-    writeTorrentFile(alert->handle.torrent_file());
+    detail::writeTorrentFile(alert->handle.torrent_file());
 }
 
 void SessionManager::handleResumeDataAlert(libtorrent::save_resume_data_alert *alert)
 {
     if (alert->handle.is_valid() && alert->handle.torrent_file()) {
         auto resumeDataBuf = lt::write_resume_data_buf(alert->params);
-        saveResumeData(alert->handle.torrent_file(), resumeDataBuf);
+        detail::saveResumeData(alert->handle.torrent_file(), resumeDataBuf);
     }
 }
 
@@ -372,6 +393,11 @@ void SessionManager::loadResumes()
     QDir dir{stateDirPath};
     auto entries = dir.entryList(QDir::Filter::Files);
     for (auto& entry : entries) {
+        if (!entry.endsWith(".fastresume")) {
+            qWarning() << "Wrong formatted file in state directory";
+            continue;
+        }
+
         QFile file{stateDirPath + QDir::separator() + entry};
         if (file.open(QIODevice::ReadOnly)) {
             auto buffer = file.readAll();
@@ -418,7 +444,7 @@ void SessionManager::renameFile(uint32_t id, int fileIndex, const QString& newNa
     handle.renameFile(fileIndex, newName);
 }
 
-void SessionManager::banPeers(const QList<QPair<QString, unsigned short> > &bannablePeers)
+void SessionManager::banPeers(const QList<QPair<QString, unsigned short>> &bannablePeers)
 {
     lt::ip_filter filter = m_session->get_ip_filter();
     for (const auto& peer : bannablePeers) {
@@ -465,7 +491,7 @@ bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outp
 {
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
     lt::add_torrent_params params{};
-    writeTorrentFile(torrent_info);
+    detail::writeTorrentFile(torrent_info);
 
     params.ti = std::move(torrent_info);
     params.save_path = outputDir.toString().toStdString();
@@ -499,7 +525,7 @@ void SessionManager::resumeTorrent(const uint32_t id)
 bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
     if (m_currentTorrentId.has_value() && id == m_currentTorrentId.value()) {
-        qDebug() << "Current torrent set to null";
+        qWarning() << "Current torrent set to null";
         m_currentTorrentId = std::nullopt;
     }
 
@@ -518,14 +544,14 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     auto torrentFile = torrentsPath + QDir::separator() + hashString + FileEnding::DOT_TORRENT;
 
     if (!QFile::remove(torrentFile)) {
-        qDebug() << "Could not remove .torrent file";
+        qWarning() << "Could not remove .torrent file";
         return false;
     }
 
     auto statePath = basePath + QDir::separator() + Dirs::STATE;
     auto stateFile = statePath + QDir::separator() + hashString + FileEnding::DOT_FASTRESUME;
     if (!QFile::remove(stateFile)) {
-        qDebug() << "Could not remove .fastresume file";
+        qWarning() << "Could not remove .fastresume file";
         return false;
     }
 
@@ -552,3 +578,48 @@ bool SessionManager::isTorrentExists(const lt::sha1_hash& hash) const
     });
     return torrentIter != handles.end();
 }
+
+
+namespace detail {
+void writeTorrentFile(std::shared_ptr<const libtorrent::torrent_info> ti) {
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto stateDirPath = basePath + QDir::separator() + Dirs::TORRENTS;
+
+    auto torrentFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_TORRENT;
+    QFile file{torrentFilePath};
+
+    if (file.open(QIODevice::WriteOnly)) {
+        lt::create_torrent ci{*ti};
+        auto buf = ci.generate_buf();
+        file.write(buf.data(), buf.size());
+
+        file.flush();
+        file.close();
+    }
+}
+
+void saveResumeData(std::shared_ptr<const libtorrent::torrent_info> ti, const std::vector<char> &buf) {
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto stateDirPath = basePath + QDir::separator() + Dirs::STATE;
+    auto stateFilePath = stateDirPath + QDir::separator() + utils::toHex(ti->info_hashes().get_best().to_string()) + FileEnding::DOT_FASTRESUME;
+    QFile file{stateFilePath};
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(buf.data(), buf.size());
+
+        file.flush();
+        file.close();
+    }
+}
+
+std::vector<char> readFile(const char *filename)
+{
+    QFile file{filename};
+    if (file.open(QIODevice::ReadOnly)) {
+        auto bytes = file.readAll();
+        return std::vector<char>{bytes.begin(), bytes.end()};
+    }
+    return {};
+}
+
+} // namespace detail
+

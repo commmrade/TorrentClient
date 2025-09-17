@@ -27,6 +27,7 @@ private:
     Ui::FileListWidget *ui;
 
     FileTableModel m_fileModel;
+    void setupTableView();
 
     FileStatusDelegate m_statusDelegate;
     FileItemDelegate m_itemDelegate;

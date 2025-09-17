@@ -1,5 +1,6 @@
 #include "torrenthandle.h"
 #include "category.h"
+#include "utils.h"
 
 std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 {
@@ -9,11 +10,10 @@ std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 void TorrentHandle::resetCategory()
 {
     auto status = m_handle.status();
-    qDebug() << isPaused();
-    if (status.is_seeding || status.is_finished) { // they are kinda the same
-        m_category = Categories::SEEDING;
-    } else if (isPaused()) {
+    if (isPaused()) {
         m_category = Categories::STOPPED;
+    } else if (status.is_seeding || status.is_finished) { // they are kinda the same
+        m_category = Categories::SEEDING;
     } else { // not seeding and not finished and not paused
         m_category = Categories::RUNNING;
     }
@@ -42,4 +42,21 @@ void TorrentHandle::pause() {
 void TorrentHandle::resume() {
     m_handle.resume();
     resetCategory();
+}
+void TorrentHandle::connectToPeer(const boost::asio::ip::tcp::endpoint &ep) {
+    m_handle.connect_peer(ep);
+}
+
+QString TorrentHandle::bestHashAsString() const { // truncates sha256
+    return utils::toHex(m_handle.info_hashes().get_best().to_string());
+}
+
+QString TorrentHandle::hashV1AsString() const {
+    return utils::toHex(m_handle.info_hashes().v1.to_string());
+}
+
+std::vector<libtorrent::peer_info> TorrentHandle::getPeerInfo() const {
+    std::vector<lt::peer_info> peers;
+    m_handle.get_peer_info(peers);
+    return peers;
 }

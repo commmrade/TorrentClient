@@ -50,12 +50,15 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
         return;
     }
 
-    int const piecesPerPixel = m_pieces.size() / BAR_WIDTH_PX; // How many pieces will be considered in 1 pixel
+    // int barWidthPx = BAR_WIDTH_PX;
+    int barWidthPx = width() - startX;
+    qDebug() << barWidthPx << width();
+    int const piecesPerPixel = m_pieces.size() / barWidthPx; // How many pieces will be considered in 1 pixel
 
     QSet<int> hashedDownloadingPieces; // idx bool
 
     int startPos = startX;
-    int endPos = startX + BAR_WIDTH_PX; // Dimensions of the bar on a widget
+    int endPos = startX + barWidthPx; // Dimensions of the bar on a widget
 
     constexpr QColor backgroundColor = QColor{199, 199, 199};
     constexpr QColor finishedColor = QColor{50, 50, 255};
@@ -109,12 +112,11 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             ++startPos;
             // qDebug() << "finished Pieces" << finishedPieces << piecesPerPixel;
             if (pidxUntil == m_pieces.size()) { // finished
-                qDebug() << "Last piece" << m_pieces[m_pieces.end_index()] << "Finished" << finishedPieces << pidxUntil - piecesPerPixel * i;
                 break;
             }
         }
     } else {
-        int const pixelsInPiece = BAR_WIDTH_PX / m_pieces.size();
+        int const pixelsInPiece = barWidthPx / m_pieces.size();
 
         for (int i = 0; i < m_pieces.size(); ++i) {
             bool isDownloaded = false;

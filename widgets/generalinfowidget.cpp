@@ -9,24 +9,7 @@ GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->timeActValue->setText("-");
-    ui->downloadedValue->setText("-");
-    ui->downSpeedValue->setText("-");
-    ui->downloadLimValue->setText("-");
-    ui->etaValue->setText("-");
-    ui->uploadedValue->setText("-");
-    ui->upSpeedValue->setText("-");
-    ui->uploadLimValue->setText("-");
-    ui->connectionsValue->setText("-");
-    ui->seedsValue->setText("-");
-    ui->peersValue->setText("-");
-
-    ui->torSizeValue->setText("-");
-    ui->startTimeValue->setText("-");
-    ui->infoHashV1Value->setText("-");
-    ui->savePathValue->setText("-");
-    ui->piecesValue->setText("-");
-    ui->completionValue->setText("-");
+    clearGeneralInfo();
 }
 
 GeneralInfoWidget::~GeneralInfoWidget()

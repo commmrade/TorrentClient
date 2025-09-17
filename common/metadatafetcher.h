@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <libtorrent/add_torrent_params.hpp>
+#include <memory>
 
 class MetadataFetcher : public QThread
 {
@@ -20,6 +21,9 @@ signals:
 private:
     lt::add_torrent_params m_params;
     bool m_isRunning{true};
+    std::unique_ptr<lt::session> m_session;
+
+    void sessionLoop();
 };
 
 #endif // METADATAFETCHER_H

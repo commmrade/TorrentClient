@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QSortFilterProxyModel>
 
-class CategorySortFIlter : public QSortFilterProxyModel
+class CategorySortFilter : public QSortFilterProxyModel
 {
     Q_OBJECT
     QString m_category{};
 public:
-    CategorySortFIlter(QObject* parent);
+    CategorySortFilter(QObject* parent);
 
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     void setCategory(const QString& category) {
