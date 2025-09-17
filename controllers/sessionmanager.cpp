@@ -103,7 +103,7 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties(); // Hits performance quite a bit, if a torrent is chose, mb FIX
 
-    // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
+    qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
 
@@ -300,7 +300,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
         status.download_payload_rate, // count only pieces, without protocol stuff
         // status.download_rate,
         // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.upload_payload_rate,
+        status.upload_rate,
         status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
@@ -350,7 +350,7 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
     auto newRecv = recvPayloadBytes - lastSessionRecvPayloadBytes;
     lastSessionRecvPayloadBytes = recvPayloadBytes;
 
-    auto uploadPayloadBytes = counters[lt::counters::sent_payload_bytes];
+    auto uploadPayloadBytes = counters[lt::counters::sent_bytes];
     auto newUpload = uploadPayloadBytes - lastSessionUploadPayloadBytes;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
