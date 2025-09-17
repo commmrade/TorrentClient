@@ -62,6 +62,14 @@ static double toValueByFormat(double bytes, const QString& format) {
     return bytes;
 }
 
+static void scaleSeries(QLineSeries* series, double factor) {
+    auto points = series->points();
+    for (auto& p : points) {
+        p.setY(p.y() * factor);
+    }
+    series->replace(points);
+}
+
 void SpeedGraphWidget::addLine(int download, int upload)
 {
     auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());
@@ -118,20 +126,12 @@ void SpeedGraphWidget::addLine(int download, int upload)
         targetScale = 1024.0;
     }
     double factor = currentScale / targetScale;
-    auto scaleSeries = [factor](QLineSeries* series) {
-        auto points = series->points();
-        for (auto& p : points) {
-            p.setY(p.y() * factor);
-        }
-        series->replace(points);
-    };
 
     if (currentFormat != targetFormat) { // expensive operation, reduce uage
-        scaleSeries(m_downloadSeries);
-        scaleSeries(m_uploadSeries);
+        scaleSeries(m_downloadSeries, factor);
+        scaleSeries(m_uploadSeries, factor);
+        verticalAxis->setLabelFormat(targetFormat);
     }
-
-    verticalAxis->setLabelFormat(targetFormat);
 
     if (std::abs(maxSpeedBytes - maxSpeedInRangeBytes * 1.1) > std::numeric_limits<double>::epsilon()) {
         verticalAxis->setMax((maxSpeedInRangeBytes / targetScale) * 1.1); // i think this is an expensive operation so should do as few of these as possible
