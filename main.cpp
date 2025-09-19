@@ -20,7 +20,6 @@ void fallToDefaultTheme(QApplication& a, QSettings& settings) {
     settings.remove(SettingsValues::GUI_CUSTOM_THEME);
 }
 
-
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("klewy");
