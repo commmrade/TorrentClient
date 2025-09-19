@@ -101,17 +101,21 @@ void SpeedGraphWidget::addLine(int download, int upload) {
 
 
     // Size is 'step' times smaller for different views
+    // If size of lsit is 1024 points, it is 1024 / 15 points for 15 min timeframe
     int seriesSize = m_downloadList.size() / step;
 
     // Graph is 60 points wide
+    // THese should be used as firstRangePos * step in first branch, because it is scaled, to get the actual index you multiply (1024/15) * step
     int firstRangePos = seriesSize > 60 ? seriesSize - 60 : 0;
     int lastRangePos = seriesSize > 60 ? seriesSize : 60;
 
 
     if (m_prevTab != m_currentTab) {
+        // TIme format is changed, reset series
         m_downloadSeries->clear();
         m_uploadSeries->clear();
 
+        // Lambda for figuring out max value in a list with steps as 'step'
         auto maxInList = [firstRangePos, step, this](const QList<QPointF> series) -> double {
             double max = 0.0;
             for (auto i = firstRangePos * step; i < series.size(); i += step) {
@@ -132,9 +136,11 @@ void SpeedGraphWidget::addLine(int download, int upload) {
             targetScale = utils::DBYTES_IN_KB;
         }
 
+        // No point in optimizing really, since it is a 1 time operation
         verticalAxis->setMax((maxSpeedInRangeBytes / targetScale) * 1.1);
         verticalAxis->setLabelFormat(targetFormat);
 
+        // Append scaled value from list to series
         for (auto i = 0; i < m_downloadList.size(); i += step) {
             auto downloadPoint = m_downloadList[i];
             auto uploadPoint = m_uploadList[i];
@@ -142,18 +148,18 @@ void SpeedGraphWidget::addLine(int download, int upload) {
             m_uploadSeries->append(uploadPoint.x() / step, uploadPoint.y() / targetScale);
         }
 
-
-
         m_prevTab = m_currentTab;
     } else {
-        auto maxInSeries = [firstRangePos, step, this](const QLineSeries* series) -> double {
+        auto maxInSeries = [firstRangePos, this](const QLineSeries* series) -> double {
             double max = 0.0;
 
             auto points = series->points();
             auto size = points.size();
+            // NOTICE: No stepping here, since at this point, we are using actual indices, since for example, for 15 min tf downloadSeries size is 1024/15 at this point
             for (auto i = firstRangePos; i < size; ++i) {
                 max = std::max(max, points[i].y());
             }
+            // FIXME: Use max element
             return max;
         };
 
