@@ -26,7 +26,7 @@ protected:
     void run() override;
 signals:
     // void sizeReady(std::int64_t bytes);
-    void metadataFetched(std::shared_ptr<const lt::torrent_info>);
+    void metadataFetched(TorrentMetadata md);
 
     void error();
 private:

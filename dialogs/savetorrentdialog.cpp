@@ -67,9 +67,34 @@ QString SaveTorrentDialog::getSavePath() const
     return ui->savePathLineEdit->text();
 }
 
-void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti)
+void SaveTorrentDialog::setData(const TorrentMetadata& tmd)
 {
-    setDataFromTi(*ti);
+    ui->sizeInfo->setText(utils::bytesToHigher(tmd.size));
+
+    auto creationTime = tmd.creationTime;
+    if (creationTime.isNull()) {
+        ui->dateInfo->setText("N/A");
+    } else {
+        ui->dateInfo->setText(creationTime.toString("MMM d HH:mm:ss yyyy"));
+    }
+
+    if (tmd.hashV1.isEmpty()) {
+        ui->infoHashV1Value->setText("N/A");
+    } else {
+        ui->infoHashV1Value->setText(tmd.hashV1);
+    }
+    if (tmd.hashV2.isEmpty()) {
+        ui->infoHashV2Value->setText("N/A");
+    } else {
+        ui->infoHashV2Value->setText(tmd.hashV2);
+    }
+    if (tmd.hashBest.isEmpty()) {
+        ui->infoHashBestValue->setText("N/A");
+    } else {
+        ui->infoHashBestValue->setText(tmd.hashBest);
+    }
+
+    ui->commentValue->setText(tmd.comment);
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
@@ -101,9 +126,6 @@ void SaveTorrentDialog::setDataFromTi(const libtorrent::torrent_info &ti)
 {
     auto totalSize = ti.total_size();
     ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
-
-    auto bytesStr = utils::bytesToHigher(ti.total_size());
-    ui->sizeInfo->setText(bytesStr);
 
     auto creationTime = ti.creation_date();
     if (creationTime == 0) {

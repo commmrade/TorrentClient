@@ -23,7 +23,7 @@ public:
     QString getSavePath() const;
 
 public slots:
-    void setData(std::shared_ptr<const lt::torrent_info> ti);
+    void setData(const TorrentMetadata& tmd);
 private slots:
     void on_changeSavePathButton_clicked();
 private:
