@@ -5,6 +5,16 @@
 #include <QThread>
 #include <libtorrent/add_torrent_params.hpp>
 #include <memory>
+#include <QDateTime>
+
+struct TorrentMetadata {
+    std::int64_t size;
+    QDateTime creationTime;
+    QString hashV1;
+    QString hashV2;
+    QString hashBest;
+    QString comment;
+};
 
 class MetadataFetcher : public QThread
 {
@@ -15,7 +25,8 @@ public:
 protected:
     void run() override;
 signals:
-    void sizeReady(std::int64_t bytes);
+    // void sizeReady(std::int64_t bytes);
+    void metadataFetched(std::shared_ptr<const lt::torrent_info>);
 
     void error();
 private:

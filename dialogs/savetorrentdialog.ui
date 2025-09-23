@@ -81,14 +81,68 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="infoHashV1Label">
               <property name="text">
-               <string>Smth:</string>
+               <string>Info hash V1:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_6">
+             <widget class="QLabel" name="infoHashV1Value">
+              <property name="text">
+               <string>Info</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLabel" name="infoHashV2Label">
+              <property name="text">
+               <string>Info hash V2:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashV2Value">
+              <property name="text">
+               <string>Info</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="infoHashBestLabel">
+              <property name="text">
+               <string>Info hash best:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="infoHashBestValue">
+              <property name="text">
+               <string>Info</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLabel" name="commentLabel">
+              <property name="text">
+               <string>Comment:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="commentValue">
               <property name="text">
                <string>Info</string>
               </property>

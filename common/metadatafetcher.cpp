@@ -4,6 +4,8 @@
 #include <libtorrent/session.hpp>
 #include <QDebug>
 #include <libtorrent/alert_types.hpp>
+#include <QTime>
+#include "utils.h"
 
 void MetadataFetcher::stopRunning()
 {
@@ -27,11 +29,17 @@ void MetadataFetcher::run()
 void MetadataFetcher::sessionLoop()
 {
     while (m_isRunning) {
+        qDebug() << "session loop";
         std::vector<lt::alert*> alerts;
         m_session->pop_alerts(&alerts);
         for (auto* alert : alerts) {
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
-                emit sizeReady(metadataRecAlert->handle.torrent_file()->total_size());
+                auto torrentFile = metadataRecAlert->handle.torrent_file();
+                auto creationTime = torrentFile->creation_date();
+                auto tp = std::chrono::system_clock::from_time_t(creationTime);
+                auto castTime = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
+
+                emit metadataFetched(torrentFile);
                 m_isRunning = false;
                 break;
             } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {

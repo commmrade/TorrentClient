@@ -23,7 +23,7 @@ public:
     QString getSavePath() const;
 
 public slots:
-    void setSize(std::int64_t bytes);
+    void setData(std::shared_ptr<const lt::torrent_info> ti);
 private slots:
     void on_changeSavePathButton_clicked();
 private:
@@ -31,6 +31,7 @@ private:
     QPointer<MetadataFetcher> m_fetcher{nullptr};
 
     void startFetchingMetadata(const lt::add_torrent_params& params);
+    void setDataFromTi(const lt::torrent_info& ti);
 };
 
 #endif // SAVETORRENTDIALOG_H

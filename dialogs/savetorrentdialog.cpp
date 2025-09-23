@@ -22,8 +22,8 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPat
     ui->setupUi(this);
 
     lt::torrent_info info{torrentPath.toStdString()};
-    auto totalSize = info.total_size();
-    ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
+
+    setDataFromTi(info);
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
@@ -67,11 +67,9 @@ QString SaveTorrentDialog::getSavePath() const
     return ui->savePathLineEdit->text();
 }
 
-void SaveTorrentDialog::setSize(int64_t bytes)
+void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti)
 {
-    auto bytesStr = utils::bytesToHigher(bytes);
-    qDebug() << "Size bytes:" << bytes << "; Bytes Str:" << bytesStr << __PRETTY_FUNCTION__;
-    ui->sizeInfo->setText(bytesStr);
+    setDataFromTi(*ti);
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
@@ -87,7 +85,7 @@ void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& para
     // Start fetching metadata
     m_fetcher = new MetadataFetcher{params};
     // TODO: Set not onyl size, but other data
-    connect(m_fetcher, &MetadataFetcher::sizeReady, this, &SaveTorrentDialog::setSize);
+    connect(m_fetcher, &MetadataFetcher::metadataFetched, this, &SaveTorrentDialog::setData);
     m_fetcher->start();
 
     // Simulating detached (hack)
@@ -97,5 +95,47 @@ void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& para
         ui->dateInfo->setText(tr("Failed"));
         QMessageBox::warning(this, tr("Warning"), tr("Metadata could not be fetched"));
     });
+}
+
+void SaveTorrentDialog::setDataFromTi(const libtorrent::torrent_info &ti)
+{
+    auto totalSize = ti.total_size();
+    ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
+
+    auto bytesStr = utils::bytesToHigher(ti.total_size());
+    ui->sizeInfo->setText(bytesStr);
+
+    auto creationTime = ti.creation_date();
+    if (creationTime == 0) {
+        ui->dateInfo->setText("N/A");
+    } else {
+        auto tp = std::chrono::system_clock::from_time_t(creationTime);
+        auto castTime = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
+        auto datetime = QDateTime::fromSecsSinceEpoch(castTime.count());
+
+        ui->dateInfo->setText(datetime.toString("MMM d HH:mm:ss yyyy"));
+    }
+
+    auto hashv1 = ti.info_hashes().get(lt::protocol_version::V1);
+    auto hashv2 = ti.info_hashes().get(lt::protocol_version::V2);
+    auto hashbest = ti.info_hashes().get_best();
+
+    if (hashv1.is_all_zeros()) {
+        ui->infoHashV1Value->setText("N/A");
+    } else {
+        ui->infoHashV1Value->setText(utils::toHex(ti.info_hashes().get(lt::protocol_version::V1).to_string()));
+    }
+    if (hashv2.is_all_zeros()) {
+        ui->infoHashV2Value->setText("N/A");
+    } else {
+        ui->infoHashV2Value->setText(utils::toHex(ti.info_hashes().get(lt::protocol_version::V2).to_string()));
+    }
+    if (hashbest.is_all_zeros()) {
+        ui->infoHashBestValue->setText("N/A");
+    } else {
+        ui->infoHashBestValue->setText(utils::toHex(ti.info_hashes().get_best().to_string()));
+    }
+
+    ui->commentValue->setText(QString::fromStdString(ti.comment()));
 }
 
