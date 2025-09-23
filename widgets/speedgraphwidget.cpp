@@ -78,12 +78,19 @@ static void scaleSeries(QLineSeries* series, double factor) {
     series->replace(points);
 }
 
+static double findMaxInRange(const QList<QPointF>& range, int firstRangePos, int step = 1) {
+    double max = 0.0;
+    auto size = range.size();
+    for (auto i = firstRangePos * step; i < size; i += step) {
+        max = std::max(max, range[i].y());
+    }
+    return max;
+}
 
 void SpeedGraphWidget::addLine(int download, int upload) {
     qreal lastX = m_downloadList.size();
     m_downloadList.push_back({QPointF{lastX, (qreal)download}});
     m_uploadList.push_back(QPointF{lastX, (qreal)upload});
-
 
     auto* verticalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Vertical).first());
     auto* horizontalAxis = static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Horizontal).first());
@@ -109,23 +116,13 @@ void SpeedGraphWidget::addLine(int download, int upload) {
     int firstRangePos = seriesSize > 60 ? seriesSize - 60 : 0;
     int lastRangePos = seriesSize > 60 ? seriesSize : 60;
 
-
-    if (m_prevTab != m_currentTab) {
+    if (m_prevTab != m_currentTab) { // Happens 1 time when format changes
         // TIme format is changed, reset series
         m_downloadSeries->clear();
         m_uploadSeries->clear();
 
-        // Lambda for figuring out max value in a list with steps as 'step'
-        auto maxInList = [firstRangePos, step, this](const QList<QPointF> series) -> double {
-            double max = 0.0;
-            for (auto i = firstRangePos * step; i < series.size(); i += step) {
-                max = std::max(max, series[i].y());
-            }
-            return max;
-        };
-
         QString targetFormat = "%.0f B/s";
-        auto maxSpeedInRangeBytes = std::max(maxInList(m_downloadList), maxInList(m_uploadList));
+        auto maxSpeedInRangeBytes = std::max(findMaxInRange(m_downloadList, firstRangePos, step), findMaxInRange(m_uploadList, firstRangePos, step));
 
         double targetScale = 1.0;
         if (maxSpeedInRangeBytes >= utils::DBYTES_IN_MB) {
@@ -149,23 +146,9 @@ void SpeedGraphWidget::addLine(int download, int upload) {
         }
 
         m_prevTab = m_currentTab;
-    } else {
-        auto maxInSeries = [firstRangePos, this](const QLineSeries* series) -> double {
-            double max = 0.0;
-
-            auto points = series->points();
-            auto size = points.size();
-            // NOTICE: No stepping here, since at this point, we are using actual indices, since for example, for 15 min tf downloadSeries size is 1024/15 at this point
-            for (auto i = firstRangePos; i < size; ++i) {
-                max = std::max(max, points[i].y());
-            }
-            // FIXME: Use max element
-            return max;
-        };
-
+    } else [[likely]] { // likely branch, since happens always unless format is changed
         QString currentFormat = verticalAxis->labelFormat();
-
-        double maxSpeedInRangeBytes = std::max(toBytesfromFormat(maxInSeries(m_downloadSeries), currentFormat), toBytesfromFormat(maxInSeries(m_uploadSeries), currentFormat));
+        double maxSpeedInRangeBytes = std::max(toBytesfromFormat(findMaxInRange(m_downloadSeries->points(), firstRangePos), currentFormat), toBytesfromFormat(findMaxInRange(m_uploadSeries->points(), firstRangePos), currentFormat));
         double maxSpeed = verticalAxis->max();
         double maxSpeedBytes = toBytesfromFormat(maxSpeed, currentFormat);
 
@@ -180,12 +163,13 @@ void SpeedGraphWidget::addLine(int download, int upload) {
             currentScale = utils::DBYTES_IN_MB;
         }
 
-
         // Add new points scaled by the current scale, this way it is ok if format is changed later
-        qreal newDownloadY = download / currentScale;
-        qreal newUploadY = upload / currentScale;
 
-        if (m_downloadList.size() % step == 0) {
+
+        if (m_downloadList.size() % step == 0) { // if its a 15 min tf, step is 15 -> add new points every 15 ticks
+            qreal newDownloadY = download / currentScale;
+            qreal newUploadY = upload / currentScale;
+
             m_downloadSeries->append(lastX / step, newDownloadY);
             m_uploadSeries->append(lastX / step, newUploadY);
         }

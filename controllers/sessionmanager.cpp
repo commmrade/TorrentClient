@@ -239,13 +239,13 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     auto status = handle.status();
     InternetInfo iInfo;
     iInfo.activeTime = status.active_duration.count();
-    iInfo.downloaded = status.total_download;
+    iInfo.downloaded = status.all_time_download; // dependent on .fastresum
     iInfo.downSpeed = status.download_rate;
     iInfo.downLimit = handle.download_limit();
 
     iInfo.eta = status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate;
 
-    iInfo.uploaded = status.total_upload;
+    iInfo.uploaded = status.all_time_upload; // dependent on .fastresum
     iInfo.upSpeed = status.upload_rate;
     iInfo.upLimit = handle.upload_limit();
 
