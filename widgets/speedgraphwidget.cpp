@@ -62,15 +62,15 @@ static double toValueByFormat(double bytes, const QString& format) {
     return bytes;
 }
 
-static void scaleSeries(QLineSeries* series, double factor) {
-    auto points = series->points();
-    for (auto& p : points) {
-        p.setY(p.y() / factor);
-    }
-    series->replace(points);
-}
+// static void scaleSeries(QLineSeries* series, double factor) {
+//     auto points = series->points();
+//     for (auto& p : points) {
+//         p.setY(p.y() / factor);
+//     }
+//     series->replace(points);
+// }
 
-static void scaleSeriesAnother(QLineSeries* series, double factor) {
+static void scaleSeries(QLineSeries* series, double factor) {
     auto points = series->points();
     for (auto& p : points) {
         p.setY(p.y() * factor);
@@ -202,8 +202,8 @@ void SpeedGraphWidget::addLine(int download, int upload) {
         double factor = currentScale / targetScale;
 
         if (currentFormat != targetFormat) { // expensive operation, reduce uage
-            scaleSeriesAnother(m_downloadSeries, factor);
-            scaleSeriesAnother(m_uploadSeries, factor);
+            scaleSeries(m_downloadSeries, factor);
+            scaleSeries(m_uploadSeries, factor);
             verticalAxis->setLabelFormat(targetFormat);
         }
 
