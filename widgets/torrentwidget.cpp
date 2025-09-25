@@ -107,14 +107,21 @@ void TorrentWidget::setupTableView()
 
 void TorrentWidget::on_pushButton_clicked()
 {
-    // TODO: connect torrentConfirmed signal, and if ti is empty use addTorrentByMagnet as backup
     try {
         SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
-        if (saveDialog.exec() == QDialog::Accepted) {
-            if (!m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), saveDialog.getSavePath())) {
-                QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo) {
+            auto savePath = saveDialog.getSavePath();
+            if (torrentInfo) {
+                if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, savePath)) {
+                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                }
+            } else {
+                if (!m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), savePath)) {
+                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                }
             }
-        }
+        });
+        saveDialog.exec();
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
         QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
@@ -123,19 +130,20 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
-    // TODO: connect torrentConfirmed signal, and if ti is empty use addTorrentByFilename as backup
     QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;
     }
     try {
         SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
-        if (saveDialog.exec() == QDialog::Accepted) {
-            auto torrentSavePath = saveDialog.getSavePath();
-            if (!m_sessionManager.addTorrentByFilename(filename, torrentSavePath)) {
+        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo) {
+            auto savePath = saveDialog.getSavePath();
+            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, savePath)) {
                 QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
             }
-        }
+        });
+        saveDialog.exec();
+        // saveDialog->show();
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
         QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));

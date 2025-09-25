@@ -45,6 +45,8 @@ private:
     void setupTableView();
 
     void setupSignals();
+
+    void init();
 signals:
     void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo);
 };
