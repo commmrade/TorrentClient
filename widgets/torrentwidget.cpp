@@ -39,6 +39,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     connect(ui->torrentsView, &QTableView::clicked, this, [this](const QModelIndex& index) {
         auto torrentId = m_tableModel.getTorrentId(index.row());
         m_sessionManager.setCurrentTorrentId(torrentId);
+        m_sessionManager.forceUpdateProperties();
     });
 
     // Context Menu Stuff
@@ -171,6 +172,8 @@ void TorrentWidget::closeAllTabs()
 
 void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentText)
 {
+    // TODO: Force update torrent somehow
+    m_sessionManager.forceUpdateCategory();
     m_categoryFilter.setCategory(currentText);
 }
 

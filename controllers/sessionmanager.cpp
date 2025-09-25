@@ -207,6 +207,34 @@ void SessionManager::updateUrlProp(TorrentHandle &handle)
     emit urlSeedsInfo(urlSeeds);
 }
 
+void SessionManager::updateTorrent(TorrentHandle &torrentHandle, const libtorrent::torrent_status &status)
+{
+    // TODO: FIlter information in status, torrentHandle.status() is expensive, so I can get rid of expensive information there if not needed
+    bool isPaused = torrentHandle.isPaused();
+    double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
+
+    qDebug() << "Update torrent";
+    torrentHandle.resetCategory(); // sync category justin case
+    Torrent torrent = {
+        torrentHandle.id(),
+        torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
+        QString::fromStdString(status.name),
+        // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
+        status.total_wanted,
+        progress,
+        !isPaused ? torrentStateToString(status.state) : "Stopped",
+        status.num_seeds,
+        status.num_peers,
+        // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        status.download_payload_rate, // count only pieces, without protocol stuff
+        // status.download_rate,
+        // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
+        status.upload_rate,
+        status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
+    };
+    emit torrentUpdated(torrent);
+}
+
 void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
 {
     auto handles = m_torrentHandles.values();
@@ -296,37 +324,14 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle& handle)
     emit pieceBarInfo(status.pieces, downloadingPiecesIndices);
 }
 
-
 void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const libtorrent::torrent_handle &handle)
 {
     auto& torrentHandle = m_torrentHandles[handle.id()];
     if (!torrentHandle.isValid()) return;
     // bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
-    bool isPaused = torrentHandle.isPaused();
+    // updateTorrent(torrentHandle, status);
 
-    double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
-
-    torrentHandle.resetCategory(); // sync category justin case
-    Torrent torrent = {
-        handle.id(),
-        torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category changing, in torrent table model i check if category is empty leave the current category
-        QString::fromStdString(status.name),
-        // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
-        status.total_wanted,
-        progress,
-        !isPaused ? torrentStateToString(status.state) : "Stopped",
-        status.num_seeds,
-        status.num_peers,
-        // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.download_payload_rate, // count only pieces, without protocol stuff
-        // status.download_rate,
-        // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + " MB/s",
-        status.upload_rate,
-        status.download_rate == 0 ? -1 : (status.total_wanted - status.total_wanted_done) / status.download_rate,
-    };
-    emit torrentUpdated(torrent);
 }
-
 
 void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert *alert)
 {
@@ -475,7 +480,20 @@ void SessionManager::setCurrentTorrentId(std::optional<uint32_t> value)
         return;
     }
     m_currentTorrentId = value;
-    emitClearSignals(); // We need to clear everything since we are switching current torrent most likely
+}
+
+void SessionManager::forceUpdateProperties() {
+    auto& torrentHandle = m_torrentHandles[m_currentTorrentId.value()];
+    updatePeersProp(torrentHandle);
+    updateGeneralProperty(torrentHandle.handle());
+    updateTrackersProp(torrentHandle);
+    updateUrlProp(torrentHandle);
+    updateFilesProp(torrentHandle);
+}
+
+void SessionManager::forceUpdateCategory()
+{
+    // TODO: Upate category and signal so torrent list immediately changes after selecting different category
 }
 
 void SessionManager::emitClearSignals()

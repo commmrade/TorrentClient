@@ -78,6 +78,10 @@ public:
     std::optional<std::uint32_t> getCurrentTorrentId() const {
         return m_currentTorrentId;
     }
+
+    // Utils
+    void forceUpdateProperties();
+    void forceUpdateCategory();
 private:
     lt::session_params loadSessionParams();
 
@@ -92,6 +96,8 @@ private:
     void updateTrackersProp(TorrentHandle& handle);
     void updateFilesProp(TorrentHandle& handle);
     void updateUrlProp(TorrentHandle& handle);
+    void updateTorrent(TorrentHandle& handle, const lt::torrent_status& status);
+
 
     void updateGeneralProperty(const lt::torrent_handle& handle);
     void handleFinishedAlert(lt::torrent_finished_alert* alert);
