@@ -193,6 +193,8 @@ void SaveTorrentDialog::setDataFromTi()
     const auto& tFiles = m_torrentInfo->files();
     auto numFiles = tFiles.num_files();
     QList<File> files;
+
+    // Track file priorities
     m_filePriorities.resize(numFiles);
     for (auto i = 0; i < numFiles; ++i) {
         // qDebug() << "FILENAME:" << tFiles.file_path(i) << "; SIZE:" << tFiles.file_size(i);
