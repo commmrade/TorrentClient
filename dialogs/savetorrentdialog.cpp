@@ -20,6 +20,8 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPat
     , ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
+    // Setup table
+    setupTableView();
 
     lt::torrent_info info{torrentPath.toStdString()};
 
@@ -29,9 +31,6 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPat
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
     ui->savePathLineEdit->setText(savePath);
 
-
-    // Setup table
-    setupTableView();
 }
 
 SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidget *parent)
@@ -39,6 +38,7 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
     , ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
+    setupTableView();
     ui->sizeInfo->setText(tr("Fetching..."));
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetUri.toStdString());
@@ -48,16 +48,12 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
         Dirs::TORRENTS +
         QDir::separator() +
         utils::toHex(params.info_hashes.get_best().to_string());
-
     params.save_path = saveTorrentFile.toStdString();
-
     startFetchingMetadata(params);
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
     ui->savePathLineEdit->setText(savePath);
-
-    setupTableView();
 }
 
 SaveTorrentDialog::~SaveTorrentDialog()

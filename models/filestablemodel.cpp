@@ -1,5 +1,4 @@
 #include "filestablemodel.h"
-#include "ui_filestablemodel.h"
 #include "utils.h"
 #include <libtorrent/download_priority.hpp>
 #include "priority.h"
@@ -23,7 +22,7 @@ QVariant FileTableModel::data(const QModelIndex &index, int role) const
             auto& file =  m_files[index.row()];
             switch (static_cast<FileFields>(index.column())) {
                 case FileFields::STATUS: {
-                    return {file.isEnabled}; // TODO: center it somehow
+                    return {file.isEnabled};
                 }
                 case FileFields::FILENAME: {
                     return {file.filename};
@@ -159,10 +158,6 @@ void FileTableModel::setFiles(const QList<File> &files)
             int row = oldTrackersMap[newKey];
             auto& oldFile = m_files[row];
 
-            // Change properties
-            // if (oldFile.downloaded != files[i].downloaded) {
-            //     oldFile.isEnabled = files[i].isEnabled;
-            // }
             oldFile.filename = files[i].filename; // Since files can be renamed
             oldFile.downloaded = files[i].downloaded;
             oldFile.priority = files[i].priority;
@@ -184,7 +179,6 @@ void FileTableModel::setFiles(const QList<File> &files)
         }
     }
 
-    qDebug() << "Enjd" << m_files.size();
     if (!m_files.isEmpty()) {
         emit dataChanged(index(0, 1), index(m_files.size() - 1, columnCount() - 1));
     }
