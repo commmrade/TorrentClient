@@ -56,9 +56,9 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
 SaveTorrentDialog::~SaveTorrentDialog()
 {
-    if (m_fetcher) {
-        m_fetcher->stopRunning();
-    }
+    // if (m_fetcher) {
+    //     m_fetcher->stopRunning();
+    // }
     delete ui;
 }
 
@@ -67,8 +67,9 @@ QString SaveTorrentDialog::getSavePath() const
     return ui->savePathLineEdit->text();
 }
 
-void SaveTorrentDialog::setData(const TorrentMetadata& tmd)
+void SaveTorrentDialog::setData(TorrentMetadata tmd)
 {
+    qDebug() << "Set data";
     ui->sizeInfo->setText(utils::bytesToHigher(tmd.size));
 
     auto creationTime = tmd.creationTime;
@@ -107,20 +108,23 @@ void SaveTorrentDialog::on_changeSavePathButton_clicked()
 
 void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& params)
 {
-    // Start fetching metadata
-    m_fetcher = new MetadataFetcher{params};
-    // TODO: Set not onyl size, but other data
-    connect(m_fetcher, &MetadataFetcher::metadataFetched, this, &SaveTorrentDialog::setData);
-    m_fetcher->start();
+    auto* fetcher = new MetadataFetcher{params};
+    auto* thread = new QThread{this};
+    fetcher->moveToThread(thread); // Doesn't block current thread
 
-    // Simulating detached (hack)
-    connect(m_fetcher, &QThread::finished, m_fetcher, &QThread::deleteLater);
-    connect(m_fetcher, &MetadataFetcher::error, this, [this]{
-        ui->sizeInfo->setText(tr("Failed"));
-        ui->dateInfo->setText(tr("Failed"));
-        QMessageBox::warning(this, tr("Warning"), tr("Metadata could not be fetched"));
-    });
+    // Start fetching when thead has started
+    connect(thread, &QThread::started, fetcher, &MetadataFetcher::run);
+
+    // Update data displayed in thi dialog
+    connect(fetcher, &MetadataFetcher::metadataFetched, this, &SaveTorrentDialog::setData);
+
+    // When fetching has been done, quit the thread and destroy the fetcher
+    connect(fetcher, &MetadataFetcher::finished, thread, &QThread::quit);
+    connect(thread, &QThread::finished, fetcher, &QObject::deleteLater);
+
+    thread->start();
 }
+
 
 void SaveTorrentDialog::setDataFromTi(const libtorrent::torrent_info &ti)
 {

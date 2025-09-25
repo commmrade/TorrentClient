@@ -24,12 +24,13 @@ void MetadataFetcher::run()
     m_session = std::make_unique<lt::session>(std::move(sessParams));
     m_session->add_torrent(std::move(m_params));
     sessionLoop();
+
+    emit finished();
 }
 
 void MetadataFetcher::sessionLoop()
 {
     while (m_isRunning) {
-        qDebug() << "session loop";
         std::vector<lt::alert*> alerts;
         m_session->pop_alerts(&alerts);
         for (auto* alert : alerts) {

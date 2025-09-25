@@ -16,19 +16,23 @@ struct TorrentMetadata {
     QString comment;
 };
 
-class MetadataFetcher : public QThread
+class MetadataFetcher : public QObject
 {
     Q_OBJECT
 public:
-    explicit MetadataFetcher(const lt::add_torrent_params& params, QObject *parent = nullptr) : QThread(parent), m_params(params) {}
+    explicit MetadataFetcher(const lt::add_torrent_params& params, QObject *parent = nullptr) : QObject(parent), m_params(params) {}
     void stopRunning();
-protected:
-    void run() override;
+
+    ~MetadataFetcher() {
+        qDebug() << "Metadata fetcher distructor";
+    }
+public:
+    void run();
 signals:
-    // void sizeReady(std::int64_t bytes);
     void metadataFetched(TorrentMetadata md);
 
     void error();
+    void finished();
 private:
     lt::add_torrent_params m_params;
     bool m_isRunning{true};
