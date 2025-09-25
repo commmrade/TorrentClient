@@ -28,7 +28,6 @@ private slots:
     void on_changeSavePathButton_clicked();
 private:
     Ui::SaveTorrentDialog *ui;
-    // QPointer<MetadataFetcher> m_fetcher{nullptr};
 
     void startFetchingMetadata(const lt::add_torrent_params& params);
     void setDataFromTi(const lt::torrent_info& ti);

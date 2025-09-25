@@ -22,10 +22,6 @@ class MetadataFetcher : public QObject
 public:
     explicit MetadataFetcher(const lt::add_torrent_params& params, QObject *parent = nullptr) : QObject(parent), m_params(params) {}
     void stopRunning();
-
-    ~MetadataFetcher() {
-        qDebug() << "Metadata fetcher distructor";
-    }
 public:
     void run();
 signals:

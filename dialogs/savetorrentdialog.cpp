@@ -59,6 +59,7 @@ SaveTorrentDialog::~SaveTorrentDialog()
     // if (m_fetcher) {
     //     m_fetcher->stopRunning();
     // }
+
     delete ui;
 }
 
@@ -69,7 +70,6 @@ QString SaveTorrentDialog::getSavePath() const
 
 void SaveTorrentDialog::setData(TorrentMetadata tmd)
 {
-    qDebug() << "Set data";
     ui->sizeInfo->setText(utils::bytesToHigher(tmd.size));
 
     auto creationTime = tmd.creationTime;
@@ -109,20 +109,24 @@ void SaveTorrentDialog::on_changeSavePathButton_clicked()
 void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& params)
 {
     auto* fetcher = new MetadataFetcher{params};
-    auto* thread = new QThread{this};
-    fetcher->moveToThread(thread); // Doesn't block current thread
+    auto* m_fetcherThread = new QThread{};
+    fetcher->moveToThread(m_fetcherThread); // Doesn't block current thread
 
     // Start fetching when thead has started
-    connect(thread, &QThread::started, fetcher, &MetadataFetcher::run);
+    connect(m_fetcherThread, &QThread::started, fetcher, &MetadataFetcher::run);
 
     // Update data displayed in thi dialog
     connect(fetcher, &MetadataFetcher::metadataFetched, this, &SaveTorrentDialog::setData);
 
-    // When fetching has been done, quit the thread and destroy the fetcher
-    connect(fetcher, &MetadataFetcher::finished, thread, &QThread::quit);
-    connect(thread, &QThread::finished, fetcher, &QObject::deleteLater);
+    // When fetching has been done, quit the thread and delete it and destroy the fetcher
+    connect(fetcher, &MetadataFetcher::finished, fetcher, &QObject::deleteLater);
+    connect(fetcher, &MetadataFetcher::finished, m_fetcherThread, &QThread::quit);
+    connect(m_fetcherThread, &QThread::finished, m_fetcherThread, &QObject::deleteLater);
 
-    thread->start();
+    // In case dialog is closed prematurily stop the fetcher, so the thread can exit
+    connect(this, &QDialog::finished, fetcher, &MetadataFetcher::stopRunning);
+
+    m_fetcherThread->start();
 }
 
 
