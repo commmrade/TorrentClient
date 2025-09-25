@@ -23,9 +23,9 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPat
     // Setup table
     setupTableView();
 
-    lt::torrent_info info{torrentPath.toStdString()};
-
-    setDataFromTi(info);
+    auto info = std::make_shared<lt::torrent_info>(torrentPath.toStdString());
+    m_torrentInfo = std::move(info);
+    setDataFromTi();
 
     QSettings settings;
     auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
@@ -76,6 +76,17 @@ void SaveTorrentDialog::setupTableView()
 
     ui->fileView->hideColumn(2);
     ui->fileView->hideColumn(3);
+
+    // connect signals from file model to updatge status and priority for files
+}
+
+void SaveTorrentDialog::setupSignals()
+{
+    connect(this, &QDialog::finished, this, [this](int result) {
+        if (result == QDialog::Accepted) {
+            torrentConfirmed(m_torrentInfo);
+        }
+    });
 }
 
 QString SaveTorrentDialog::getSavePath() const
@@ -114,7 +125,8 @@ QString SaveTorrentDialog::getSavePath() const
 // }
 
 void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti) {
-    setDataFromTi(*ti);
+    m_torrentInfo = std::move(ti);
+    setDataFromTi();
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
@@ -149,12 +161,12 @@ void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& para
 }
 
 
-void SaveTorrentDialog::setDataFromTi(const libtorrent::torrent_info &ti)
+void SaveTorrentDialog::setDataFromTi()
 {
-    auto totalSize = ti.total_size();
+    auto totalSize = m_torrentInfo->total_size();
     ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
 
-    auto creationTime = ti.creation_date();
+    auto creationTime = m_torrentInfo->creation_date();
     if (creationTime == 0) {
         ui->dateInfo->setText("N/A");
     } else {
@@ -165,32 +177,32 @@ void SaveTorrentDialog::setDataFromTi(const libtorrent::torrent_info &ti)
         ui->dateInfo->setText(datetime.toString("MMM d HH:mm:ss yyyy"));
     }
 
-    auto hashv1 = ti.info_hashes().get(lt::protocol_version::V1);
-    auto hashv2 = ti.info_hashes().get(lt::protocol_version::V2);
-    auto hashbest = ti.info_hashes().get_best();
+    auto hashv1 = m_torrentInfo->info_hashes().get(lt::protocol_version::V1);
+    auto hashv2 = m_torrentInfo->info_hashes().get(lt::protocol_version::V2);
+    auto hashbest = m_torrentInfo->info_hashes().get_best();
 
     if (hashv1.is_all_zeros()) {
         ui->infoHashV1Value->setText("N/A");
     } else {
-        ui->infoHashV1Value->setText(utils::toHex(ti.info_hashes().get(lt::protocol_version::V1).to_string()));
+        ui->infoHashV1Value->setText(utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V1).to_string()));
     }
     if (hashv2.is_all_zeros()) {
         ui->infoHashV2Value->setText("N/A");
     } else {
-        ui->infoHashV2Value->setText(utils::toHex(ti.info_hashes().get(lt::protocol_version::V2).to_string()));
+        ui->infoHashV2Value->setText(utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V2).to_string()));
     }
     if (hashbest.is_all_zeros()) {
         ui->infoHashBestValue->setText("N/A");
     } else {
-        ui->infoHashBestValue->setText(utils::toHex(ti.info_hashes().get_best().to_string()));
+        ui->infoHashBestValue->setText(utils::toHex(m_torrentInfo->info_hashes().get_best().to_string()));
     }
 
-    ui->commentValue->setText(QString::fromStdString(ti.comment()));
+    ui->commentValue->setText(QString::fromStdString(m_torrentInfo->comment()));
 
 
     // Set files
 
-    const auto& tFiles = ti.files();
+    const auto& tFiles = m_torrentInfo->files();
 
     QList<File> files;
     qDebug() << "There are" << tFiles.num_files() << "files";

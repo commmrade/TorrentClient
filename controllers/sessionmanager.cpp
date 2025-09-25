@@ -524,6 +524,16 @@ bool SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir
     return addTorrent(std::move(params));
 }
 
+bool SessionManager::addTorrentByTorrentInfo(std::shared_ptr<libtorrent::torrent_info> ti, QStringView outputDir)
+{
+    lt::add_torrent_params params{};
+    detail::writeTorrentFile(ti);
+
+    params.ti = std::move(ti);
+    params.save_path = outputDir.toString().toStdString();
+    return addTorrent(params);
+}
+
 bool SessionManager::isTorrentPaused(const uint32_t id) const
 {
     auto& torrentHandle = m_torrentHandles[id];

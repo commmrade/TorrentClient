@@ -107,6 +107,7 @@ void TorrentWidget::setupTableView()
 
 void TorrentWidget::on_pushButton_clicked()
 {
+    // TODO: connect torrentConfirmed signal, and if ti is empty use addTorrentByMagnet as backup
     try {
         SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
         if (saveDialog.exec() == QDialog::Accepted) {
@@ -122,6 +123,7 @@ void TorrentWidget::on_pushButton_clicked()
 
 void TorrentWidget::on_pushButton_2_clicked()
 {
+    // TODO: connect torrentConfirmed signal, and if ti is empty use addTorrentByFilename as backup
     QString filename = QFileDialog::getOpenFileName(this, tr("Open torrent"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
     if (filename.isEmpty()) {
         return;

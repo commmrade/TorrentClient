@@ -26,13 +26,13 @@ public:
     ~SaveTorrentDialog();
     QString getSavePath() const;
 
-public slots:
-    // void setData(TorrentMetadata tmd);
     void setData(std::shared_ptr<const lt::torrent_info> ti);
 private slots:
     void on_changeSavePathButton_clicked();
 private:
     Ui::SaveTorrentDialog *ui;
+
+    std::shared_ptr<const lt::torrent_info> m_torrentInfo{nullptr};
 
     FileTableModel m_fileModel;
     FileStatusDelegate m_statusDelegate;
@@ -40,9 +40,13 @@ private:
     FilePriorityDelegate m_priorityDelegate;
 
     void startFetchingMetadata(const lt::add_torrent_params& params);
-    void setDataFromTi(const lt::torrent_info& ti);
+    void setDataFromTi();
 
     void setupTableView();
+
+    void setupSignals();
+signals:
+    void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo);
 };
 
 #endif // SAVETORRENTDIALOG_H
