@@ -33,6 +33,7 @@ private:
     Ui::SaveTorrentDialog *ui;
 
     std::shared_ptr<const lt::torrent_info> m_torrentInfo{nullptr};
+    QList<lt::download_priority_t> m_filePriorities;
 
     FileTableModel m_fileModel;
     FileStatusDelegate m_statusDelegate;
@@ -48,7 +49,7 @@ private:
 
     void init();
 signals:
-    void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo);
+    void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo, QList<lt::download_priority_t> filePriorities);
 };
 
 #endif // SAVETORRENTDIALOG_H

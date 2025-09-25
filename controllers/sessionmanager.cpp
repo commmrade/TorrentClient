@@ -213,7 +213,6 @@ void SessionManager::updateTorrent(TorrentHandle &torrentHandle, const libtorren
     bool isPaused = torrentHandle.isPaused();
     double progress = std::ceil((static_cast<double>(status.total_wanted_done) / static_cast<double>(status.total_wanted) * 100.0) * 100) / 100.0;
 
-    qDebug() << "Update torrent";
     torrentHandle.resetCategory(); // sync category justin case
     Torrent torrent = {
         torrentHandle.id(),
@@ -329,8 +328,7 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status& status, const 
     auto& torrentHandle = m_torrentHandles[handle.id()];
     if (!torrentHandle.isValid()) return;
     // bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
-    // updateTorrent(torrentHandle, status);
-
+    updateTorrent(torrentHandle, status);
 }
 
 void SessionManager::handleMetadataReceived(libtorrent::metadata_received_alert *alert)
@@ -510,7 +508,6 @@ bool SessionManager::addTorrentByFilename(QStringView filepath, QStringView outp
     auto torrent_info = std::make_shared<lt::torrent_info>(filepath.toUtf8().toStdString());
     lt::add_torrent_params params{};
     detail::writeTorrentFile(torrent_info);
-
     params.ti = std::move(torrent_info);
     params.save_path = outputDir.toString().toStdString();
     return addTorrent(params);
@@ -524,12 +521,15 @@ bool SessionManager::addTorrentByMagnet(QString magnetURI, QStringView outputDir
     return addTorrent(std::move(params));
 }
 
-bool SessionManager::addTorrentByTorrentInfo(std::shared_ptr<const libtorrent::torrent_info> ti, QStringView outputDir)
+bool SessionManager::addTorrentByTorrentInfo(std::shared_ptr<const libtorrent::torrent_info> ti, const QList<lt::download_priority_t>& filePriorities, QStringView outputDir)
 {
     lt::add_torrent_params params{};
     detail::writeTorrentFile(ti);
 
     params.ti = std::make_shared<lt::torrent_info>(*ti);
+
+    std::vector<lt::download_priority_t> priorities{filePriorities.constBegin(), filePriorities.end()};
+    params.file_priorities = std::move(priorities);
     params.save_path = outputDir.toString().toStdString();
     return addTorrent(params);
 }

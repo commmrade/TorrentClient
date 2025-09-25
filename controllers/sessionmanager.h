@@ -52,7 +52,7 @@ public:
 
     bool addTorrentByFilename(QStringView filepath, QStringView outputDir);
     bool addTorrentByMagnet(QString magnetURI, QStringView outputDir);
-    bool addTorrentByTorrentInfo(std::shared_ptr<const lt::torrent_info> ti, QStringView outputDir);
+    bool addTorrentByTorrentInfo(std::shared_ptr<const lt::torrent_info> ti, const QList<lt::download_priority_t>& filePriorities, QStringView outputDir);
 
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);

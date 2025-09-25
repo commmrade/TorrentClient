@@ -109,10 +109,10 @@ void TorrentWidget::on_pushButton_clicked()
 {
     try {
         SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
-        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo) {
+        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo, QList<lt::download_priority_t> filePriorities) {
             auto savePath = saveDialog.getSavePath();
             if (torrentInfo) {
-                if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, savePath)) {
+                if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities, savePath)) {
                     QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
                 }
             } else {
@@ -136,14 +136,13 @@ void TorrentWidget::on_pushButton_2_clicked()
     }
     try {
         SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
-        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo) {
+        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this, [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo, QList<lt::download_priority_t> filePriorities) {
             auto savePath = saveDialog.getSavePath();
-            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, savePath)) {
+            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities, savePath)) {
                 QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
             }
         });
         saveDialog.exec();
-        // saveDialog->show();
     } catch (const std::exception& ex) {
         qCritical() << ex.what();
         QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));

@@ -79,8 +79,15 @@ void SaveTorrentDialog::setupTableView()
 
     // TODO: connect signals from file model to updatge status and priority for files
     connect(&m_fileModel, &FileTableModel::statusChanged, this, [this](int index, bool value) {
-        const auto& files = m_torrentInfo->files();
-        files.
+        qDebug() << index << m_filePriorities.size();
+        m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
+
+        // Recalc total size TODO:
+    });
+    connect(&m_fileModel, &FileTableModel::priorityChanged, this, [this](int index, int priority) {
+        m_filePriorities[index] = priority;
+
+        // Recalc total size TODO:
     });
 }
 
@@ -89,7 +96,7 @@ void SaveTorrentDialog::setupSignals()
     connect(this, &QDialog::finished, this, [this](int result) {
         qDebug() << "Finshed" << result;
         if (result == QDialog::Accepted) {
-            torrentConfirmed(m_torrentInfo);
+            emit torrentConfirmed(m_torrentInfo, m_filePriorities);
         }
     });
 }
@@ -184,16 +191,18 @@ void SaveTorrentDialog::setDataFromTi()
     // Set files
 
     const auto& tFiles = m_torrentInfo->files();
-
+    auto numFiles = tFiles.num_files();
     QList<File> files;
-    qDebug() << "There are" << tFiles.num_files() << "files";
-    for (auto i = 0; i < tFiles.num_files(); ++i) {
+    m_filePriorities.resize(numFiles);
+    for (auto i = 0; i < numFiles; ++i) {
         // qDebug() << "FILENAME:" << tFiles.file_path(i) << "; SIZE:" << tFiles.file_size(i);
         File file;
+        file.id = i;
         file.filename = QString::fromStdString(tFiles.file_path(i));
         file.isEnabled = true; // by default all are enabled
         file.filesize = tFiles.file_size(i);
         file.priority = lt::default_priority;
+        m_filePriorities[i] = lt::default_priority;
 
         files.append(std::move(file));
     }
