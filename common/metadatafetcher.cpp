@@ -36,30 +36,31 @@ void MetadataFetcher::sessionLoop()
         for (auto* alert : alerts) {
             if (auto metadataRecAlert = lt::alert_cast<lt::metadata_received_alert>(alert)) {
                 auto torrentFile = metadataRecAlert->handle.torrent_file();
-                auto ti = *torrentFile;
+                // auto ti = *torrentFile;
 
-                TorrentMetadata tmd;
-                auto totalSize = ti.total_size();
-                // ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
-                tmd.size = totalSize;
+                // TorrentMetadata tmd;
+                // auto totalSize = ti.total_size();
+                // // ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
+                // tmd.size = totalSize;
 
-                auto creationTime = ti.creation_date();
-                auto tp = std::chrono::system_clock::from_time_t(creationTime);
-                auto castTime = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
-                auto datetime = QDateTime::fromSecsSinceEpoch(castTime.count());
-                tmd.creationTime = std::move(datetime);
+                // auto creationTime = ti.creation_date();
+                // auto tp = std::chrono::system_clock::from_time_t(creationTime);
+                // auto castTime = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
+                // auto datetime = QDateTime::fromSecsSinceEpoch(castTime.count());
+                // tmd.creationTime = std::move(datetime);
 
-                auto hashv1 = ti.info_hashes().get(lt::protocol_version::V1);
-                auto hashv2 = ti.info_hashes().get(lt::protocol_version::V2);
-                auto hashbest = ti.info_hashes().get_best();
+                // auto hashv1 = ti.info_hashes().get(lt::protocol_version::V1);
+                // auto hashv2 = ti.info_hashes().get(lt::protocol_version::V2);
+                // auto hashbest = ti.info_hashes().get_best();
 
-                tmd.hashV1 = utils::toHex(hashv1.is_all_zeros() ? "" : hashv1.to_string());
-                tmd.hashV2 = utils::toHex(hashv2.is_all_zeros() ? "" : hashv2.to_string());
-                tmd.hashBest = utils::toHex(hashbest.is_all_zeros() ? "" : hashbest.to_string());
+                // tmd.hashV1 = utils::toHex(hashv1.is_all_zeros() ? "" : hashv1.to_string());
+                // tmd.hashV2 = utils::toHex(hashv2.is_all_zeros() ? "" : hashv2.to_string());
+                // tmd.hashBest = utils::toHex(hashbest.is_all_zeros() ? "" : hashbest.to_string());
 
-                tmd.comment = QString::fromStdString(ti.comment());
+                // tmd.comment = QString::fromStdString(ti.comment());
 
-                emit metadataFetched(tmd);
+                // emit metadataFetched(tmd);
+                emit metadataFetched(torrentFile);
                 m_isRunning = false;
                 break;
             } else if (auto metadataFailedAlert = lt::alert_cast<lt::metadata_failed_alert>(alert)) {

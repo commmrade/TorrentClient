@@ -4,6 +4,10 @@
 #include <QDialog>
 #include "metadatafetcher.h"
 #include <QPointer>
+#include <fileitemdelegate.h>
+#include <fileprioritydelegate.h>
+#include <filestatusdelegate.h>
+#include "filestablemodel.h"
 
 namespace Ui {
 class SaveTorrentDialog;
@@ -23,14 +27,22 @@ public:
     QString getSavePath() const;
 
 public slots:
-    void setData(TorrentMetadata tmd);
+    // void setData(TorrentMetadata tmd);
+    void setData(std::shared_ptr<const lt::torrent_info> ti);
 private slots:
     void on_changeSavePathButton_clicked();
 private:
     Ui::SaveTorrentDialog *ui;
 
+    FileTableModel m_fileModel;
+    FileStatusDelegate m_statusDelegate;
+    FileItemDelegate m_itemDelegate;
+    FilePriorityDelegate m_priorityDelegate;
+
     void startFetchingMetadata(const lt::add_torrent_params& params);
     void setDataFromTi(const lt::torrent_info& ti);
+
+    void setupTableView();
 };
 
 #endif // SAVETORRENTDIALOG_H

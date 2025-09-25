@@ -139,6 +139,7 @@ QHash<int, QByteArray> FileTableModel::roleNames() const
 
 void FileTableModel::setFiles(const QList<File> &files)
 {
+    qDebug() << "Setting " << files.size();
     // TODO: Optimize it, since it is suitable for torrents list, but i guess i can do it easier for (almost) static files
     QHash<int, int> newTrackersMap; // key - index in trackers
     QHash<int, int> oldTrackersMap; // key - index in m_trackers
@@ -183,6 +184,7 @@ void FileTableModel::setFiles(const QList<File> &files)
         }
     }
 
+    qDebug() << "Enjd" << m_files.size();
     if (!m_files.isEmpty()) {
         emit dataChanged(index(0, 1), index(m_files.size() - 1, columnCount() - 1));
     }

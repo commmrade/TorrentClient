@@ -25,7 +25,7 @@ public:
 public:
     void run();
 signals:
-    void metadataFetched(TorrentMetadata md);
+    void metadataFetched(std::shared_ptr<const lt::torrent_info> md);
 
     void error();
     void finished();

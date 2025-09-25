@@ -107,7 +107,7 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
 
-    qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
+    // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
 // HERE: Separate function for each emit thingy
