@@ -7,6 +7,10 @@
 #include <QDebug>
 #include "dirs.h"
 
+static constexpr const char* ORG_NAME = "klewy";
+static constexpr const char* ORG_DOM = "klewy.com";
+static constexpr const char* APP_NAME = "TorrentClient";
+
 void fallToDefaultTheme(QApplication& a, QSettings& settings) {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto darkThemePath = basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
@@ -22,9 +26,9 @@ void fallToDefaultTheme(QApplication& a, QSettings& settings) {
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("klewy");
-    QCoreApplication::setOrganizationDomain("klewy.com");
-    QCoreApplication::setApplicationName("TorrentClient");
+    QCoreApplication::setOrganizationName(ORG_NAME);
+    QCoreApplication::setOrganizationDomain(ORG_DOM);
+    QCoreApplication::setApplicationName(APP_NAME);
 
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
