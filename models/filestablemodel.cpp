@@ -138,6 +138,12 @@ QHash<int, QByteArray> FileTableModel::roleNames() const
 
 void FileTableModel::setFiles(const QList<File> &files)
 {
+    qDebug() << "======DEBUG=======";
+    for (auto& file : files) {
+        qDebug() << file.id << file.isEnabled << file.filename << file.filesize << file.downloaded << file.priority;
+    }
+    qDebug() << "======DEBUG=======";
+
     qDebug() << "Setting " << files.size();
     // TODO: Optimize it, since it is suitable for torrents list, but i guess i can do it easier for (almost) static files
     QHash<int, int> newTrackersMap; // key - index in trackers

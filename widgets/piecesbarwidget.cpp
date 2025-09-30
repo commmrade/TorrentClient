@@ -52,7 +52,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
     // int barWidthPx = BAR_WIDTH_PX;
     int barWidthPx = width() - startX;
-    qDebug() << barWidthPx << width();
     int const piecesPerPixel = m_pieces.size() / barWidthPx; // How many pieces will be considered in 1 pixel
 
     QSet<int> hashedDownloadingPieces; // idx bool
