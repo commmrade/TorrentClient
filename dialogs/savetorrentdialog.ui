@@ -156,7 +156,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTableView" name="fileView"/>
+      <widget class="QTreeView" name="fileView"/>
      </item>
     </layout>
    </item>

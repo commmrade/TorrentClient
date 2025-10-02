@@ -2,6 +2,7 @@
 #include <QComboBox>
 #include <libtorrent/download_priority.hpp> // TODO: Avoid using this
 #include "priority.h"
+#include "filestablemodel.h"
 
 FilePriorityDelegate::FilePriorityDelegate(QObject *parent)
     : QStyledItemDelegate{parent}
@@ -9,7 +10,12 @@ FilePriorityDelegate::FilePriorityDelegate(QObject *parent)
 
 QWidget *FilePriorityDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    qDebug() << "Create editor priority";
+    BaseItem* obj = static_cast<BaseItem*>(index.internalPointer());
+    if (obj->isDir()) {
+        return nullptr;
+    }
+
+
     QComboBox* comboBox = new QComboBox(parent);
     comboBox->addItem(Priorities::DONT_DOWNLOAD);
     comboBox->addItem(Priorities::DEFAULT);

@@ -1,5 +1,6 @@
 #include "fileitemdelegate.h"
 #include <QApplication>
+#include "filestablemodel.h"
 
 FileItemDelegate::FileItemDelegate(QObject *parent)
     : QStyledItemDelegate{parent}
@@ -7,6 +8,12 @@ FileItemDelegate::FileItemDelegate(QObject *parent)
 
 void FileItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    BaseItem* obj = static_cast<BaseItem*>(index.internalPointer());
+    if (obj->isDir()) {
+        QStyledItemDelegate::paint(painter, option, index);
+        return;
+    }
+
     double value = index.data().toDouble();
     if (std::isnan(value)) {
         value = 0.0;

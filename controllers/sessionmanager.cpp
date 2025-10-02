@@ -496,6 +496,7 @@ void SessionManager::forceUpdateCategory()
 
 void SessionManager::emitClearSignals()
 {
+    qDebug() << "Emit clear";
     emit clearPeerInfo();
     emit clearGeneralInfo();
     emit clearTrackers();

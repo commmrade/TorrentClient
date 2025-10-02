@@ -35,7 +35,7 @@ private:
     std::shared_ptr<const lt::torrent_info> m_torrentInfo{nullptr};
     QList<lt::download_priority_t> m_filePriorities;
 
-    FileTableModel m_fileModel;
+    FileTreeModel m_fileModel;
     FileStatusDelegate m_statusDelegate;
     FileItemDelegate m_itemDelegate;
     FilePriorityDelegate m_priorityDelegate;

@@ -65,8 +65,12 @@ void SaveTorrentDialog::setupTableView()
     ui->fileView->setModel(&m_fileModel);
     ui->fileView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->fileView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-    ui->fileView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->fileView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->fileView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->fileView->header()->setSectionResizeMode(
+        ui->fileView->header()->count() - 1,
+        QHeaderView::Stretch
+        );
+    ui->fileView->setAnimated(true);
 
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
@@ -78,15 +82,14 @@ void SaveTorrentDialog::setupTableView()
 
 
     // TODO: connect signals from file model to updatge status and priority for files
-    connect(&m_fileModel, &FileTableModel::statusChanged, this, [this](int index, bool value) {
+    connect(&m_fileModel, &FileTreeModel::statusChanged, this, [this](int index, bool value) {
         qDebug() << index << m_filePriorities.size();
         m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
 
         // Recalc total size TODO:
     });
-    connect(&m_fileModel, &FileTableModel::priorityChanged, this, [this](int index, int priority) {
+    connect(&m_fileModel, &FileTreeModel::priorityChanged, this, [this](int index, int priority) {
         m_filePriorities[index] = priority;
-
         // Recalc total size TODO:
     });
 }
