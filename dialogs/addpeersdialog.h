@@ -4,16 +4,16 @@
 #include <QDialog>
 #include <boost/asio.hpp>
 
-namespace Ui {
+namespace Ui
+{
 class AddPeersDialog;
 }
-
 
 class AddPeersDialog : public QDialog
 {
     Q_OBJECT
 
-public:
+  public:
     explicit AddPeersDialog(QWidget *parent = nullptr);
     ~AddPeersDialog();
 
@@ -21,10 +21,9 @@ public:
     void done(int) override;
 
     // Usable only 1 time, since addresses are moved
-    QList<boost::asio::ip::tcp::endpoint> getAddrs() {
-        return std::move(m_addrs);
-    }
-private:
+    QList<boost::asio::ip::tcp::endpoint> getAddrs() { return std::move(m_addrs); }
+
+  private:
     Ui::AddPeersDialog *ui;
 
     QList<boost::asio::ip::tcp::endpoint> m_addrs;

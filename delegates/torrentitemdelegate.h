@@ -5,10 +5,11 @@
 class TorrentItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
-public:
-    explicit TorrentItemDelegate(QObject* parent = nullptr);
+  public:
+    explicit TorrentItemDelegate(QObject *parent = nullptr);
 
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
 };
 
 #endif // TORRENTITEMDELEGATE_H

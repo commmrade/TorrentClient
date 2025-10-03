@@ -6,7 +6,8 @@
 #include "torrentwidget.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 QT_END_NAMESPACE
@@ -15,14 +16,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
+  public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+  private slots:
     void on_actionSettings_triggered();
 
-private:
+  private:
     Ui::MainWindow *ui;
 
     QPointer<TorrentWidget> m_torrentWidget;

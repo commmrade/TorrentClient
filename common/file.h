@@ -2,16 +2,18 @@
 #define FILE_H
 #include <QString>
 
-struct File {
-    int id;
-    bool isEnabled;
-    QString filename;
-    std::uint64_t filesize; // in bytes
+struct File
+{
+    int           id;
+    bool          isEnabled;
+    QString       filename;
+    std::uint64_t filesize;   // in bytes
     std::uint64_t downloaded; // in bytes
-    int priority;
+    int           priority;
 };
 
-enum class FileFields {
+enum class FileFields
+{
     STATUS,
     FILENAME,
     PROGRESS,

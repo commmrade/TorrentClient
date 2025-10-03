@@ -13,71 +13,53 @@ class TorrentHandle
     QString m_category{Categories::RUNNING};
     // QStringList m_categories; // TODO: May be use a list
 
-public:
+  public:
     void resetCategory();
     explicit TorrentHandle(lt::torrent_handle handle);
     TorrentHandle() = default;
 
-    std::uint32_t id() const {
-        return m_handle.id();
-    }
+    std::uint32_t id() const { return m_handle.id(); }
 
-    const lt::torrent_handle& handle() const {
-        return m_handle;
-    }
+    const lt::torrent_handle &handle() const { return m_handle; }
 
     void connectToPeer(const boost::asio::ip::tcp::endpoint &ep);
 
-    bool isNeedSaveData() const {
-        return m_handle.need_save_resume_data();
-    }
-    bool isValid() const {
-        return m_handle.is_valid();
-    }
+    bool isNeedSaveData() const { return m_handle.need_save_resume_data(); }
+    bool isValid() const { return m_handle.is_valid(); }
 
     std::vector<lt::announce_entry> getTrackers() const;
-    std::vector<lt::peer_info> getPeerInfo() const;
+    std::vector<lt::peer_info>      getPeerInfo() const;
 
     QString bestHashAsString() const;
     QString hashV1AsString() const;
 
-    lt::sha1_hash hashV1() const {
-        return m_handle.info_hashes().v1;
-    }
-    lt::sha256_hash hashV2() const {
-        return m_handle.info_hashes().v2;
-    }
+    lt::sha1_hash   hashV1() const { return m_handle.info_hashes().v1; }
+    lt::sha256_hash hashV2() const { return m_handle.info_hashes().v2; }
 
-    lt::sha1_hash bestHash() const { // may return truncated sha256
+    lt::sha1_hash bestHash() const
+    { // may return truncated sha256
         return m_handle.info_hashes().get_best();
     }
 
-
     void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
-    void renameFile(lt::file_index_t index, const QString& newName);
+    void renameFile(lt::file_index_t index, const QString &newName);
 
     void pause();
-    bool isPaused() const {
-        bool IsPaused = (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true : false;
+    bool isPaused() const
+    {
+        bool IsPaused =
+            (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true
+                                                                                          : false;
         return IsPaused;
     }
     void resume();
 
-    void saveResumeData() {
-        m_handle.save_resume_data();
-    }
+    void saveResumeData() { m_handle.save_resume_data(); }
 
-    std::uint64_t activeDur() {
-        return m_handle.status().active_duration.count();
-    }
+    std::uint64_t activeDur() { return m_handle.status().active_duration.count(); }
 
-
-    void setCategory(const QString& category) {
-        m_category = category;
-    }
-    QString getCategory() const {
-        return m_category;
-    }
+    void    setCategory(const QString &category) { m_category = category; }
+    QString getCategory() const { return m_category; }
 };
 
 #endif // TORRENTHANDLE_H

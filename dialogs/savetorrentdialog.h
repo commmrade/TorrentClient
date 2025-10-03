@@ -9,38 +9,45 @@
 #include <filestatusdelegate.h>
 #include "filetreemodel.h"
 
-namespace Ui {
+namespace Ui
+{
 class SaveTorrentDialog;
 }
 
-struct torrent_file_tag {};
-struct magnet_tag {};
+struct torrent_file_tag
+{
+};
+struct magnet_tag
+{
+};
 
 class SaveTorrentDialog : public QDialog
 {
     Q_OBJECT
 
-public:
-    explicit SaveTorrentDialog(torrent_file_tag, const QString& torrentPath, QWidget *parent = nullptr); // for .torrent
-    explicit SaveTorrentDialog(magnet_tag, const QString& magnetUri, QWidget* parent = nullptr);
+  public:
+    explicit SaveTorrentDialog(torrent_file_tag, const QString &torrentPath,
+                               QWidget *parent = nullptr); // for .torrent
+    explicit SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidget *parent = nullptr);
     ~SaveTorrentDialog();
     QString getSavePath() const;
 
     void setData(std::shared_ptr<const lt::torrent_info> ti);
-private slots:
+  private slots:
     void on_changeSavePathButton_clicked();
-private:
+
+  private:
     Ui::SaveTorrentDialog *ui;
 
     std::shared_ptr<const lt::torrent_info> m_torrentInfo{nullptr};
-    QList<lt::download_priority_t> m_filePriorities;
+    QList<lt::download_priority_t>          m_filePriorities;
 
-    FileTreeModel m_fileModel;
-    FileStatusDelegate m_statusDelegate;
-    FileItemDelegate m_itemDelegate;
+    FileTreeModel        m_fileModel;
+    FileStatusDelegate   m_statusDelegate;
+    FileItemDelegate     m_itemDelegate;
     FilePriorityDelegate m_priorityDelegate;
 
-    void startFetchingMetadata(const lt::add_torrent_params& params);
+    void startFetchingMetadata(const lt::add_torrent_params &params);
     void setDataFromTi();
 
     void setupTableView();
@@ -48,8 +55,9 @@ private:
     void setupSignals();
 
     void init();
-signals:
-    void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo, QList<lt::download_priority_t> filePriorities);
+  signals:
+    void torrentConfirmed(std::shared_ptr<const lt::torrent_info> torrentInfo,
+                          QList<lt::download_priority_t>          filePriorities);
 };
 
 #endif // SAVETORRENTDIALOG_H

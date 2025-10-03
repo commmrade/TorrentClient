@@ -3,9 +3,7 @@
 #include "settingsdialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , m_torrentWidget(new TorrentWidget)
+    : QMainWindow(parent), ui(new Ui::MainWindow), m_torrentWidget(new TorrentWidget)
 {
     ui->setupUi(this);
 
@@ -14,10 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     // test
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::on_actionSettings_triggered()
 {

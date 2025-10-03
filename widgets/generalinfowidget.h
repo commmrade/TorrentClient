@@ -5,25 +5,26 @@
 #include "torrentinfo.h"
 #include <libtorrent/libtorrent.hpp>
 
-namespace Ui {
+namespace Ui
+{
 class GeneralInfoWidget;
 }
-
-
 
 class GeneralInfoWidget : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit GeneralInfoWidget(QWidget *parent = nullptr);
     ~GeneralInfoWidget();
 
-    void setGeneralInfo(const TorrentInfo& tInfo, const InternetInfo& iInfo);
+    void setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo);
     void clearGeneralInfo();
 
-    void setPieces(const lt::typed_bitfield<lt::piece_index_t>& pieces, const std::vector<int>& downloadingPiecesIndices);
-private:
+    void setPieces(const lt::typed_bitfield<lt::piece_index_t> &pieces,
+                   const std::vector<int>                      &downloadingPiecesIndices);
+
+  private:
     Ui::GeneralInfoWidget *ui;
 };
 

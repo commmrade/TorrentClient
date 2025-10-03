@@ -4,34 +4,32 @@
 #include <QDateTime>
 
 GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::GeneralInfoWidget)
+    : QWidget(parent), ui(new Ui::GeneralInfoWidget)
 {
     ui->setupUi(this);
 
     clearGeneralInfo();
 }
 
-GeneralInfoWidget::~GeneralInfoWidget()
-{
-    delete ui;
-}
+GeneralInfoWidget::~GeneralInfoWidget() { delete ui; }
 
 void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
     {
-        auto hrs = iInfo.activeTime / 3600;
-        auto mins = iInfo.activeTime % 3600 / 60;
-        auto secs = iInfo.activeTime % 60;
+        auto    hrs  = iInfo.activeTime / 3600;
+        auto    mins = iInfo.activeTime % 3600 / 60;
+        auto    secs = iInfo.activeTime % 60;
         QString timeStr;
-        if (iInfo.activeTime == -1) {
+        if (iInfo.activeTime == -1)
+        {
             timeStr = tr("infinity");
-        } else {
+        }
+        else
+        {
             timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
         }
         ui->timeActValue->setText(timeStr);
     }
-
 
     auto downloaded = utils::bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
@@ -39,7 +37,8 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto downSpeed = utils::bytesToHigherPerSec(iInfo.downSpeed);
     ui->downSpeedValue->setText(downSpeed);
 
-    ui->downloadLimValue->setText(iInfo.downLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.downLimit));
+    ui->downloadLimValue->setText(
+        iInfo.downLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.downLimit));
 
     {
         auto etaStr = utils::secsToFormattedTime(iInfo.eta);
@@ -52,7 +51,8 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto upSpeed = utils::bytesToHigherPerSec(iInfo.upSpeed);
     ui->upSpeedValue->setText(upSpeed);
 
-    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.upLimit));
+    ui->uploadLimValue->setText(iInfo.upLimit == -1 ? tr("Unlimited")
+                                                    : utils::bytesToHigherPerSec(iInfo.upLimit));
 
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
@@ -67,7 +67,6 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
 
     auto torSize = utils::bytesToHigher(tInfo.size);
     ui->torSizeValue->setText(torSize);
-
 
     QDateTime timestamp;
     timestamp.setSecsSinceEpoch(tInfo.startTime);
@@ -85,18 +84,20 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     auto comm = tInfo.comment;
     ui->commentValue->setText(comm);
 
-    auto pieces = QString::number(tInfo.piecesCount);
+    auto pieces    = QString::number(tInfo.piecesCount);
     auto piecesStr = pieces + " x " + utils::bytesToHigher(tInfo.pieceSize);
     ui->piecesValue->setText(piecesStr);
 
-    if (tInfo.completedTime != 0) {
+    if (tInfo.completedTime != 0)
+    {
         QDateTime timestamp;
         timestamp.setSecsSinceEpoch(tInfo.completedTime);
         ui->completionValue->setText(timestamp.toString("dd.MM.yyyy hh:mm"));
-    } else {
+    }
+    else
+    {
         ui->completionValue->setText(tr("Not finished"));
     }
-
 
     ui->piecesBar->update();
 }
@@ -125,7 +126,8 @@ void GeneralInfoWidget::clearGeneralInfo()
     ui->piecesBar->clearPieces();
 }
 
-void GeneralInfoWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces, const std::vector<int>& downloadingPiecesIndices)
+void GeneralInfoWidget::setPieces(const lt::typed_bitfield<libtorrent::piece_index_t> &pieces,
+                                  const std::vector<int> &downloadingPiecesIndices)
 {
     ui->piecesBar->setPieces(pieces, downloadingPiecesIndices);
 }

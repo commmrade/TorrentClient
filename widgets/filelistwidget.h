@@ -7,7 +7,8 @@
 #include "filestatusdelegate.h"
 #include "fileprioritydelegate.h"
 
-namespace Ui {
+namespace Ui
+{
 class FileListWidget;
 }
 
@@ -15,23 +16,24 @@ class FileListWidget : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit FileListWidget(QWidget *parent = nullptr);
     ~FileListWidget();
 
-    void setFiles(const QList<File>& files);
+    void setFiles(const QList<File> &files);
     void clearFiles();
-private:
+
+  private:
     void contextMenuRequested(const QPoint &pos);
 
     Ui::FileListWidget *ui;
 
     // FileTableModel m_fileModel;
     FileTreeModel m_fileModel;
-    void setupTableView();
+    void          setupTableView();
 
-    FileStatusDelegate m_statusDelegate;
-    FileItemDelegate m_itemDelegate;
+    FileStatusDelegate   m_statusDelegate;
+    FileItemDelegate     m_itemDelegate;
     FilePriorityDelegate m_priorityDelegate;
 };
 

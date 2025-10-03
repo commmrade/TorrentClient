@@ -10,52 +10,67 @@ std::vector<libtorrent::announce_entry> TorrentHandle::getTrackers() const
 void TorrentHandle::resetCategory()
 {
     auto status = m_handle.status();
-    if (isPaused()) {
+    if (isPaused())
+    {
         m_category = Categories::STOPPED;
-    } else if (status.is_seeding || status.is_finished) { // they are kinda the same
+    }
+    else if (status.is_seeding || status.is_finished)
+    { // they are kinda the same
         m_category = Categories::SEEDING;
-    } else { // not seeding and not finished and not paused
+    }
+    else
+    { // not seeding and not finished and not paused
         m_category = Categories::RUNNING;
     }
 }
 
-TorrentHandle::TorrentHandle(libtorrent::torrent_handle handle) : m_handle(handle) {
+TorrentHandle::TorrentHandle(libtorrent::torrent_handle handle) : m_handle(handle)
+{
     resetCategory();
 }
 
-void TorrentHandle::setFilePriority(libtorrent::file_index_t index, libtorrent::download_priority_t priority) {
+void TorrentHandle::setFilePriority(libtorrent::file_index_t        index,
+                                    libtorrent::download_priority_t priority)
+{
     m_handle.file_priority(index, priority);
 }
 
-void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString& newName)
+void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString &newName)
 {
     // File is renamed asynchronously, so should probably get an alert
     // TODO: Handle alerts or not?
     m_handle.rename_file(index, newName.toStdString());
 }
-void TorrentHandle::pause() {
+void TorrentHandle::pause()
+{
     setCategory(Categories::STOPPED);
-    m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto resume torrent handle
+    m_handle.unset_flags(lt::torrent_flags::auto_managed); // We need this so libtorrent wont auto
+                                                           // resume torrent handle
     m_handle.pause();
 }
 
-void TorrentHandle::resume() {
+void TorrentHandle::resume()
+{
     m_handle.resume();
     resetCategory();
 }
-void TorrentHandle::connectToPeer(const boost::asio::ip::tcp::endpoint &ep) {
+void TorrentHandle::connectToPeer(const boost::asio::ip::tcp::endpoint &ep)
+{
     m_handle.connect_peer(ep);
 }
 
-QString TorrentHandle::bestHashAsString() const { // truncates sha256
+QString TorrentHandle::bestHashAsString() const
+{ // truncates sha256
     return utils::toHex(m_handle.info_hashes().get_best().to_string());
 }
 
-QString TorrentHandle::hashV1AsString() const {
+QString TorrentHandle::hashV1AsString() const
+{
     return utils::toHex(m_handle.info_hashes().v1.to_string());
 }
 
-std::vector<libtorrent::peer_info> TorrentHandle::getPeerInfo() const {
+std::vector<libtorrent::peer_info> TorrentHandle::getPeerInfo() const
+{
     std::vector<lt::peer_info> peers;
     m_handle.get_peer_info(peers);
     return peers;

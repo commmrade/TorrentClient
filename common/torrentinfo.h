@@ -4,24 +4,26 @@
 #include <cstdint>
 #include <QString>
 
-struct InternetInfo {
+struct InternetInfo
+{
     std::int64_t activeTime;
     std::int64_t downloaded;
-    int downSpeed;
-    int downLimit;
+    int          downSpeed;
+    int          downLimit;
 
     std::int64_t eta; // signed for -1
 
     std::int64_t uploaded;
-    int upSpeed;
-    int upLimit;
+    int          upSpeed;
+    int          upLimit;
 
     int connections;
     int seeds;
     int peers;
 };
 
-struct TorrentInfo {
+struct TorrentInfo
+{
     std::int64_t size;
     std::int64_t startTime;
 

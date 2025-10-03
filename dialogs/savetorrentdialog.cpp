@@ -15,50 +15,48 @@
 #include "utils.h"
 #include <QMessageBox>
 
-SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString& torrentPath, QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::SaveTorrentDialog)
+SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString &torrentPath, QWidget *parent)
+    : QDialog(parent), ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
     // Setup table
     init();
 
-    auto info = std::make_shared<lt::torrent_info>(torrentPath.toStdString());
+    auto info     = std::make_shared<lt::torrent_info>(torrentPath.toStdString());
     m_torrentInfo = std::move(info);
     setDataFromTi();
 
     QSettings settings;
-    auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
+    auto      savePath = settings
+                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                               QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
+                        .toString();
     ui->savePathLineEdit->setText(savePath);
 }
 
 SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::SaveTorrentDialog)
+    : QDialog(parent), ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
     init();
     ui->sizeInfo->setText(tr("Fetching..."));
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetUri.toStdString());
-    auto saveTorrentFile =
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-        QDir::separator() +
-        Dirs::TORRENTS +
-        QDir::separator() +
-        utils::toHex(params.info_hashes.get_best().to_string());
+    auto saveTorrentFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                           QDir::separator() + Dirs::TORRENTS + QDir::separator() +
+                           utils::toHex(params.info_hashes.get_best().to_string());
     params.save_path = saveTorrentFile.toStdString();
     startFetchingMetadata(params);
 
     QSettings settings;
-    auto savePath = settings.value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)).toString();
+    auto      savePath = settings
+                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                               QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
+                        .toString();
     ui->savePathLineEdit->setText(savePath);
 }
 
-SaveTorrentDialog::~SaveTorrentDialog()
-{
-    delete ui;
-}
+SaveTorrentDialog::~SaveTorrentDialog() { delete ui; }
 
 void SaveTorrentDialog::setupTableView()
 {
@@ -66,42 +64,46 @@ void SaveTorrentDialog::setupTableView()
     ui->fileView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->fileView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     ui->fileView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui->fileView->header()->setSectionResizeMode(
-        ui->fileView->header()->count() - 1,
-        QHeaderView::Stretch
-        );
+    ui->fileView->header()->setSectionResizeMode(ui->fileView->header()->count() - 1,
+                                                 QHeaderView::Stretch);
     ui->fileView->setAnimated(true);
 
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
-    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PRIORITY), &m_priorityDelegate);
-
+    ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PRIORITY),
+                                           &m_priorityDelegate);
 
     ui->fileView->hideColumn(2);
     ui->fileView->hideColumn(3);
 
-
     // TODO: connect signals from file model to updatge status and priority for files
-    connect(&m_fileModel, &FileTreeModel::statusChanged, this, [this](int index, bool value) {
-        qDebug() << index << m_filePriorities.size();
-        m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
+    connect(&m_fileModel, &FileTreeModel::statusChanged, this,
+            [this](int index, bool value)
+            {
+                qDebug() << index << m_filePriorities.size();
+                m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
 
-        // Recalc total size TODO:
-    });
-    connect(&m_fileModel, &FileTreeModel::priorityChanged, this, [this](int index, int priority) {
-        m_filePriorities[index] = priority;
-        // Recalc total size TODO:
-    });
+                // Recalc total size TODO:
+            });
+    connect(&m_fileModel, &FileTreeModel::priorityChanged, this,
+            [this](int index, int priority)
+            {
+                m_filePriorities[index] = priority;
+                // Recalc total size TODO:
+            });
 }
 
 void SaveTorrentDialog::setupSignals()
 {
-    connect(this, &QDialog::finished, this, [this](int result) {
-        qDebug() << "Finshed" << result;
-        if (result == QDialog::Accepted) {
-            emit torrentConfirmed(m_torrentInfo, m_filePriorities);
-        }
-    });
+    connect(this, &QDialog::finished, this,
+            [this](int result)
+            {
+                qDebug() << "Finshed" << result;
+                if (result == QDialog::Accepted)
+                {
+                    emit torrentConfirmed(m_torrentInfo, m_filePriorities);
+                }
+            });
 }
 
 void SaveTorrentDialog::init()
@@ -110,28 +112,28 @@ void SaveTorrentDialog::init()
     setupSignals();
 }
 
-QString SaveTorrentDialog::getSavePath() const
-{
-    return ui->savePathLineEdit->text();
-}
+QString SaveTorrentDialog::getSavePath() const { return ui->savePathLineEdit->text(); }
 
-void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti) {
+void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti)
+{
     m_torrentInfo = std::move(ti);
     setDataFromTi();
 }
 
 void SaveTorrentDialog::on_changeSavePathButton_clicked()
 {
-    QString saveDir = QFileDialog::getExistingDirectory(this, tr("Choose a directory to save torrent in"));
-    if (!saveDir.isEmpty()) {
+    QString saveDir =
+        QFileDialog::getExistingDirectory(this, tr("Choose a directory to save torrent in"));
+    if (!saveDir.isEmpty())
+    {
         ui->savePathLineEdit->setText(saveDir);
     }
 }
 
-void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& params)
+void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params &params)
 {
-    auto* fetcher = new MetadataFetcher{params};
-    auto* m_fetcherThread = new QThread{};
+    auto *fetcher         = new MetadataFetcher{params};
+    auto *m_fetcherThread = new QThread{};
     fetcher->moveToThread(m_fetcherThread); // Doesn't block current thread
 
     // Start fetching when thead has started
@@ -151,68 +153,79 @@ void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params& para
     m_fetcherThread->start();
 }
 
-
 void SaveTorrentDialog::setDataFromTi()
 {
     auto totalSize = m_torrentInfo->total_size();
     ui->sizeInfo->setText(utils::bytesToHigher(totalSize));
 
     auto creationTime = m_torrentInfo->creation_date();
-    if (creationTime == 0) {
+    if (creationTime == 0)
+    {
         ui->dateInfo->setText("N/A");
-    } else {
-        auto tp = std::chrono::system_clock::from_time_t(creationTime);
+    }
+    else
+    {
+        auto tp       = std::chrono::system_clock::from_time_t(creationTime);
         auto castTime = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
         auto datetime = QDateTime::fromSecsSinceEpoch(castTime.count());
 
         ui->dateInfo->setText(datetime.toString("MMM d HH:mm:ss yyyy"));
     }
 
-    auto hashv1 = m_torrentInfo->info_hashes().get(lt::protocol_version::V1);
-    auto hashv2 = m_torrentInfo->info_hashes().get(lt::protocol_version::V2);
+    auto hashv1   = m_torrentInfo->info_hashes().get(lt::protocol_version::V1);
+    auto hashv2   = m_torrentInfo->info_hashes().get(lt::protocol_version::V2);
     auto hashbest = m_torrentInfo->info_hashes().get_best();
 
-    if (hashv1.is_all_zeros()) {
+    if (hashv1.is_all_zeros())
+    {
         ui->infoHashV1Value->setText("N/A");
-    } else {
-        ui->infoHashV1Value->setText(utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V1).to_string()));
     }
-    if (hashv2.is_all_zeros()) {
+    else
+    {
+        ui->infoHashV1Value->setText(
+            utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V1).to_string()));
+    }
+    if (hashv2.is_all_zeros())
+    {
         ui->infoHashV2Value->setText("N/A");
-    } else {
-        ui->infoHashV2Value->setText(utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V2).to_string()));
     }
-    if (hashbest.is_all_zeros()) {
+    else
+    {
+        ui->infoHashV2Value->setText(
+            utils::toHex(m_torrentInfo->info_hashes().get(lt::protocol_version::V2).to_string()));
+    }
+    if (hashbest.is_all_zeros())
+    {
         ui->infoHashBestValue->setText("N/A");
-    } else {
-        ui->infoHashBestValue->setText(utils::toHex(m_torrentInfo->info_hashes().get_best().to_string()));
+    }
+    else
+    {
+        ui->infoHashBestValue->setText(
+            utils::toHex(m_torrentInfo->info_hashes().get_best().to_string()));
     }
 
     ui->commentValue->setText(QString::fromStdString(m_torrentInfo->comment()));
 
-
     // Set files
 
-    const auto& tFiles = m_torrentInfo->files();
-    auto numFiles = tFiles.num_files();
+    const auto &tFiles   = m_torrentInfo->files();
+    auto        numFiles = tFiles.num_files();
     QList<File> files;
 
     // Track file priorities
     m_filePriorities.resize(numFiles);
-    for (auto i = 0; i < numFiles; ++i) {
+    for (auto i = 0; i < numFiles; ++i)
+    {
         // qDebug() << "FILENAME:" << tFiles.file_path(i) << "; SIZE:" << tFiles.file_size(i);
         File file;
-        file.id = i;
-        file.filename = QString::fromStdString(tFiles.file_path(i));
-        file.isEnabled = true; // by default all are enabled
-        file.filesize = tFiles.file_size(i);
-        file.priority = lt::default_priority;
+        file.id             = i;
+        file.filename       = QString::fromStdString(tFiles.file_path(i));
+        file.isEnabled      = true; // by default all are enabled
+        file.filesize       = tFiles.file_size(i);
+        file.priority       = lt::default_priority;
         m_filePriorities[i] = lt::default_priority;
 
         files.append(std::move(file));
     }
     m_fileModel.setFiles(files);
 }
-
-
-

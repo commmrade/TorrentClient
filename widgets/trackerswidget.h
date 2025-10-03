@@ -4,7 +4,8 @@
 #include <QWidget>
 #include "trackertablemodel.h"
 
-namespace Ui {
+namespace Ui
+{
 class TrackersWidget;
 }
 
@@ -13,15 +14,16 @@ struct Tracker;
 class TrackersWidget : public QWidget
 {
     Q_OBJECT
-public:
+  public:
     explicit TrackersWidget(QWidget *parent = nullptr);
     ~TrackersWidget();
 
-    void setTrackers(const QList<Tracker>& trackers);
+    void setTrackers(const QList<Tracker> &trackers);
     void clearTrackers();
-private:
+
+  private:
     Ui::TrackersWidget *ui;
-    TrackerTableModel m_trackerModel;
+    TrackerTableModel   m_trackerModel;
 };
 
 #endif // TRACKERSWIDGET_H

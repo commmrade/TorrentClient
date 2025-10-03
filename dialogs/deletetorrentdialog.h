@@ -3,7 +3,8 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class DeleteTorrentDialog;
 }
 
@@ -11,12 +12,13 @@ class DeleteTorrentDialog : public QDialog
 {
     Q_OBJECT
 
-public:
+  public:
     explicit DeleteTorrentDialog(QWidget *parent = nullptr);
     ~DeleteTorrentDialog();
 
     bool getRemoveWithContens() const;
-private:
+
+  private:
     Ui::DeleteTorrentDialog *ui;
 };
 
