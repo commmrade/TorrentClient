@@ -32,9 +32,12 @@ TorrentWidget::TorrentWidget(QWidget *parent)
             { m_tableModel.finishTorrent(id, status); });
     connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
             [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });
-    connect(&m_sessionManager, &SessionManager::torrentStorageMoveFailed, this, [this](const QString& msg, const QString& filename) {
-        QMessageBox::critical(this, tr("Error"), tr("Could not move torrent storage, file:") + filename);
-    });
+    connect(&m_sessionManager, &SessionManager::torrentStorageMoveFailed, this,
+            [this](const QString &msg, const QString &filename)
+            {
+                QMessageBox::critical(this, tr("Error"),
+                                      tr("Could not move torrent storage, file:") + filename);
+            });
 
     connect(ui->torrentsView, &QTableView::clicked, this,
             [this](const QModelIndex &index)
@@ -99,23 +102,25 @@ void TorrentWidget::customContextMenu(const QPoint &pos)
                 }
             });
     menu.addAction(deleteAction);
-    QAction* settingsAction = new QAction(tr("Settings"), this);
-    connect(settingsAction, &QAction::triggered, this, [this, torrentId] {
-        const TorrentHandle tHandle = m_sessionManager.getTorrentHandle(torrentId);
-        TorrentSettingsDialog settingsDialog(tHandle, this);
+    QAction *settingsAction = new QAction(tr("Settings"), this);
+    connect(settingsAction, &QAction::triggered, this,
+            [this, torrentId]
+            {
+                const TorrentHandle   tHandle = m_sessionManager.getTorrentHandle(torrentId);
+                TorrentSettingsDialog settingsDialog(tHandle, this);
 
-        // These only fire when dialog is accepted
-        connect(&settingsDialog, &TorrentSettingsDialog::downloadLimitChanged, this, [this, torrentId](int newLimit) {
-            m_sessionManager.setTorrentDownloadLimit(torrentId, newLimit);
-        });
-        connect(&settingsDialog, &TorrentSettingsDialog::uploadLimitChanged, this, [this, torrentId](int newLimit) {
-            m_sessionManager.setTorrentUploadLimit(torrentId, newLimit);
-        });
-        connect(&settingsDialog, &TorrentSettingsDialog::savePathChanged, this, [this, torrentId](const QString& newPath) {
-            m_sessionManager.setTorrentSavePath(torrentId, newPath);
-        });
-        settingsDialog.exec();
-    });
+                // These only fire when dialog is accepted
+                connect(&settingsDialog, &TorrentSettingsDialog::downloadLimitChanged, this,
+                        [this, torrentId](int newLimit)
+                        { m_sessionManager.setTorrentDownloadLimit(torrentId, newLimit); });
+                connect(&settingsDialog, &TorrentSettingsDialog::uploadLimitChanged, this,
+                        [this, torrentId](int newLimit)
+                        { m_sessionManager.setTorrentUploadLimit(torrentId, newLimit); });
+                connect(&settingsDialog, &TorrentSettingsDialog::savePathChanged, this,
+                        [this, torrentId](const QString &newPath)
+                        { m_sessionManager.setTorrentSavePath(torrentId, newPath); });
+                settingsDialog.exec();
+            });
     menu.addAction(settingsAction);
 
     menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));

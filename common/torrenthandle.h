@@ -44,10 +44,10 @@ class TorrentHandle
     void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
     void renameFile(lt::file_index_t index, const QString &newName);
     void setDownloadLimit(int newLimit);
-    int getDownloadLimit() const;
+    int  getDownloadLimit() const;
     void setUploadLimit(int newLimit);
-    int getUploadLimit() const;
-    void moveStorage(const QString& newPath);
+    int  getUploadLimit() const;
+    void moveStorage(const QString &newPath);
 
     void pause();
     bool isPaused() const

@@ -74,7 +74,8 @@ QVariant FileItem::getValue(int column) const
         };
         return {priorityToString(m_fileData.priority)};
     }
-    case FileFields::ID: {
+    case FileFields::ID:
+    {
         return {m_fileData.id};
     }
     default:
@@ -186,13 +187,15 @@ QModelIndex FileTreeModel::parent(const QModelIndex &child) const
 QVariant FileTreeModel::data(const QModelIndex &index, int role) const
 {
 
-    if (!index.isValid() || (role != Qt::DisplayRole && role <= Qt::UserRole)) {
+    if (!index.isValid() || (role != Qt::DisplayRole && role <= Qt::UserRole))
+    {
 
         return QVariant{};
     }
 
-    BaseItem* obj = static_cast<BaseItem*>(index.internalPointer());
-    if (role == Qt::UserRole + 1) { // TODO: Get rid of magic this
+    BaseItem *obj = static_cast<BaseItem *>(index.internalPointer());
+    if (role == Qt::UserRole + 1)
+    { // TODO: Get rid of magic this
         return {obj->getValue(role)};
     }
     return {obj->getValue(index.column())};

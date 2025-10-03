@@ -42,25 +42,13 @@ void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString &ne
     m_handle.rename_file(index, newName.toStdString());
 }
 
-void TorrentHandle::setDownloadLimit(int newLimit)
-{
-    m_handle.set_download_limit(newLimit);
-}
+void TorrentHandle::setDownloadLimit(int newLimit) { m_handle.set_download_limit(newLimit); }
 
-int TorrentHandle::getDownloadLimit() const
-{
-    return m_handle.download_limit();
-}
+int TorrentHandle::getDownloadLimit() const { return m_handle.download_limit(); }
 
-void TorrentHandle::setUploadLimit(int newLimit)
-{
-    m_handle.set_upload_limit(newLimit);
-}
+void TorrentHandle::setUploadLimit(int newLimit) { m_handle.set_upload_limit(newLimit); }
 
-int TorrentHandle::getUploadLimit() const
-{
-    return m_handle.upload_limit();
-}
+int TorrentHandle::getUploadLimit() const { return m_handle.upload_limit(); }
 
 void TorrentHandle::moveStorage(const QString &newPath)
 {

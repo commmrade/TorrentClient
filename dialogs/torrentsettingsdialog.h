@@ -13,15 +13,15 @@ class TorrentSettingsDialog : public QDialog
 {
     Q_OBJECT
 
-public:
-    explicit TorrentSettingsDialog(const TorrentHandle& tHandle, QWidget *parent = nullptr);
+  public:
+    explicit TorrentSettingsDialog(const TorrentHandle &tHandle, QWidget *parent = nullptr);
     ~TorrentSettingsDialog();
 
-signals:
+  signals:
     void downloadLimitChanged(int newLimit);
     void uploadLimitChanged(int newLimit);
-    void savePathChanged(const QString& newPath);
-private slots:
+    void savePathChanged(const QString &newPath);
+  private slots:
     void on_downloadLimitSpin_valueChanged(int arg1);
 
     void on_uploadLimitSpin_valueChanged(int arg1);

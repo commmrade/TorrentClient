@@ -50,66 +50,85 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     // TODO: Rename, change priority
     // auto index = ui->torrentsView->indexAt(pos);
     auto index = ui->treeView->indexAt(pos);
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         qDebug() << "Invalid index in " << __FUNCTION__;
         return;
     }
 
     // auto fileId = m_fileModel.getFileId(index.row());
-    auto fileId = index.data(Qt::UserRole + 1).toInt();
-    auto& sessionManager = SessionManager::instance();
-    QMenu mainMenu(this);
-    QAction* renameAction = new QAction(tr("Rename"), this);
-    connect(renameAction, &QAction::triggered, this, [this, &sessionManager, fileId] {\
-        bool ok{};
-        QString text = QInputDialog::getText(this, tr("Renaming"),
-                                             tr("New file name:"), QLineEdit::Normal,
-                                             "", &ok);
-        if (ok && !text.isEmpty()) {
-            auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
-            if (currentTorrentIdOpt.has_value()) {
-                sessionManager.renameFile(*currentTorrentIdOpt, fileId, text);
-            }
-        }
-    });
+    auto     fileId         = index.data(Qt::UserRole + 1).toInt();
+    auto    &sessionManager = SessionManager::instance();
+    QMenu    mainMenu(this);
+    QAction *renameAction = new QAction(tr("Rename"), this);
+    connect(renameAction, &QAction::triggered, this,
+            [this, &sessionManager, fileId]
+            {
+                bool    ok{};
+                QString text = QInputDialog::getText(this, tr("Renaming"), tr("New file name:"),
+                                                     QLineEdit::Normal, "", &ok);
+                if (ok && !text.isEmpty())
+                {
+                    auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
+                    if (currentTorrentIdOpt.has_value())
+                    {
+                        sessionManager.renameFile(*currentTorrentIdOpt, fileId, text);
+                    }
+                }
+            });
     mainMenu.addAction(renameAction);
 
-    QMenu* priorityMenu = mainMenu.addMenu(tr("Priority"));
-    QAction* dontDownloadPriority = new QAction(Priorities::DONT_DOWNLOAD, this);
-    connect(dontDownloadPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
-        auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
-        if (currentTorrentIdOpt.has_value()) {
-            sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId, lt::dont_download);
-        }
-    });
+    QMenu   *priorityMenu         = mainMenu.addMenu(tr("Priority"));
+    QAction *dontDownloadPriority = new QAction(Priorities::DONT_DOWNLOAD, this);
+    connect(dontDownloadPriority, &QAction::triggered, this,
+            [this, &sessionManager, fileId]
+            {
+                auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
+                if (currentTorrentIdOpt.has_value())
+                {
+                    sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId,
+                                                      lt::dont_download);
+                }
+            });
     priorityMenu->addAction(dontDownloadPriority);
 
-    QAction* defaultPriority = new QAction(Priorities::DEFAULT, this);
-    connect(defaultPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
-        auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
-        if (currentTorrentIdOpt.has_value()) {
-            sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId,
-            lt::default_priority);
-        }
-    });
+    QAction *defaultPriority = new QAction(Priorities::DEFAULT, this);
+    connect(defaultPriority, &QAction::triggered, this,
+            [this, &sessionManager, fileId]
+            {
+                auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
+                if (currentTorrentIdOpt.has_value())
+                {
+                    sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId,
+                                                      lt::default_priority);
+                }
+            });
     priorityMenu->addAction(defaultPriority);
 
-    QAction* lowPriority = new QAction(Priorities::LOW, this);
-    connect(lowPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
-        auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
-        if (currentTorrentIdOpt.has_value()) {
-            sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId, lt::low_priority);
-        }
-    });
+    QAction *lowPriority = new QAction(Priorities::LOW, this);
+    connect(lowPriority, &QAction::triggered, this,
+            [this, &sessionManager, fileId]
+            {
+                auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
+                if (currentTorrentIdOpt.has_value())
+                {
+                    sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId,
+                                                      lt::low_priority);
+                }
+            });
     priorityMenu->addAction(lowPriority);
 
-    QAction* topPriority = new QAction(Priorities::HIGH, this);
-    connect(topPriority, &QAction::triggered, this, [this, &sessionManager, fileId] {
-        auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
-        if (currentTorrentIdOpt.has_value()) {
-            sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId, lt::top_priority);
-        }
-    });
+    QAction *topPriority = new QAction(Priorities::HIGH, this);
+    connect(topPriority, &QAction::triggered, this,
+            [this, &sessionManager, fileId]
+            {
+                auto currentTorrentIdOpt = sessionManager.getCurrentTorrentId();
+                if (currentTorrentIdOpt.has_value())
+                {
+                    sessionManager.changeFilePriority(*currentTorrentIdOpt, fileId,
+                                                      lt::top_priority);
+                }
+            });
     priorityMenu->addAction(topPriority);
 
     mainMenu.exec(ui->treeView->viewport()->mapToGlobal(pos));

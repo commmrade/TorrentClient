@@ -125,10 +125,12 @@ void SessionManager::eventLoop()
         {
             handleTorrentErrorAlert(torrentErrorAlert);
         }
-        else if (auto* moveFailedAlert = lt::alert_cast<lt::storage_moved_failed_alert>(alert)) {
+        else if (auto *moveFailedAlert = lt::alert_cast<lt::storage_moved_failed_alert>(alert))
+        {
             handleStorageMoveFailedAlert(moveFailedAlert);
         }
-        else if (auto* renameFileFailedAlert = lt::alert_cast<lt::file_rename_failed_alert>(alert)) {
+        else if (auto *renameFileFailedAlert = lt::alert_cast<lt::file_rename_failed_alert>(alert))
+        {
             // TODO: Complete
             qFatal() << "Could not rename a file, because:" << renameFileFailedAlert->message();
         }
