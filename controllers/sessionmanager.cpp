@@ -40,6 +40,11 @@ SessionManager::~SessionManager()
     }
 }
 
+const TorrentHandle SessionManager::getTorrentHandle(const std::uint32_t id) const
+{
+    return m_torrentHandles[id];
+}
+
 libtorrent::session_params SessionManager::loadSessionParams()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
@@ -119,6 +124,13 @@ void SessionManager::eventLoop()
         else if (auto *torrentErrorAlert = lt::alert_cast<lt::torrent_error_alert>(alert))
         {
             handleTorrentErrorAlert(torrentErrorAlert);
+        }
+        else if (auto* moveFailedAlert = lt::alert_cast<lt::storage_moved_failed_alert>(alert)) {
+            handleStorageMoveFailedAlert(moveFailedAlert);
+        }
+        else if (auto* renameFileFailedAlert = lt::alert_cast<lt::file_rename_failed_alert>(alert)) {
+            // TODO: Complete
+            qFatal() << "Could not rename a file, because:" << renameFileFailedAlert->message();
         }
     }
 
@@ -442,6 +454,11 @@ void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *al
     torrentHandle.setCategory(Categories::FAILED);
 }
 
+void SessionManager::handleStorageMoveFailedAlert(libtorrent::storage_moved_failed_alert *alert)
+{
+    emit torrentStorageMoveFailed(QString::fromStdString(alert->message()), alert->file_path());
+}
+
 void SessionManager::loadResumes()
 {
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -655,6 +672,22 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     m_torrentHandles.remove(id);
     emit torrentDeleted(id);
     return true;
+}
+
+void SessionManager::setTorrentDownloadLimit(const uint32_t id, int newLimit)
+{
+    m_torrentHandles[id].setDownloadLimit(newLimit);
+}
+
+void SessionManager::setTorrentUploadLimit(const uint32_t id, int newLimit)
+{
+    m_torrentHandles[id].setUploadLimit(newLimit);
+}
+
+void SessionManager::setTorrentSavePath(const std::uint32_t id, const QString &newPath)
+{
+    // TODO: Might wanna handle failed/success alrts
+    m_torrentHandles[id].moveStorage(newPath);
 }
 
 bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
