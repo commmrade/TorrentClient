@@ -1,6 +1,6 @@
 #include "fileitemdelegate.h"
 #include <QApplication>
-#include "filestablemodel.h"
+#include "filetreemodel.h"
 
 FileItemDelegate::FileItemDelegate(QObject *parent)
     : QStyledItemDelegate{parent}

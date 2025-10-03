@@ -2,7 +2,7 @@
 #include <QComboBox>
 #include <libtorrent/download_priority.hpp> // TODO: Avoid using this
 #include "priority.h"
-#include "filestablemodel.h"
+#include "filetreemodel.h"
 
 FilePriorityDelegate::FilePriorityDelegate(QObject *parent)
     : QStyledItemDelegate{parent}

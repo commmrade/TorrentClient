@@ -2,7 +2,7 @@
 #define FILELISTWIDGET_H
 
 #include <QWidget>
-#include "filestablemodel.h"
+#include "filetreemodel.h"
 #include "fileitemdelegate.h"
 #include "filestatusdelegate.h"
 #include "fileprioritydelegate.h"

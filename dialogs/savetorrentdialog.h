@@ -7,7 +7,7 @@
 #include <fileitemdelegate.h>
 #include <fileprioritydelegate.h>
 #include <filestatusdelegate.h>
-#include "filestablemodel.h"
+#include "filetreemodel.h"
 
 namespace Ui {
 class SaveTorrentDialog;

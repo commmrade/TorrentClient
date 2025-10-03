@@ -1,5 +1,5 @@
-#ifndef FILESTABLEMODEL_H
-#define FILESTABLEMODEL_H
+#ifndef FILETREEMODEL_H
+#define FILETREEMODEL_H
 
 #include <QWidget>
 #include <QAbstractTableModel>
@@ -12,23 +12,15 @@
 class BaseItem {
 public:
     BaseItem() = default;
-    virtual ~BaseItem() = default;
+    virtual ~BaseItem() {
+        qDeleteAll(m_children);
+    }
 
-    virtual bool isDir() const {
-        return true;
-    }
-    virtual void setPath(const QString& newPath) {
-    }
-    virtual QString getPath() const {
-        return {};
-    }
-    virtual QVariant getValue(int column) const {
-        qDebug() << "Default get value";
-        return {};
-    }
-    virtual bool setValue(int column, const QVariant& value) {
-        return false;
-    }
+    virtual bool isDir() const = 0;
+    virtual void setPath(const QString& newPath) = 0;
+    virtual QString getPath() const = 0;
+    virtual QVariant getValue(int column) const = 0;
+    virtual bool setValue(int column, const QVariant& value) = 0;
 
 
     void addChild(BaseItem *file);
@@ -46,8 +38,6 @@ public:
     BaseItem* parent() const {
         return m_parent;
     }
-
-
 private:
     BaseItem* m_parent{nullptr};
     QList<BaseItem*> m_children;
@@ -94,6 +84,11 @@ public:
     }
 
     QVariant getValue(int column) const override;
+
+    bool isDir() const override {
+        return true;
+    }
+    bool setValue(int column, const QVariant &value) override;
 };
 
 
@@ -106,9 +101,10 @@ class FileTreeModel : public QAbstractItemModel {
     void resetRoot();
 
     bool isRootVirgin() const {
-        return m_rootItem == nullptr || (m_rootItem && m_rootItem->childCount() == 0);
-        // return m_rootItem->childCount() == 0;
+        return (m_rootItem->childCount() == 0);
     }
+
+    QString getFirstLeafPath() const;
 public:
     explicit FileTreeModel(QObject* parent = nullptr);
 
@@ -156,4 +152,4 @@ private:
 
 
 
-#endif // FILESTABLEMODEL_H
+#endif // FILETREEMODEL_H

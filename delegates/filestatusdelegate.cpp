@@ -1,7 +1,7 @@
 #include "filestatusdelegate.h"
 #include <QCheckBox>
 #include <QApplication>
-#include "filestablemodel.h"
+#include "filetreemodel.h"
 
 FileStatusDelegate::FileStatusDelegate(QObject *parent)
     : QStyledItemDelegate{parent}
