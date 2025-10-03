@@ -38,7 +38,6 @@ void FilePriorityDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
     QComboBox *comboBox    = static_cast<QComboBox *>(editor);
     auto       priorityStr = comboBox->currentText();
     int        priority    = 0;
-    // TODO: Avoid these magic values
     if (priorityStr == Priorities::DONT_DOWNLOAD)
     {
         priority = lt::dont_download;
