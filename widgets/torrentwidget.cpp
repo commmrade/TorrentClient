@@ -95,6 +95,11 @@ void TorrentWidget::customContextMenu(const QPoint &pos)
                 }
             });
     menu.addAction(deleteAction);
+    QAction* settingsAction = new QAction(tr("Settings"), this);
+    connect(settingsAction, &QAction::triggered, this, [this] {
+        // TODO
+    });
+    menu.addAction(settingsAction);
 
     menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));
 }
