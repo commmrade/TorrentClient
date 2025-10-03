@@ -8,18 +8,20 @@
 class QChartView;
 class QLineSeries;
 
-namespace Ui {
+namespace Ui
+{
 class SpeedGraphWidget;
 }
 
 class SpeedGraphWidget : public QWidget
 {
     Q_OBJECT
-public:
+  public:
     explicit SpeedGraphWidget(QWidget *parent = nullptr);
     ~SpeedGraphWidget();
 
-    enum Tab {
+    enum Tab
+    {
         ONE_MINUTE,
         FIVE_MINUTES,
         FIFTEEN_MINUTES,
@@ -27,20 +29,19 @@ public:
         TWELVE_HOURS,
         ONE_DAY
     };
-private slots:
+  private slots:
     void on_periodComboBox_activated(int index);
 
-private:
+  private:
     Ui::SpeedGraphWidget *ui;
-
 
     Tab m_currentTab{ONE_MINUTE};
     Tab m_prevTab{FIVE_MINUTES};
 
     QPointer<QChartView> m_chartView;
 
-    QLineSeries* m_downloadSeries{nullptr};
-    QLineSeries* m_uploadSeries{nullptr};
+    QLineSeries *m_downloadSeries{nullptr};
+    QLineSeries *m_uploadSeries{nullptr};
 
     QList<QPointF> m_downloadList;
     QList<QPointF> m_uploadList;

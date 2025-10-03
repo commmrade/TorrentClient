@@ -6,10 +6,11 @@
 class FileItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
-public:
+  public:
     explicit FileItemDelegate(QObject *parent = nullptr);
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-signals:
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
+  signals:
 };
 
 #endif // FILEITEMDELEGATE_H

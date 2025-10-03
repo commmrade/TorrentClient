@@ -3,12 +3,13 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class SettingsDialog;
 }
 
-
-enum SettingsTabs {
+enum SettingsTabs
+{
     APPLICATION,
     TORRENT,
     ADVANCED
@@ -17,11 +18,11 @@ enum SettingsTabs {
 class SettingsDialog : public QDialog
 {
     Q_OBJECT
-public:
+  public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
 
-private slots:
+  private slots:
     void on_listWidget_currentRowChanged(int currentRow);
 
     // void on_customizeButton_clicked();
@@ -44,7 +45,7 @@ private slots:
 
     void on_chooseThemeBtn_clicked();
 
-private:
+  private:
     Ui::SettingsDialog *ui;
 
     // Settings flags
@@ -59,7 +60,7 @@ private:
     void applyApplicationSettings();
     void applyTorrentSettings();
 
-signals:
+  signals:
     void downloadLimitChanged(int value);
     void uploadLimitChanged(int value);
 };

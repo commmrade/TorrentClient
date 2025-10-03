@@ -1,9 +1,7 @@
 #include "trackerswidget.h"
 #include "ui_trackerswidget.h"
 
-TrackersWidget::TrackersWidget(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::TrackersWidget)
+TrackersWidget::TrackersWidget(QWidget *parent) : QWidget(parent), ui(new Ui::TrackersWidget)
 {
     ui->setupUi(this);
 
@@ -13,17 +11,11 @@ TrackersWidget::TrackersWidget(QWidget *parent)
     ui->trackersView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
-TrackersWidget::~TrackersWidget()
-{
-    delete ui;
-}
+TrackersWidget::~TrackersWidget() { delete ui; }
 
 void TrackersWidget::setTrackers(const QList<Tracker> &trackers)
 {
     m_trackerModel.setTrackers(trackers);
 }
 
-void TrackersWidget::clearTrackers()
-{
-    m_trackerModel.clearTrackers();
-}
+void TrackersWidget::clearTrackers() { m_trackerModel.clearTrackers(); }

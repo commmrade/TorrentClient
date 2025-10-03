@@ -7,9 +7,7 @@
 #include <QClipboard>
 #include "addpeersdialog.h"
 
-PeersWidget::PeersWidget(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::PeersWidget)
+PeersWidget::PeersWidget(QWidget *parent) : QWidget(parent), ui(new Ui::PeersWidget)
 {
     ui->setupUi(this);
 
@@ -19,64 +17,70 @@ PeersWidget::PeersWidget(QWidget *parent)
     ui->peerTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->peerTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    connect(ui->peerTable, &QTableView::customContextMenuRequested, this, &PeersWidget::contextMenuRequested);
+    connect(ui->peerTable, &QTableView::customContextMenuRequested, this,
+            &PeersWidget::contextMenuRequested);
 }
 
-PeersWidget::~PeersWidget()
-{
-    delete ui;
-}
+PeersWidget::~PeersWidget() { delete ui; }
 
-void PeersWidget::clearPeers()
-{
-    m_peerModel.clearPeers();
-}
+void PeersWidget::clearPeers() { m_peerModel.clearPeers(); }
 
 void PeersWidget::contextMenuRequested(const QPoint &pos)
 {
     auto index = ui->peerTable->indexAt(pos);
 
-    QMenu menu(this);
-    QAction* banAction = new QAction(tr("Ban peers"), this);
-    connect(banAction, &QAction::triggered, this, [this] {
-        const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
-        QList<QPair<QString, unsigned short>> banPeers;
-        for (const auto& modelIndex : selectedRows) {
-            banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
-        }
+    QMenu    menu(this);
+    QAction *banAction = new QAction(tr("Ban peers"), this);
+    connect(banAction, &QAction::triggered, this,
+            [this]
+            {
+                const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
+                QList<QPair<QString, unsigned short>> banPeers;
+                for (const auto &modelIndex : selectedRows)
+                {
+                    banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
+                }
 
-        auto& sessionManager = SessionManager::instance();
-        sessionManager.banPeers(banPeers);
-    });
+                auto &sessionManager = SessionManager::instance();
+                sessionManager.banPeers(banPeers);
+            });
 
-    QAction* copyAction = new QAction(tr("Copy ip:port"), this);
-    connect(copyAction, &QAction::triggered, this, [this] {
-        const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
+    QAction *copyAction = new QAction(tr("Copy ip:port"), this);
+    connect(copyAction, &QAction::triggered, this,
+            [this]
+            {
+                const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
 
-        QString toCopyStr;
-        for (const auto& modelIndex : selectedRows) {
-            auto peer = m_peerModel.getPeerShortInfo(modelIndex.row());
-            toCopyStr += peer.first + ":" + QString::number(peer.second) + '\n';
-        }
-        QApplication::clipboard()->setText(toCopyStr);
-    });
+                QString toCopyStr;
+                for (const auto &modelIndex : selectedRows)
+                {
+                    auto peer = m_peerModel.getPeerShortInfo(modelIndex.row());
+                    toCopyStr += peer.first + ":" + QString::number(peer.second) + '\n';
+                }
+                QApplication::clipboard()->setText(toCopyStr);
+            });
 
-    QAction* addPeerAction = new QAction(tr("Add a peer"), this);
-    connect(addPeerAction, &QAction::triggered, this, [this] {
-        AddPeersDialog dialog(this);
+    QAction *addPeerAction = new QAction(tr("Add a peer"), this);
+    connect(addPeerAction, &QAction::triggered, this,
+            [this]
+            {
+                AddPeersDialog dialog(this);
 
-        if (dialog.exec() == QDialog::Accepted) {
-            auto eps = dialog.getAddrs();
-            auto& sessionManager = SessionManager::instance();
-            auto currentTorrentId = sessionManager.getCurrentTorrentId();
+                if (dialog.exec() == QDialog::Accepted)
+                {
+                    auto  eps              = dialog.getAddrs();
+                    auto &sessionManager   = SessionManager::instance();
+                    auto  currentTorrentId = sessionManager.getCurrentTorrentId();
 
-            if (currentTorrentId.has_value()) {
-                sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
-            }
-        }
-    });
+                    if (currentTorrentId.has_value())
+                    {
+                        sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
+                    }
+                }
+            });
 
-    if (index.row() == -1) {
+    if (index.row() == -1)
+    {
         banAction->setEnabled(false);
         copyAction->setEnabled(false);
     }

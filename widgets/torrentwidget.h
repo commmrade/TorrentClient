@@ -8,7 +8,8 @@
 #include <QPointer>
 #include "categorysortfilter.h"
 
-namespace Ui {
+namespace Ui
+{
 class TorrentWidget;
 }
 
@@ -18,16 +19,16 @@ class TorrentWidget : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     explicit TorrentWidget(QWidget *parent = nullptr);
     ~TorrentWidget();
 
-private slots:
+  private slots:
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
 
-    void customContextMenu(const QPoint& pos);
+    void customContextMenu(const QPoint &pos);
 
     void on_togglePropertiesBtn_clicked();
 
@@ -37,18 +38,18 @@ private slots:
 
     void on_categoriesList_currentTextChanged(const QString &currentText);
 
-private:
+  private:
     void setupTableView();
 
     Ui::TorrentWidget *ui;
 
     QPointer<SpeedGraphWidget> m_speedGraph;
 
-    SessionManager& m_sessionManager;
+    SessionManager &m_sessionManager;
 
-    TorrentsTableModel m_tableModel;
+    TorrentsTableModel  m_tableModel;
     TorrentItemDelegate m_tableDelegate;
-    CategorySortFilter m_categoryFilter;
+    CategorySortFilter  m_categoryFilter;
 };
 
 #endif // TORRENTWIDGET_H

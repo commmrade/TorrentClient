@@ -2,18 +2,20 @@
 #define TRACKER_H
 #include <QString>
 
-struct Tracker {
-    QString url;
+struct Tracker
+{
+    QString      url;
     std::uint8_t tier;
-    bool isWorking;
-    int seeds;
-    int leeches;
-    QString message;
+    bool         isWorking;
+    int          seeds;
+    int          leeches;
+    QString      message;
     std::int32_t nextAnnounce;
     std::int32_t minAnnounce;
 };
 
-enum class TrackerFields {
+enum class TrackerFields
+{
     URL = 0,
     TIER,
     STATUS,

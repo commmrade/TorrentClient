@@ -54,7 +54,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         widgets/piecesbarwidget.h widgets/piecesbarwidget.cpp widgets/piecesbarwidget.ui
         dialogs/addpeersdialog.h dialogs/addpeersdialog.cpp dialogs/addpeersdialog.ui
         widgets/speedgraphwidget.h widgets/speedgraphwidget.cpp widgets/speedgraphwidget.ui
-        models/filestablemodel.h models/filestablemodel.cpp models/filestablemodel.ui
+        models/filetreemodel.h models/filetreemodel.cpp models/filetreemodel.ui
         common/file.h
         delegates/fileitemdelegate.h delegates/fileitemdelegate.cpp
         widgets/filelistwidget.h widgets/filelistwidget.cpp widgets/filelistwidget.ui

@@ -2,25 +2,28 @@
 #define PEER_H
 #include <QString>
 
-struct Peer {
-    QString country;
-    QString ip;
+struct Peer
+{
+    QString        country;
+    QString        ip;
     unsigned short port;
-    QString connectionType;
-    QString client;
-    float progress;
-    std::uint64_t upSpeed;
-    std::uint64_t downSpeed;
-    std::uint64_t downloaded;
-    std::uint64_t uploaded;
+    QString        connectionType;
+    QString        client;
+    float          progress;
+    std::uint64_t  upSpeed;
+    std::uint64_t  downSpeed;
+    std::uint64_t  downloaded;
+    std::uint64_t  uploaded;
 };
 
-struct PeerShort {
-    QString ip;
+struct PeerShort
+{
+    QString        ip;
     unsigned short port;
 };
 
-enum class PeerFields {
+enum class PeerFields
+{
     COUNTRY = 0,
     IP,
     PORT,

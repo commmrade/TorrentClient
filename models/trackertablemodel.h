@@ -8,29 +8,30 @@
 class TrackerTableModel : public QAbstractTableModel
 {
     Q_OBJECT
-public:
+  public:
     explicit TrackerTableModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex& index = QModelIndex{}) const override {
+    int rowCount(const QModelIndex &index = QModelIndex{}) const override
+    {
         return m_trackers.size();
     }
-    int columnCount(const QModelIndex& index = QModelIndex{}) const override {
+    int columnCount(const QModelIndex &index = QModelIndex{}) const override
+    {
         return TRACKER_FIELDS_COUNT;
     }
 
-    QVariant data(const QModelIndex& index = QModelIndex{}, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex &index = QModelIndex{},
+                  int                role  = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-
-    void setTrackers(const QList<Tracker>& trackers);
+    void setTrackers(const QList<Tracker> &trackers);
     void clearTrackers();
-signals:
+  signals:
 
-private:
+  private:
     QList<Tracker> m_trackers;
-
 };
 
 #endif // TRACKERTABLEMODEL_H

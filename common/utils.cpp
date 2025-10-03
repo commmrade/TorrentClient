@@ -1,23 +1,27 @@
 #include "utils.h"
 #include <cmath>
 
+namespace utils
+{
 
-
-namespace utils {
-
-double ceilTwoAfterComa(double number) {
-    return std::ceil(number * 100.0) / 100.0;
-}
+double ceilTwoAfterComa(double number) { return std::ceil(number * 100.0) / 100.0; }
 
 QString bytesToHigher(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B"};
-    if (bytes < BYTES_IN_KB) { }
-    else if (bytes < BYTES_IN_MB) { // < mb
+    if (bytes < BYTES_IN_KB)
+    {
+    }
+    else if (bytes < BYTES_IN_MB)
+    { // < mb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB";
-    } else if (bytes < BYTES_IN_GB) { // < gb
+    }
+    else if (bytes < BYTES_IN_GB)
+    { // < gb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB";
-    } else { // >= gb
+    }
+    else
+    { // >= gb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB";
     }
     return sizeStr;
@@ -26,12 +30,19 @@ QString bytesToHigher(const std::uint64_t bytes)
 QString bytesToHigherPerSec(const std::uint64_t bytes)
 {
     QString sizeStr{QString::number(bytes) + " B/s"};
-    if (bytes < BYTES_IN_KB) {}
-    else if (bytes < BYTES_IN_MB) { // < mb
+    if (bytes < BYTES_IN_KB)
+    {
+    }
+    else if (bytes < BYTES_IN_MB)
+    { // < mb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_KB)) + " KB/s";
-    } else if (bytes < BYTES_IN_GB) { // < gb
+    }
+    else if (bytes < BYTES_IN_GB)
+    { // < gb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_MB)) + " MB/s";
-    } else { // >= gb
+    }
+    else
+    { // >= gb
         sizeStr = QString::number(ceilTwoAfterComa(bytes / DBYTES_IN_GB)) + " GB/s";
     }
     return sizeStr;
@@ -39,24 +50,28 @@ QString bytesToHigherPerSec(const std::uint64_t bytes)
 
 QString secsToFormattedTime(std::int64_t secs)
 {
-    if (secs == -1) return QString("infinity");
+    if (secs == -1)
+        return QString("infinity");
 
     QString etaStr;
-    auto years = secs / SECONDS_IN_YEAR;
-    if (years) {
+    auto    years = secs / SECONDS_IN_YEAR;
+    if (years)
+    {
         etaStr += QString::number(years) + " y ";
     }
     auto weeks = secs / SECONDS_IN_WEEK;
-    if (weeks) {
+    if (weeks)
+    {
         etaStr += QString::number(weeks) + " w ";
     }
     auto days = secs / SECONDS_IN_DAY;
-    if (days) {
+    if (days)
+    {
         etaStr += QString::number(days) + " d ";
     }
 
-    auto hrs = secs % SECONDS_IN_YEAR % SECONDS_IN_WEEK % SECONDS_IN_DAY / SECONDS_IN_HOUR;
-    auto mins = secs % SECONDS_IN_HOUR / SECONDS_IN_MINUTE;
+    auto hrs     = secs % SECONDS_IN_YEAR % SECONDS_IN_WEEK % SECONDS_IN_DAY / SECONDS_IN_HOUR;
+    auto mins    = secs % SECONDS_IN_HOUR / SECONDS_IN_MINUTE;
     auto seconds = secs % SECONDS_IN_MINUTE;
     etaStr += QString("%1:%2:%3").arg(hrs).arg(mins).arg(seconds);
 
@@ -68,14 +83,18 @@ QString toHex(std::span<const char> data, bool to_upper /* = false */)
     QString result;
     result.reserve(data.size() * 2);
 
-    uint8_t into_letter = to_upper ? 55 : 87; // (65 ('A') - 10 ('hex letters')) and  (97 ('a) - 10 ('hex letters'))
+    uint8_t into_letter =
+        to_upper ? 55 : 87; // (65 ('A') - 10 ('hex letters')) and  (97 ('a) - 10 ('hex letters'))
 
-    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(data.data());
-    for (auto i = 0; i < data.size(); ++i) {
-        uint8_t byte_first = (bytes[i] >> 4);
+    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(data.data());
+    for (auto i = 0; i < data.size(); ++i)
+    {
+        uint8_t byte_first  = (bytes[i] >> 4);
         uint8_t byte_second = (0x0F) & bytes[i];
-        result += (byte_first < 10) ? static_cast<char>(byte_first + 48) : static_cast<char>(byte_first + into_letter);
-        result += (byte_second < 10) ? static_cast<char>(byte_second + 48) : static_cast<char>(byte_second + into_letter);
+        result += (byte_first < 10) ? static_cast<char>(byte_first + 48)
+                                    : static_cast<char>(byte_first + into_letter);
+        result += (byte_second < 10) ? static_cast<char>(byte_second + 48)
+                                     : static_cast<char>(byte_second + into_letter);
     }
     return result;
 }
