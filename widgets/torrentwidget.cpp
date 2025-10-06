@@ -245,5 +245,4 @@ void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentT
 {
     m_categoryFilter.setCategory(currentText);
     m_categoryFilter.invalidate();
-
 }

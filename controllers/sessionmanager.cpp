@@ -628,19 +628,11 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
     if (m_currentTorrentId.has_value() && id == m_currentTorrentId.value())
     {
-        qWarning() << "Current torrent set to null";
         m_currentTorrentId = std::nullopt;
     }
 
-    if (removeWithContents)
-    {
-        m_session->remove_torrent(m_torrentHandles[id].handle(), lt::session::delete_files);
-    }
-    else
-    {
-        m_session->remove_torrent(m_torrentHandles[id].handle());
-    }
     auto &torrentHandle = m_torrentHandles[id];
+    m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files : lt::remove_flags_t{});
 
     // Delete .fastresume and .torrent
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
