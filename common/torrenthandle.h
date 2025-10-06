@@ -59,7 +59,8 @@ class TorrentHandle
     }
     void resume();
 
-    void saveResumeData() {
+    void saveResumeData()
+    {
         auto a = lt::resume_data_flags_t{};
         m_handle.save_resume_data(lt::torrent_handle::save_info_dict);
     }

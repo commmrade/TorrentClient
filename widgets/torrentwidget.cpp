@@ -47,7 +47,6 @@ TorrentWidget::TorrentWidget(QWidget *parent)
                 m_sessionManager.forceUpdateProperties();
             });
 
-
     // Context Menu Stuff
     ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->torrentsView, &QTableView::customContextMenuRequested, this,

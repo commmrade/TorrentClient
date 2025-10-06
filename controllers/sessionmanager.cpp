@@ -132,8 +132,7 @@ void SessionManager::eventLoop()
         }
         else if (auto *renameFileFailedAlert = lt::alert_cast<lt::file_rename_failed_alert>(alert))
         {
-            // TODO: Complete
-            qFatal() << "Could not rename a file, because:" << renameFileFailedAlert->message();
+            handleFileRenameFailedAlert(renameFileFailedAlert);
         }
     }
 
@@ -484,8 +483,10 @@ void SessionManager::loadResumes()
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
             // bool isPaused =
-            //     (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true
-            //                                                                                   : false;
+            //     (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ?
+            //     true
+            //                                                                                   :
+            //                                                                                   false;
             // if (isPaused)
             // {
             //     params.flags &= ~lt::torrent_flags::auto_managed;
@@ -637,7 +638,8 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     }
 
     auto &torrentHandle = m_torrentHandles[id];
-    m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files : lt::remove_flags_t{});
+    m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files
+                                                                         : lt::remove_flags_t{});
 
     // Delete .fastresume and .torrent
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);

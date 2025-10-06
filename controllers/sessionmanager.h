@@ -127,7 +127,7 @@ class SessionManager : public QObject
     void torrentDeleted(const std::uint32_t id);
     // void torrentStorageMoveFailed(const QString& message);
     void torrentFileMoveFailed(const QString &message, const QString &torrentName);
-    void torrentFileRenameFailed(const QString& message, const QString& file);
+    void torrentFileRenameFailed(const QString &message, const QString &file);
     // or
     // void error(const QString& type, const QString& message);
 
