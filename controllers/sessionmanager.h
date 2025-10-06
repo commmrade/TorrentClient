@@ -27,7 +27,6 @@ class SessionManager : public QObject
 
     std::unique_ptr<lt::session> m_session;
     void                         loadSessionSettingsFromSettings(lt::session_params &sessParams);
-    // QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
     QHash<std::uint32_t, TorrentHandle> m_torrentHandles;
 
     QTimer m_alertTimer;
@@ -42,7 +41,6 @@ class SessionManager : public QObject
     explicit SessionManager(QObject *parent = nullptr);
 
   public:
-    // Q_DISABLE_COPY_MOVE(SessionManager); // Can't copy and move QObjects
     ~SessionManager();
 
     static SessionManager &instance()
@@ -89,7 +87,6 @@ class SessionManager : public QObject
 
     // Utils
     void forceUpdateProperties();
-    void forceUpdateCategory();
 
   private:
     lt::session_params loadSessionParams();

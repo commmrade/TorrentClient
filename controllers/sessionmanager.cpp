@@ -267,9 +267,7 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
     torrentHandle.resetCategory(); // sync category justin case
     Torrent torrent = {
         torrentHandle.id(),
-        torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category
-                                     // changing, in torrent table model i check if category is
-                                     // empty leave the current category
+        torrentHandle.getCategory(), // Default category is All,
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,
@@ -571,12 +569,6 @@ void SessionManager::forceUpdateProperties()
     updateTrackersProp(torrentHandle);
     updateUrlProp(torrentHandle);
     updateFilesProp(torrentHandle);
-}
-
-void SessionManager::forceUpdateCategory()
-{
-    // TODO: Upate category and signal so torrent list immediately changes after selecting different
-    // category
 }
 
 void SessionManager::emitClearSignals()

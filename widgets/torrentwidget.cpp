@@ -47,6 +47,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
                 m_sessionManager.forceUpdateProperties();
             });
 
+
     // Context Menu Stuff
     ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->torrentsView, &QTableView::customContextMenuRequested, this,
@@ -242,7 +243,7 @@ void TorrentWidget::closeAllTabs()
 
 void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentText)
 {
-    // TODO: Force update torrent somehow
-    m_sessionManager.forceUpdateCategory();
     m_categoryFilter.setCategory(currentText);
+    m_categoryFilter.invalidate();
+
 }
