@@ -36,7 +36,7 @@ TorrentWidget::TorrentWidget(QWidget *parent)
             [this](const QString &msg, const QString &torrentName)
             {
                 QMessageBox::critical(this, tr("Error"),
-                                      tr("Could not move a file, torrent:") + torrentName);
+                                      tr("Could not move a file, torrent:") + torrentName + tr(", because ") + msg);
             });
 
     connect(ui->torrentsView, &QTableView::clicked, this,
