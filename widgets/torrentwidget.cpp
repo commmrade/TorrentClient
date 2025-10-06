@@ -32,11 +32,11 @@ TorrentWidget::TorrentWidget(QWidget *parent)
             { m_tableModel.finishTorrent(id, status); });
     connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
             [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });
-    connect(&m_sessionManager, &SessionManager::torrentStorageMoveFailed, this,
-            [this](const QString &msg, const QString &filename)
+    connect(&m_sessionManager, &SessionManager::torrentFileMoveFailed, this,
+            [this](const QString &msg, const QString &torrentName)
             {
                 QMessageBox::critical(this, tr("Error"),
-                                      tr("Could not move torrent storage, file:") + filename);
+                                      tr("Could not move a file, torrent:") + torrentName);
             });
 
     connect(ui->torrentsView, &QTableView::clicked, this,

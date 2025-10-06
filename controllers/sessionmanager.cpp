@@ -456,7 +456,12 @@ void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *al
 
 void SessionManager::handleStorageMoveFailedAlert(libtorrent::storage_moved_failed_alert *alert)
 {
-    emit torrentStorageMoveFailed(QString::fromStdString(alert->message()), alert->file_path());
+    emit torrentFileMoveFailed(QString::fromStdString(alert->message()), alert->torrent_name());
+}
+
+void SessionManager::handleFileRenameFailedAlert(libtorrent::file_rename_failed_alert *alert)
+{
+    emit torrentFileMoveFailed(QString::fromStdString(alert->message()), alert->torrent_name());
 }
 
 void SessionManager::loadResumes()

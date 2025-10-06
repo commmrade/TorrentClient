@@ -113,6 +113,7 @@ class SessionManager : public QObject
     void handleSessionStatsAlert(lt::session_stats_alert *alert);
     void handleTorrentErrorAlert(lt::torrent_error_alert *alert);
     void handleStorageMoveFailedAlert(lt::storage_moved_failed_alert *alert);
+    void handleFileRenameFailedAlert(lt::file_rename_failed_alert *alert);
 
     void saveResumes();
     bool addTorrent(lt::add_torrent_params params);
@@ -125,7 +126,8 @@ class SessionManager : public QObject
     void torrentFinished(const std::uint32_t id, const lt::torrent_status &status);
     void torrentDeleted(const std::uint32_t id);
     // void torrentStorageMoveFailed(const QString& message);
-    void torrentStorageMoveFailed(const QString &message, const QString &whereTo);
+    void torrentFileMoveFailed(const QString &message, const QString &torrentName);
+    void torrentFileRenameFailed(const QString& message, const QString& file);
     // or
     // void error(const QString& type, const QString& message);
 
