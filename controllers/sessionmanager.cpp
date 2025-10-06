@@ -107,6 +107,7 @@ void SessionManager::eventLoop()
         }
         else if (auto *metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert))
         {
+            qDebug() << "MDAta received";
             handleMetadataReceived(metadataReceivedAlert);
         }
         else if (auto *resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert))
@@ -263,7 +264,6 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
                                  static_cast<double>(status.total_wanted) * 100.0) *
                                 100) /
                       100.0;
-
     torrentHandle.resetCategory(); // sync category justin case
     Torrent torrent = {
         torrentHandle.id(),
@@ -478,13 +478,13 @@ void SessionManager::loadResumes()
         {
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
-            bool isPaused =
-                (params.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true
-                                                                                          : false;
-            if (isPaused)
-            {
-                params.flags &= ~lt::torrent_flags::auto_managed;
-            }
+            // bool isPaused =
+            //     (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true
+            //                                                                                   : false;
+            // if (isPaused)
+            // {
+            //     params.flags &= ~lt::torrent_flags::auto_managed;
+            // }
             m_session->async_add_torrent(std::move(params));
         }
     }

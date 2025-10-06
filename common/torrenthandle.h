@@ -59,7 +59,10 @@ class TorrentHandle
     }
     void resume();
 
-    void saveResumeData() { m_handle.save_resume_data(); }
+    void saveResumeData() {
+        auto a = lt::resume_data_flags_t{};
+        m_handle.save_resume_data(lt::torrent_handle::save_info_dict);
+    }
 
     std::uint64_t activeDur() { return m_handle.status().active_duration.count(); }
 
