@@ -11,6 +11,8 @@
 #include "torrentsettingsdialog.h"
 #include "QSettings"
 #include "settingsvalues.h"
+#include <QSystemTrayIcon>
+#include <QApplication>
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -18,44 +20,20 @@ TorrentWidget::TorrentWidget(QWidget *parent)
     , m_sessionManager(SessionManager::instance())
     , m_speedGraph(new SpeedGraphWidget{})
     , m_categoryFilter(this)
+    , m_trayIcon(new QSystemTrayIcon{this})
 {
     ui->setupUi(this);
 
     closeAllTabs();
 
     setupTableView();
+    setupTray();
+    setupSession();
 
-    connect(&m_sessionManager, &SessionManager::torrentAdded, this,
-            [this](const Torrent &torrent) { m_tableModel.addTorrent(torrent); });
-    connect(&m_sessionManager, &SessionManager::torrentUpdated, this,
-            [this](const Torrent &torrent) { m_tableModel.updateTorrent(torrent); });
-    connect(&m_sessionManager, &SessionManager::torrentFinished, this,
-            [this](const std::uint32_t id, const lt::torrent_status &status)
-            { m_tableModel.finishTorrent(id, status); });
-    connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
-            [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });
-    connect(&m_sessionManager, &SessionManager::torrentFileMoveFailed, this,
-            [this](const QString &msg, const QString &torrentName)
-            {
-                QMessageBox::critical(this, tr("Error"),
-                                      tr("Could not move a file, torrent:") + torrentName + tr(", because ") + msg);
-            });
-
-    connect(ui->torrentsView, &QTableView::clicked, this,
-            [this](const QModelIndex &index)
-            {
-                auto torrentId = m_tableModel.getTorrentId(index.row());
-                m_sessionManager.setCurrentTorrentId(torrentId);
-                m_sessionManager.forceUpdateProperties();
-            });
-
-    // Context Menu Stuff
+    connect(ui->torrentsView, &QTableView::clicked, this, &TorrentWidget::torrentClicked);
     ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->torrentsView, &QTableView::customContextMenuRequested, this,
             &TorrentWidget::customContextMenu);
-
-    m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't
-                                    // get torrentAdded signal
 }
 
 TorrentWidget::~TorrentWidget() { delete ui; }
@@ -147,6 +125,61 @@ void TorrentWidget::setupTableView()
     ui->torrentsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     ui->torrentsView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->torrentsView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+void TorrentWidget::setupTray()
+{
+    m_trayIcon->setIcon(QIcon{"icon.png"});
+    QMenu* trayMenu = new QMenu(this);
+    QAction* toggleMenu = new QAction(tr("Hide"), this);
+    connect(toggleMenu, &QAction::triggered, this, []{
+        qDebug() << "Hide action";
+        // TODO: Daemonization
+    });
+    trayMenu->addAction(toggleMenu);
+
+    QAction* addTorrentFilename = new QAction(tr("Add torrent file"), this);
+    connect(addTorrentFilename, &QAction::triggered, this, [this] {
+        on_pushButton_2_clicked();
+    });
+    trayMenu->addAction(addTorrentFilename);
+
+    QAction* addTorrentMagnet = new QAction(tr("Add torrent link"), this);
+    connect(addTorrentMagnet, &QAction::triggered, this, [this] {
+        // TODO: separate dialog for adding magnet torrents for release version
+        // now there is no such thing since it was not needed up until now
+    });
+    trayMenu->addAction(addTorrentMagnet);
+
+    QAction* exit = new QAction(tr("Exit"), this);
+    connect(exit, &QAction::triggered, this, []{
+        QApplication::exit();
+    });
+    trayMenu->addAction(exit);
+    m_trayIcon->setContextMenu(trayMenu);
+    m_trayIcon->show();
+}
+
+void TorrentWidget::setupSession()
+{
+    connect(&m_sessionManager, &SessionManager::torrentAdded, this,
+            [this](const Torrent &torrent) { m_tableModel.addTorrent(torrent); });
+    connect(&m_sessionManager, &SessionManager::torrentUpdated, this,
+            [this](const Torrent &torrent) { m_tableModel.updateTorrent(torrent); });
+    connect(&m_sessionManager, &SessionManager::torrentFinished, this,
+            [this](const std::uint32_t id, const lt::torrent_status &status)
+            { m_tableModel.finishTorrent(id, status); });
+    connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
+            [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });
+    connect(&m_sessionManager, &SessionManager::torrentFileMoveFailed, this,
+            [this](const QString &msg, const QString &torrentName)
+            {
+                QMessageBox::critical(this, tr("Error"),
+                                      tr("Could not move a file, torrent:") + torrentName + tr(", because ") + msg);
+            });
+    m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't
+                                    // get torrentAdded signal
+
 }
 
 void TorrentWidget::on_pushButton_clicked()
@@ -255,4 +288,11 @@ void TorrentWidget::on_categoriesList_currentTextChanged(const QString &currentT
 {
     m_categoryFilter.setCategory(currentText);
     m_categoryFilter.invalidate();
+}
+
+void TorrentWidget::torrentClicked(const QModelIndex &index)
+{
+    auto torrentId = m_tableModel.getTorrentId(index.row());
+    m_sessionManager.setCurrentTorrentId(torrentId);
+    m_sessionManager.forceUpdateProperties();
 }

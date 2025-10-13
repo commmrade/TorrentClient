@@ -14,7 +14,7 @@ class TorrentWidget;
 }
 
 class SpeedGraphWidget;
-
+class QSystemTrayIcon;
 class TorrentWidget : public QWidget
 {
     Q_OBJECT
@@ -37,9 +37,11 @@ class TorrentWidget : public QWidget
     void closeAllTabs();
 
     void on_categoriesList_currentTextChanged(const QString &currentText);
-
+    void torrentClicked(const QModelIndex& index);
   private:
     void setupTableView();
+    void setupTray();
+    void setupSession();
 
     Ui::TorrentWidget *ui;
 
@@ -50,6 +52,7 @@ class TorrentWidget : public QWidget
     TorrentsTableModel  m_tableModel;
     TorrentItemDelegate m_tableDelegate;
     CategorySortFilter  m_categoryFilter;
+    QSystemTrayIcon* m_trayIcon;
 };
 
 #endif // TORRENTWIDGET_H

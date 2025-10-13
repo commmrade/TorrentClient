@@ -1,15 +1,12 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "settingsdialog.h"
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_torrentWidget(new TorrentWidget)
 {
     ui->setupUi(this);
 
     setCentralWidget(m_torrentWidget);
-
-    // test
 }
 
 MainWindow::~MainWindow() { delete ui; }

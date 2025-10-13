@@ -98,8 +98,6 @@ int main(int argc, char *argv[])
             fallToDefaultTheme(a, settings);
         }
     }
-    // qDebug() << "Application is in" << QCoreApplication::applicationFilePath();
-
     MainWindow w;
     w.show();
     return a.exec();
