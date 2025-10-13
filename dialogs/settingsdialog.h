@@ -45,6 +45,8 @@ class SettingsDialog : public QDialog
 
     void on_chooseThemeBtn_clicked();
 
+    void on_confirmDelBox_clicked(bool checked);
+
   private:
     Ui::SettingsDialog *ui;
 

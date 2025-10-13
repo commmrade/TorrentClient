@@ -9,6 +9,8 @@
 #include "speedgraphwidget.h"
 #include "deletetorrentdialog.h"
 #include "torrentsettingsdialog.h"
+#include "QSettings"
+#include "settingsvalues.h"
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -88,17 +90,26 @@ void TorrentWidget::customContextMenu(const QPoint &pos)
     connect(deleteAction, &QAction::triggered, this,
             [this, torrentId]
             {
-                bool removeWithContents = true;
-
-                DeleteTorrentDialog dialog{this};
-                if (dialog.exec() == QDialog::Accepted)
-                {
-                    if (!m_sessionManager.removeTorrent(torrentId, dialog.getRemoveWithContens()))
+                auto deleteTorrent = [this](const std::uint32_t torrentId, bool withContents) {
+                    if (!m_sessionManager.removeTorrent(torrentId, withContents))
                     {
                         QMessageBox::warning(
                             this, tr("Beware"),
                             tr("Could not delete all torrent files, please finish it manually."));
                     }
+                };
+
+                QSettings settings;
+                bool confirmWhenDelete = settings.value(SettingsValues::TRANSFER_CONFIRM_DELETION, true).toBool();
+
+                if (confirmWhenDelete) {
+                    DeleteTorrentDialog dialog{this};
+                    if (dialog.exec() == QDialog::Accepted)
+                    {
+                        deleteTorrent(torrentId, dialog.getRemoveWithContens());
+                    }
+                } else {
+                    deleteTorrent(torrentId, true);
                 }
             });
     menu.addAction(deleteAction);

@@ -59,6 +59,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
                    QVariant{QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)})
             .toString();
     ui->savePathLineEdit->setText(defaultSavePath);
+
+    bool confirmDeletion = settings.value(SettingsValues::TRANSFER_CONFIRM_DELETION, true).toBool();
+    ui->confirmDelBox->setChecked(confirmDeletion);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -196,3 +199,10 @@ void SettingsDialog::on_chooseThemeBtn_clicked()
         m_themeChanged = true;
     }
 }
+
+void SettingsDialog::on_confirmDelBox_clicked(bool checked)
+{
+    QSettings settings;
+    settings.setValue(SettingsValues::TRANSFER_CONFIRM_DELETION, checked);
+}
+
