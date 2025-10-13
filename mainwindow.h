@@ -18,11 +18,12 @@ class MainWindow : public QMainWindow
 
   public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
   private slots:
     void on_actionSettings_triggered();
 
+    void changeEvent(QEvent* event) override;
   private:
     Ui::MainWindow *ui;
 
