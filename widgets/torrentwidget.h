@@ -43,6 +43,9 @@ class TorrentWidget : public QWidget
     void setupTray();
     void setupSession();
 
+    void addTorrentByMagnet(const QString& magnetUri);
+    void addTorrentByFile(const QString& filepath);
+
     Ui::TorrentWidget *ui;
 
     QPointer<SpeedGraphWidget> m_speedGraph;

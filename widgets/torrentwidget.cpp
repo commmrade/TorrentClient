@@ -13,6 +13,7 @@
 #include "settingsvalues.h"
 #include <QSystemTrayIcon>
 #include <QApplication>
+#include "loadmagnetdialog.h"
 
 TorrentWidget::TorrentWidget(QWidget *parent)
     : QWidget(parent)
@@ -146,8 +147,14 @@ void TorrentWidget::setupTray()
 
     QAction* addTorrentMagnet = new QAction(tr("Add torrent link"), this);
     connect(addTorrentMagnet, &QAction::triggered, this, [this] {
-        // TODO: separate dialog for adding magnet torrents for release version
-        // now there is no such thing since it was not needed up until now
+        LoadMagnetDialog magnetDialog{this};
+        if (magnetDialog.exec() == QDialog::Accepted) {
+            QList<QString> magnets = magnetDialog.getMagnets();
+            // TODO: Open all save torrent dialogs at once somehow
+            for (const auto& magnet : std::as_const(magnets)) {
+                addTorrentByMagnet(magnet);
+            }
+        }
     });
     trayMenu->addAction(addTorrentMagnet);
 
@@ -182,14 +189,15 @@ void TorrentWidget::setupSession()
 
 }
 
-void TorrentWidget::on_pushButton_clicked()
+void TorrentWidget::addTorrentByMagnet(const QString &magnetUri)
 {
     try
     {
-        SaveTorrentDialog saveDialog{magnet_tag{}, ui->lineEdit->text(), this};
+        SaveTorrentDialog saveDialog{magnet_tag{}, magnetUri, this};
+        // TODO: Why the fuck do i even use a signal here, i can just return what i need in get method
         connect(
             &saveDialog, &SaveTorrentDialog::torrentConfirmed, this,
-            [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo,
+            [this, &saveDialog, &magnetUri](std::shared_ptr<const lt::torrent_info> torrentInfo,
                                 QList<lt::download_priority_t>          filePriorities)
             {
                 auto savePath = saveDialog.getSavePath();
@@ -203,7 +211,7 @@ void TorrentWidget::on_pushButton_clicked()
                 }
                 else
                 {
-                    if (!m_sessionManager.addTorrentByMagnet(ui->lineEdit->text(), savePath))
+                    if (!m_sessionManager.addTorrentByMagnet(magnetUri, savePath))
                     {
                         QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
                     }
@@ -218,18 +226,12 @@ void TorrentWidget::on_pushButton_clicked()
     }
 }
 
-void TorrentWidget::on_pushButton_2_clicked()
+void TorrentWidget::addTorrentByFile(const QString &filepath)
 {
-    QString filename = QFileDialog::getOpenFileName(
-        this, tr("Open torrent"),
-        QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
-    if (filename.isEmpty())
-    {
-        return;
-    }
     try
     {
-        SaveTorrentDialog saveDialog{torrent_file_tag{}, filename, this};
+        SaveTorrentDialog saveDialog{torrent_file_tag{}, filepath, this};
+        // TODO: Why the fuck do i even use a signal here, i can just return what i need in get method
         connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this,
                 [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo,
                                     QList<lt::download_priority_t>          filePriorities)
@@ -248,6 +250,31 @@ void TorrentWidget::on_pushButton_2_clicked()
         qCritical() << ex.what();
         QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent: Invalid format"));
     }
+}
+
+void TorrentWidget::on_pushButton_clicked()
+{
+    LoadMagnetDialog magnetDialog{this};
+    if (magnetDialog.exec() == QDialog::Accepted) {
+        QList<QString> magnets = magnetDialog.getMagnets();
+        // TODO: Open all save torrent dialogs at once somehow
+        // maybe i can just create all of them on the heap and .show() and then connect closed to delete later
+        for (const auto& magnet : std::as_const(magnets)) {
+            addTorrentByMagnet(magnet);
+        }
+    }
+}
+
+void TorrentWidget::on_pushButton_2_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(
+        this, tr("Open torrent"),
+        QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), "Torrents (*.torrent)");
+    if (filename.isEmpty())
+    {
+        return;
+    }
+    addTorrentByFile(filename);
 }
 
 void TorrentWidget::on_togglePropertiesBtn_clicked()

@@ -80,7 +80,6 @@ void SaveTorrentDialog::setupTableView()
     connect(&m_fileModel, &FileTreeModel::statusChanged, this,
             [this](int index, bool value)
             {
-                qDebug() << index << m_filePriorities.size();
                 m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
 
                 // Recalc total size TODO:
