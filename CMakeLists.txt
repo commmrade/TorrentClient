@@ -31,7 +31,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(torrent-client
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        widgets/torrentwidget.h widgets/torrentwidget.cpp widgets/torrentwidget.ui
+
         controllers/sessionmanager.h controllers/sessionmanager.cpp
         models/torrentstablemodel.h models/torrentstablemodel.cpp
         delegates/torrentitemdelegate.h delegates/torrentitemdelegate.cpp
