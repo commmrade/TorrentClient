@@ -28,7 +28,7 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString &torrentPat
 
     QSettings settings;
     auto      savePath = settings
-                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                        .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
                                QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
                         .toString();
     ui->savePathLineEdit->setText(savePath);
@@ -50,7 +50,7 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
     QSettings settings;
     auto      savePath = settings
-                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                        .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
                                QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
                         .toString();
     ui->savePathLineEdit->setText(savePath);

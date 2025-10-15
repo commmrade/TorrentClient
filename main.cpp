@@ -23,9 +23,9 @@ void fallToDefaultTheme(QApplication &a, QSettings &settings)
         file.close();
     }
 
-    settings.setValue(SettingsValues::GUI_THEME,
+    settings.setValue(SettingsNames::GUI_THEME,
                       "Dark"); // reset to default theme (factor out in a function)
-    settings.remove(SettingsValues::GUI_CUSTOM_THEME);
+    settings.remove(SettingsNames::GUI_CUSTOM_THEME);
 }
 
 int main(int argc, char *argv[])
@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QSettings    settings;
     // Set theme
-    QString theme = settings.value(SettingsValues::GUI_THEME, "Dark").toString();
-    if (theme == "Dark")
+    int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
+    if (theme == SettingsValues::GUI_THEME_DARK)
     {
         auto darkThemePath =
             basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
             file.close();
         }
     }
-    else if (theme == "Light")
+    else if (theme == SettingsValues::GUI_THEME_LIGHT)
     {
         auto lightThemePath =
             basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "light.qss";
@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
             file.close();
         }
     }
-    else if (theme == "Custom")
+    else if (theme == SettingsValues::GUI_THEME_CUSTOM)
     {
-        QString customThemePath = settings.value(SettingsValues::GUI_CUSTOM_THEME).toString();
+        QString customThemePath = settings.value(SettingsNames::GUI_CUSTOM_THEME).toString();
         if (!customThemePath.isEmpty())
         {
             QFile file(customThemePath);
@@ -84,10 +84,9 @@ int main(int argc, char *argv[])
             {
                 a.setStyleSheet(file.readAll());
                 file.close();
-                ;
             }
             else
-            { // if cant open theme file
+            {
                 qDebug() << "Could not open theme file";
                 fallToDefaultTheme(a, settings);
             }

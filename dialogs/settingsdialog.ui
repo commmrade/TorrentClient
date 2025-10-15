@@ -325,7 +325,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Show application in tray (when minimized)</string>
+                <string>Show application in tray</string>
                </property>
               </widget>
              </item>

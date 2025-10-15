@@ -70,9 +70,9 @@ void SessionManager::loadSessionSettingsFromSettings(lt::session_params &sessPar
 {
     QSettings settings;
     int       downloadSpeedLimit =
-        settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+        settings.value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT).toInt();
     int uploadSpeedLimit =
-        settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+        settings.value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, SettingsValues::SESSION_UPLOAD_SPEED_LIMIT).toInt();
     sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
     sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
 }
@@ -503,7 +503,7 @@ void SessionManager::setDownloadLimit(int value)
     m_session->apply_settings(std::move(newSettings));
 
     QSettings settings;
-    settings.setValue(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{value});
+    settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{value});
 }
 
 void SessionManager::setUploadLimit(int value)
@@ -513,7 +513,7 @@ void SessionManager::setUploadLimit(int value)
     m_session->apply_settings(std::move(newSettings));
 
     QSettings settings;
-    settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{value});
+    settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, QVariant{value});
 }
 
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)

@@ -15,7 +15,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     ui->setupUi(this);
 
     // Default size
-    this->setFixedSize(900, 600);
+    this->setFixedSize(900, 600); // TODO: maybe get rid of it
 
     // Disable cutom theme stuff
     ui->chooseThemeBtn->setVisible(false);
@@ -24,44 +24,57 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     QSettings settings;
 
     // Application category
-    QString language = settings.value(SettingsValues::GUI_LANGUAGE, QString{"English"}).toString();
-    ui->languageBox->setCurrentText(language);
+    int language = settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH).toInt();
+    ui->languageBox->blockSignals(true);
+    ui->languageBox->setCurrentIndex(language);
+    ui->languageBox->blockSignals(false);
 
-    QString theme = settings.value(SettingsValues::GUI_THEME, QString{"Dark"}).toString();
-    ui->themeBox->setCurrentText(theme);
-    if (theme == "Custom")
+    ui->themeBox->blockSignals(true);
+    int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
+    ui->themeBox->setCurrentIndex(theme);
+    if (theme == SettingsValues::GUI_THEME_CUSTOM)
     { // if theme is custom set custom theme edit, if empty set to dark (default)
-        QString customTheme = settings.value(SettingsValues::GUI_CUSTOM_THEME).toString();
-        qDebug() << "Custom theme found";
+        QString customTheme = settings.value(SettingsNames::GUI_CUSTOM_THEME).toString();
         if (!customTheme.isEmpty())
-        { // Weird
+        {
             ui->customThemeEdit->setText(customTheme);
         }
         else
         {
-            qDebug() << "Loaded custom theme but its empty";
-            ui->themeBox->setCurrentText("Dark"); // default theme is dark
+            ui->themeBox->setCurrentIndex(SettingsValues::GUI_THEME_DARK);
         }
     }
+    ui->themeBox->blockSignals(false);
 
     // Torrent category
     int downloadSpeedLimit =
-        settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt() / 1024;
+        settings.value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT).toInt() / 1024;
     ui->downloadLimitSpin->setValue(downloadSpeedLimit);
 
     int uploadSpeedLimit =
-        settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt() / 1024;
+        settings.value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, SettingsValues::SESSION_UPLOAD_SPEED_LIMIT).toInt() / 1024;
     ui->uploadLimitSpin->setValue(uploadSpeedLimit);
 
     QString defaultSavePath =
         settings
-            .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+            .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
                    QVariant{QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)})
             .toString();
     ui->savePathLineEdit->setText(defaultSavePath);
 
-    bool confirmDeletion = settings.value(SettingsValues::TRANSFER_CONFIRM_DELETION, true).toBool();
+    bool confirmDeletion = settings.value(SettingsNames::TRANSFER_CONFIRM_DELETION, SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT).toBool();
     ui->confirmDelBox->setChecked(confirmDeletion);
+
+    int exitBeh = settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE).toInt();
+    ui->exitBehBtn->blockSignals(true);
+    ui->exitBehBtn->setCurrentIndex(exitBeh);
+    ui->exitBehBtn->blockSignals(false);
+
+    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
+    ui->showTrayBox->setChecked(showTray);
+
+    bool showNotifs = settings.value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT).toBool();
+    ui->enaleNotifBox->setChecked(showNotifs);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -100,23 +113,18 @@ void SettingsDialog::applyApplicationSettings()
     // Language
     if (m_languageChanged)
     {
-        settings.setValue(SettingsValues::GUI_LANGUAGE, ui->languageBox->currentText());
+        settings.setValue(SettingsNames::GUI_LANGUAGE, ui->languageBox->currentIndex());
         m_languageChanged = false;
     }
     // Theme
     if (m_themeChanged)
     {
-        auto theme = ui->themeBox->currentText();
-        if (theme == "Custom")
+        auto theme = ui->themeBox->currentIndex();
+        if (theme == SettingsValues::GUI_THEME_CUSTOM)
         {
-            settings.setValue(SettingsValues::GUI_THEME, theme); // Remove theme
-            settings.setValue(SettingsValues::GUI_CUSTOM_THEME, ui->customThemeEdit->text());
+            settings.setValue(SettingsNames::GUI_CUSTOM_THEME, ui->customThemeEdit->text());
         }
-        else
-        {
-            settings.setValue(SettingsValues::GUI_THEME, theme);
-        }
-
+        settings.setValue(SettingsNames::GUI_THEME, theme);
         m_themeChanged = false;
     }
 }
@@ -147,32 +155,9 @@ void SettingsDialog::on_savePathButton_clicked()
     if (!defaultSavePath.isEmpty())
     {
         QSettings settings;
-        settings.setValue(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
+        settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         ui->savePathLineEdit->setText(defaultSavePath);
     }
-}
-
-void SettingsDialog::on_languageBox_currentTextChanged(const QString &arg1)
-{
-    m_languageChanged = true;
-    m_restartRequired = true; // Can't change language in runtime, (actually i can)
-}
-
-void SettingsDialog::on_themeBox_currentTextChanged(const QString &arg1)
-{
-    if (arg1 == "Custom")
-    {
-        ui->customThemeEdit->setVisible(true);
-        ui->chooseThemeBtn->setVisible(true);
-    }
-    else
-    {
-        ui->customThemeEdit->setVisible(false);
-        ui->chooseThemeBtn->setVisible(false);
-    }
-
-    m_themeChanged    = true;
-    m_restartRequired = true; // Can't change theme in runtime (i think)
 }
 
 void SettingsDialog::on_downloadLimitSpin_valueChanged(int arg1) { m_downloadLimitChanged = true; }
@@ -203,6 +188,68 @@ void SettingsDialog::on_chooseThemeBtn_clicked()
 void SettingsDialog::on_confirmDelBox_clicked(bool checked)
 {
     QSettings settings;
-    settings.setValue(SettingsValues::TRANSFER_CONFIRM_DELETION, checked);
+    settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
+}
+
+
+void SettingsDialog::on_showTrayBox_clicked(bool checked)
+{
+    QSettings settings;
+    settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
+
+    if (!checked) {
+        ui->enaleNotifBox->setChecked(false);
+        on_enaleNotifBox_clicked(false);
+        ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+        on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+    }
+    m_restartRequired = true; // Cant enable tray in runtime (i mean i can but aint doin it
+}
+
+void SettingsDialog::on_enaleNotifBox_clicked(bool checked)
+{
+    if (checked && !ui->showTrayBox->isChecked()) {
+        QMessageBox::warning(this, tr("Warning"), tr("You can't enable notifications when tray is disabled"));
+        ui->enaleNotifBox->setChecked(false);
+        return;
+    }
+
+    QSettings settings;
+    settings.setValue(SettingsNames::DESKTOP_SHOW_NOTIFS, checked);
+    // Can easily enable messages in runtime
+}
+
+void SettingsDialog::on_exitBehBtn_currentIndexChanged(int index)
+{
+    if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked()) {
+        QMessageBox::warning(this, tr("Warning"), tr("You can't minimize to tray when tray is disabled"));
+        ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+        return;
+    }
+    QSettings settings;
+    settings.setValue(SettingsNames::DESKTOP_EXIT_BEH, index);
+}
+
+void SettingsDialog::on_languageBox_currentIndexChanged(int index)
+{
+    m_languageChanged = true;
+    m_restartRequired = true; // Can't change language in runtime, (actually i can)
+}
+
+void SettingsDialog::on_themeBox_currentIndexChanged(int index)
+{
+    if (index == SettingsValues::GUI_THEME_CUSTOM)
+    {
+        ui->customThemeEdit->setVisible(true);
+        ui->chooseThemeBtn->setVisible(true);
+    }
+    else
+    {
+        ui->customThemeEdit->setVisible(false);
+        ui->chooseThemeBtn->setVisible(false);
+    }
+
+    m_themeChanged    = true;
+    m_restartRequired = true; // Can't change theme in runtime (i think)
 }
 

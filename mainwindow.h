@@ -44,9 +44,11 @@ class MainWindow : public QMainWindow
     void on_categoriesList_currentTextChanged(const QString &currentText);
     void torrentClicked(const QModelIndex& index);
 
-    void changeEvent(QEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
   private:
     Ui::MainWindow *ui;
+
+    QAction* toggleAction{nullptr};
 
     // QPointer<TorrentWidget> m_torrentWidget;
     QPointer<SpeedGraphWidget> m_speedGraph;
@@ -56,7 +58,9 @@ class MainWindow : public QMainWindow
     TorrentsTableModel  m_tableModel;
     TorrentItemDelegate m_tableDelegate;
     CategorySortFilter  m_categoryFilter;
-    QSystemTrayIcon* m_trayIcon;
+    QSystemTrayIcon* m_trayIcon{nullptr};
+
+    void showMessage(QStringView msg);
 
     void setupTableView();
     void setupTray();

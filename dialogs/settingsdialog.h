@@ -31,10 +31,6 @@ class SettingsDialog : public QDialog
 
     void on_savePathButton_clicked();
 
-    void on_languageBox_currentTextChanged(const QString &arg1);
-
-    void on_themeBox_currentTextChanged(const QString &arg1);
-
     void on_downloadLimitSpin_valueChanged(int arg1);
 
     void on_uploadLimitSpin_valueChanged(int arg1);
@@ -46,6 +42,15 @@ class SettingsDialog : public QDialog
     void on_chooseThemeBtn_clicked();
 
     void on_confirmDelBox_clicked(bool checked);
+    void on_showTrayBox_clicked(bool checked);
+
+    void on_enaleNotifBox_clicked(bool checked);
+
+    void on_exitBehBtn_currentIndexChanged(int index);
+
+    void on_languageBox_currentIndexChanged(int index);
+
+    void on_themeBox_currentIndexChanged(int index);
 
   private:
     Ui::SettingsDialog *ui;

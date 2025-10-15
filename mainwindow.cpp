@@ -15,13 +15,13 @@
 #include <QApplication>
 #include "loadmagnetdialog.h"
 #include "settingsdialog.h"
+#include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
     , m_sessionManager(SessionManager::instance())
     , m_speedGraph(new SpeedGraphWidget{})
     , m_categoryFilter(this)
-    , m_trayIcon(new QSystemTrayIcon{this})
 {
     ui->setupUi(this);
 
@@ -84,7 +84,7 @@ void MainWindow::customContextMenu(const QPoint &pos)
                 };
 
                 QSettings settings;
-                bool confirmWhenDelete = settings.value(SettingsValues::TRANSFER_CONFIRM_DELETION, true).toBool();
+                bool confirmWhenDelete = settings.value(SettingsNames::TRANSFER_CONFIRM_DELETION, SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT).toBool();
 
                 if (confirmWhenDelete) {
                     DeleteTorrentDialog dialog{this};
@@ -135,19 +135,25 @@ void MainWindow::setupTableView()
 
 void MainWindow::setupTray()
 {
+    QSettings settings;
+    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
+    if (!showTray) return;
+
+    m_trayIcon = new QSystemTrayIcon{this};
+
     m_trayIcon->setIcon(QIcon{"icon.png"});
     QMenu* trayMenu = new QMenu(this);
-    QAction* toggleMenu = new QAction(tr("Hide"), this);
-    connect(toggleMenu, &QAction::triggered, this, [this, toggleMenu]{
+    toggleAction = new QAction(tr("Hide"), this);
+    connect(toggleAction, &QAction::triggered, this, [this]{
         if (isHidden()) {
             showNormal();
-            toggleMenu->setText(tr("Hide"));
+            toggleAction->setText(tr("Hide"));
         } else {
             hide();
-            toggleMenu->setText(tr("Show"));
+            toggleAction->setText(tr("Show"));
         }
     });
-    trayMenu->addAction(toggleMenu);
+    trayMenu->addAction(toggleAction);
 
     QAction* addTorrentFilename = new QAction(tr("Add torrent file"), this);
     connect(addTorrentFilename, &QAction::triggered, this, [this] {
@@ -184,27 +190,28 @@ void MainWindow::on_actionSettings_triggered()
     dialog.exec(); // idc if it is accepted or rejected
 }
 
-void MainWindow::changeEvent(QEvent *event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
-    // switch (event->type())
-    // {
-    // case QEvent::WindowStateChange:
-    // {
-    //     if (this->windowState() & Qt::WindowMinimized)
-    //     {
-    //         QTimer::singleShot(0, this, SLOT(hide()));
-    //     }
-    //     break;
-    // }
-    // default:
-    //     break;
-    // }
-
-    QMainWindow::changeEvent(event);
+    QSettings settings;
+    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
+    int exitBehaviour = settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE).toInt();
+    if (exitBehaviour == SettingsValues::DESKTOP_EXIT_BEH_CLOSE || !showTray) {
+        QMainWindow::closeEvent(event);
+    } else {
+        hide();
+        toggleAction->setText(tr("Show"));
+        event->ignore();
+    }
 }
 
-
-
+void MainWindow::showMessage(QStringView msg)
+{
+    if (m_trayIcon) {
+        QSettings settings;
+        bool notifsEnabled = settings.value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT).toBool();
+        if (notifsEnabled) m_trayIcon->showMessage(tr("Notification"), QString{msg});
+    }
+}
 
 void MainWindow::setupSession()
 {
@@ -214,7 +221,10 @@ void MainWindow::setupSession()
             [this](const Torrent &torrent) { m_tableModel.updateTorrent(torrent); });
     connect(&m_sessionManager, &SessionManager::torrentFinished, this,
             [this](const std::uint32_t id, const lt::torrent_status &status)
-            { m_tableModel.finishTorrent(id, status); });
+            {
+                m_tableModel.finishTorrent(id, status);
+                showMessage(QString{tr("Torrent '%1' has been finished")}.arg(status.name));
+            });
     connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
             [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });
     connect(&m_sessionManager, &SessionManager::torrentFileMoveFailed, this,
