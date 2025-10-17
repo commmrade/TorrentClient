@@ -242,11 +242,12 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
 {
     try
     {
-        SaveTorrentDialog saveDialog{magnet_tag{}, magnetUri, this};
-        if (saveDialog.exec() == QDialog::Accepted) {
-            auto torrentInfo = saveDialog.getTorrentInfo();
-            auto filePriorities = saveDialog.getFilePriorities();
-            auto savePath = saveDialog.getSavePath();
+        SaveTorrentDialog* saveDialog = new SaveTorrentDialog{magnet_tag{}, magnetUri};
+
+        connect(saveDialog, &SaveTorrentDialog::accepted, this, [=, this]() {
+            auto torrentInfo = saveDialog->getTorrentInfo();
+            auto filePriorities = saveDialog->getFilePriorities();
+            auto savePath = saveDialog->getSavePath();
 
             if (torrentInfo) {
                 if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
@@ -262,7 +263,9 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
                     QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
                 }
             }
-        }
+        });
+        connect(saveDialog, &SaveTorrentDialog::finished, saveDialog, &SaveTorrentDialog::deleteLater);
+        saveDialog->open();
     }
     catch (const std::exception &ex)
     {
@@ -300,8 +303,6 @@ void MainWindow::on_pushButton_clicked()
     LoadMagnetDialog magnetDialog{this};
     if (magnetDialog.exec() == QDialog::Accepted) {
         QList<QString> magnets = magnetDialog.getMagnets();
-        // TODO: Open all save torrent dialogs at once somehow
-        // maybe i can just create all of them on the heap and .show() and then connect closed to delete later
         for (const auto& magnet : std::as_const(magnets)) {
             addTorrentByMagnet(magnet);
         }
