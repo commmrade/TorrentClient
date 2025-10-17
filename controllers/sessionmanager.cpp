@@ -69,10 +69,14 @@ libtorrent::session_params SessionManager::loadSessionParams()
 void SessionManager::loadSessionSettingsFromSettings(lt::session_params &sessParams)
 {
     QSettings settings;
-    int       downloadSpeedLimit =
-        settings.value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT).toInt();
-    int uploadSpeedLimit =
-        settings.value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, SettingsValues::SESSION_UPLOAD_SPEED_LIMIT).toInt();
+    int       downloadSpeedLimit = settings
+                                 .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
+                                        SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
+                                 .toInt();
+    int uploadSpeedLimit = settings
+                               .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
+                                      SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
+                               .toInt();
     sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
     sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
 }

@@ -24,7 +24,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     QSettings settings;
 
     // Application category
-    int language = settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH).toInt();
+    int language =
+        settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH).toInt();
     ui->languageBox->blockSignals(true);
     ui->languageBox->setCurrentIndex(language);
     ui->languageBox->blockSignals(false);
@@ -47,12 +48,18 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     ui->themeBox->blockSignals(false);
 
     // Torrent category
-    int downloadSpeedLimit =
-        settings.value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT).toInt() / 1024;
+    int downloadSpeedLimit = settings
+                                 .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
+                                        SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
+                                 .toInt() /
+                             1024;
     ui->downloadLimitSpin->setValue(downloadSpeedLimit);
 
-    int uploadSpeedLimit =
-        settings.value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, SettingsValues::SESSION_UPLOAD_SPEED_LIMIT).toInt() / 1024;
+    int uploadSpeedLimit = settings
+                               .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
+                                      SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
+                               .toInt() /
+                           1024;
     ui->uploadLimitSpin->setValue(uploadSpeedLimit);
 
     QString defaultSavePath =
@@ -62,18 +69,28 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
             .toString();
     ui->savePathLineEdit->setText(defaultSavePath);
 
-    bool confirmDeletion = settings.value(SettingsNames::TRANSFER_CONFIRM_DELETION, SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT).toBool();
+    bool confirmDeletion = settings
+                               .value(SettingsNames::TRANSFER_CONFIRM_DELETION,
+                                      SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT)
+                               .toBool();
     ui->confirmDelBox->setChecked(confirmDeletion);
 
-    int exitBeh = settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE).toInt();
+    int exitBeh =
+        settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE)
+            .toInt();
     ui->exitBehBtn->blockSignals(true);
     ui->exitBehBtn->setCurrentIndex(exitBeh);
     ui->exitBehBtn->blockSignals(false);
 
-    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
+    bool showTray =
+        settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
+            .toBool();
     ui->showTrayBox->setChecked(showTray);
 
-    bool showNotifs = settings.value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT).toBool();
+    bool showNotifs =
+        settings
+            .value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
+            .toBool();
     ui->enaleNotifBox->setChecked(showNotifs);
 }
 
@@ -191,13 +208,13 @@ void SettingsDialog::on_confirmDelBox_clicked(bool checked)
     settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
 }
 
-
 void SettingsDialog::on_showTrayBox_clicked(bool checked)
 {
     QSettings settings;
     settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
 
-    if (!checked) {
+    if (!checked)
+    {
         ui->enaleNotifBox->setChecked(false);
         on_enaleNotifBox_clicked(false);
         ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
@@ -208,8 +225,10 @@ void SettingsDialog::on_showTrayBox_clicked(bool checked)
 
 void SettingsDialog::on_enaleNotifBox_clicked(bool checked)
 {
-    if (checked && !ui->showTrayBox->isChecked()) {
-        QMessageBox::warning(this, tr("Warning"), tr("You can't enable notifications when tray is disabled"));
+    if (checked && !ui->showTrayBox->isChecked())
+    {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You can't enable notifications when tray is disabled"));
         ui->enaleNotifBox->setChecked(false);
         return;
     }
@@ -221,8 +240,10 @@ void SettingsDialog::on_enaleNotifBox_clicked(bool checked)
 
 void SettingsDialog::on_exitBehBtn_currentIndexChanged(int index)
 {
-    if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked()) {
-        QMessageBox::warning(this, tr("Warning"), tr("You can't minimize to tray when tray is disabled"));
+    if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked())
+    {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("You can't minimize to tray when tray is disabled"));
         ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
         return;
     }
@@ -252,4 +273,3 @@ void SettingsDialog::on_themeBox_currentIndexChanged(int index)
     m_themeChanged    = true;
     m_restartRequired = true; // Can't change theme in runtime (i think)
 }
-

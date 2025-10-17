@@ -92,10 +92,7 @@ void SaveTorrentDialog::setupTableView()
             });
 }
 
-void SaveTorrentDialog::init()
-{
-    setupTableView();
-}
+void SaveTorrentDialog::init() { setupTableView(); }
 
 QString SaveTorrentDialog::getSavePath() const { return ui->savePathLineEdit->text(); }
 
@@ -224,5 +221,3 @@ void SaveTorrentDialog::setDataFromTi()
     }
     m_fileModel.setFiles(files);
 }
-
-

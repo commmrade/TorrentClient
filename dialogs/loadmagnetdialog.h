@@ -18,6 +18,7 @@ class LoadMagnetDialog : public QDialog
     ~LoadMagnetDialog();
 
     QList<QString> getMagnets() const;
+
   private:
     Ui::LoadMagnetDialog *ui;
 };

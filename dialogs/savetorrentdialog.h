@@ -30,9 +30,9 @@ class SaveTorrentDialog : public QDialog
                                QWidget *parent = nullptr); // for .torrent
     explicit SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidget *parent = nullptr);
     ~SaveTorrentDialog();
-    QString getSavePath() const;
+    QString                                 getSavePath() const;
     std::shared_ptr<const lt::torrent_info> getTorrentInfo() const;
-    QList<lt::download_priority_t> getFilePriorities() const;
+    QList<lt::download_priority_t>          getFilePriorities() const;
 
     void setData(std::shared_ptr<const lt::torrent_info> ti);
   private slots:

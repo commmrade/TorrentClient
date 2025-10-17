@@ -55,8 +55,9 @@ QString secsToFormattedTime(std::int64_t secs)
         return QString("infinity");
 
     QString etaStr;
-    auto months = secs / SECONDS_IN_MONTH;
-    if (months) {
+    auto    months = secs / SECONDS_IN_MONTH;
+    if (months)
+    {
         etaStr += QString::number(months) + " m ";
     }
     secs -= months * SECONDS_IN_MONTH;
@@ -75,14 +76,15 @@ QString secsToFormattedTime(std::int64_t secs)
     }
     secs -= days * SECONDS_IN_DAY;
 
-    auto hrs     = secs / SECONDS_IN_HOUR;
+    auto hrs = secs / SECONDS_IN_HOUR;
     secs -= hrs * SECONDS_IN_HOUR;
 
-    auto mins    = secs / SECONDS_IN_MINUTE;
+    auto mins = secs / SECONDS_IN_MINUTE;
     secs -= mins * SECONDS_IN_MINUTE;
 
     auto seconds = secs;
-    etaStr += QString("%1:%2:%3").arg(hrs, 2, 10, '0').arg(mins, 2, 10, '0').arg(seconds, 2, 10, '0');
+    etaStr +=
+        QString("%1:%2:%3").arg(hrs, 2, 10, '0').arg(mins, 2, 10, '0').arg(seconds, 2, 10, '0');
     return etaStr;
 }
 

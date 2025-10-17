@@ -23,8 +23,9 @@ void fallToDefaultTheme(QApplication &a, QSettings &settings)
         file.close();
     }
 
-    settings.setValue(SettingsNames::GUI_THEME,
-                      SettingsValues::GUI_THEME_DARK); // reset to default theme (factor out in a function)
+    settings.setValue(
+        SettingsNames::GUI_THEME,
+        SettingsValues::GUI_THEME_DARK); // reset to default theme (factor out in a function)
     settings.remove(SettingsNames::GUI_CUSTOM_THEME);
 }
 

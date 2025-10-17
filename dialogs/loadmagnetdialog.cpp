@@ -10,7 +10,7 @@ LoadMagnetDialog::~LoadMagnetDialog() { delete ui; }
 
 QList<QString> LoadMagnetDialog::getMagnets() const
 {
-    QString magnetsStr = ui->textEdit->toPlainText();
-    QStringList magnets = magnetsStr.split('\n');
+    QString     magnetsStr = ui->textEdit->toPlainText();
+    QStringList magnets    = magnetsStr.split('\n');
     return magnets;
 }

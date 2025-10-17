@@ -18,7 +18,8 @@
 #include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
     , m_sessionManager(SessionManager::instance())
     , m_speedGraph(new SpeedGraphWidget{})
     , m_categoryFilter(this)
@@ -35,14 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->torrentsView, &QTableView::customContextMenuRequested, this,
             &MainWindow::customContextMenu);
-
 }
 
-MainWindow::~MainWindow() {
-    delete ui;
-}
-
-
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::customContextMenu(const QPoint &pos)
 {
@@ -74,7 +70,8 @@ void MainWindow::customContextMenu(const QPoint &pos)
     connect(deleteAction, &QAction::triggered, this,
             [this, torrentId]
             {
-                auto deleteTorrent = [this](const std::uint32_t torrentId, bool withContents) {
+                auto deleteTorrent = [this](const std::uint32_t torrentId, bool withContents)
+                {
                     if (!m_sessionManager.removeTorrent(torrentId, withContents))
                     {
                         QMessageBox::warning(
@@ -84,15 +81,22 @@ void MainWindow::customContextMenu(const QPoint &pos)
                 };
 
                 QSettings settings;
-                bool confirmWhenDelete = settings.value(SettingsNames::TRANSFER_CONFIRM_DELETION, SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT).toBool();
+                bool      confirmWhenDelete =
+                    settings
+                        .value(SettingsNames::TRANSFER_CONFIRM_DELETION,
+                               SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT)
+                        .toBool();
 
-                if (confirmWhenDelete) {
+                if (confirmWhenDelete)
+                {
                     DeleteTorrentDialog dialog{this};
                     if (dialog.exec() == QDialog::Accepted)
                     {
                         deleteTorrent(torrentId, dialog.getRemoveWithContens());
                     }
-                } else {
+                }
+                else
+                {
                     deleteTorrent(torrentId, true);
                 }
             });
@@ -104,7 +108,7 @@ void MainWindow::customContextMenu(const QPoint &pos)
                 const TorrentHandle   tHandle = m_sessionManager.getTorrentHandle(torrentId);
                 TorrentSettingsDialog settingsDialog(tHandle, this);
 
-                       // These only fire when dialog is accepted
+                // These only fire when dialog is accepted
                 connect(&settingsDialog, &TorrentSettingsDialog::downloadLimitChanged, this,
                         [this, torrentId](int newLimit)
                         { m_sessionManager.setTorrentDownloadLimit(torrentId, newLimit); });
@@ -136,53 +140,60 @@ void MainWindow::setupTableView()
 void MainWindow::setupTray()
 {
     QSettings settings;
-    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
-    if (!showTray) return;
+    bool      showTray =
+        settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
+            .toBool();
+    if (!showTray)
+        return;
 
     m_trayIcon = new QSystemTrayIcon{this};
 
     m_trayIcon->setIcon(QIcon{"icon.png"});
-    QMenu* trayMenu = new QMenu(this);
-    toggleAction = new QAction(tr("Hide"), this);
-    connect(toggleAction, &QAction::triggered, this, [this]{
-        if (isHidden()) {
-            showNormal();
-            toggleAction->setText(tr("Hide"));
-        } else {
-            hide();
-            toggleAction->setText(tr("Show"));
-        }
-    });
+    QMenu *trayMenu = new QMenu(this);
+    toggleAction    = new QAction(tr("Hide"), this);
+    connect(toggleAction, &QAction::triggered, this,
+            [this]
+            {
+                if (isHidden())
+                {
+                    showNormal();
+                    toggleAction->setText(tr("Hide"));
+                }
+                else
+                {
+                    hide();
+                    toggleAction->setText(tr("Show"));
+                }
+            });
     trayMenu->addAction(toggleAction);
 
-    QAction* addTorrentFilename = new QAction(tr("Add torrent file"), this);
-    connect(addTorrentFilename, &QAction::triggered, this, [this] {
-        on_pushButton_2_clicked();
-    });
+    QAction *addTorrentFilename = new QAction(tr("Add torrent file"), this);
+    connect(addTorrentFilename, &QAction::triggered, this, [this] { on_pushButton_2_clicked(); });
     trayMenu->addAction(addTorrentFilename);
 
-    QAction* addTorrentMagnet = new QAction(tr("Add torrent link"), this);
-    connect(addTorrentMagnet, &QAction::triggered, this, [this] {
-        LoadMagnetDialog magnetDialog{this};
-        if (magnetDialog.exec() == QDialog::Accepted) {
-            QList<QString> magnets = magnetDialog.getMagnets();
-            // TODO: Open all save torrent dialogs at once somehow
-            for (const auto& magnet : std::as_const(magnets)) {
-                addTorrentByMagnet(magnet);
-            }
-        }
-    });
+    QAction *addTorrentMagnet = new QAction(tr("Add torrent link"), this);
+    connect(addTorrentMagnet, &QAction::triggered, this,
+            [this]
+            {
+                LoadMagnetDialog magnetDialog{this};
+                if (magnetDialog.exec() == QDialog::Accepted)
+                {
+                    QList<QString> magnets = magnetDialog.getMagnets();
+                    // TODO: Open all save torrent dialogs at once somehow
+                    for (const auto &magnet : std::as_const(magnets))
+                    {
+                        addTorrentByMagnet(magnet);
+                    }
+                }
+            });
     trayMenu->addAction(addTorrentMagnet);
 
-    QAction* exit = new QAction(tr("Exit"), this);
-    connect(exit, &QAction::triggered, this, []{
-        QApplication::exit();
-    });
+    QAction *exit = new QAction(tr("Exit"), this);
+    connect(exit, &QAction::triggered, this, [] { QApplication::exit(); });
     trayMenu->addAction(exit);
     m_trayIcon->setContextMenu(trayMenu);
     m_trayIcon->show();
 }
-
 
 void MainWindow::on_actionSettings_triggered()
 {
@@ -190,14 +201,21 @@ void MainWindow::on_actionSettings_triggered()
     dialog.exec(); // idc if it is accepted or rejected
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings;
-    bool showTray = settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT).toBool();
-    int exitBehaviour = settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE).toInt();
-    if (exitBehaviour == SettingsValues::DESKTOP_EXIT_BEH_CLOSE || !showTray) {
+    bool      showTray =
+        settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
+            .toBool();
+    int exitBehaviour =
+        settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE)
+            .toInt();
+    if (exitBehaviour == SettingsValues::DESKTOP_EXIT_BEH_CLOSE || !showTray)
+    {
         QMainWindow::closeEvent(event);
-    } else {
+    }
+    else
+    {
         hide();
         toggleAction->setText(tr("Show"));
         event->ignore();
@@ -206,10 +224,15 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::showMessage(QStringView msg)
 {
-    if (m_trayIcon) {
+    if (m_trayIcon)
+    {
         QSettings settings;
-        bool notifsEnabled = settings.value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT).toBool();
-        if (notifsEnabled) m_trayIcon->showMessage(tr("Notification"), QString{msg});
+        bool      notifsEnabled = settings
+                                 .value(SettingsNames::DESKTOP_SHOW_NOTIFS,
+                                        SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
+                                 .toBool();
+        if (notifsEnabled)
+            m_trayIcon->showMessage(tr("Notification"), QString{msg});
     }
 }
 
@@ -231,40 +254,45 @@ void MainWindow::setupSession()
             [this](const QString &msg, const QString &torrentName)
             {
                 QMessageBox::critical(this, tr("Error"),
-                                      tr("Could not move a file, torrent:") + torrentName + tr(", because ") + msg);
+                                      tr("Could not move a file, torrent:") + torrentName +
+                                          tr(", because ") + msg);
             });
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't
                                     // get torrentAdded signal
-
 }
 
 void MainWindow::addTorrentByMagnet(const QString &magnetUri)
 {
     try
     {
-        SaveTorrentDialog* saveDialog = new SaveTorrentDialog{magnet_tag{}, magnetUri};
+        SaveTorrentDialog *saveDialog = new SaveTorrentDialog{magnet_tag{}, magnetUri};
 
-        connect(saveDialog, &SaveTorrentDialog::accepted, this, [=, this]() {
-            auto torrentInfo = saveDialog->getTorrentInfo();
-            auto filePriorities = saveDialog->getFilePriorities();
-            auto savePath = saveDialog->getSavePath();
-
-            if (torrentInfo) {
-                if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
-                                                              savePath))
-                {
-                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
-                }
-            }
-            else
+        connect(
+            saveDialog, &SaveTorrentDialog::accepted, this,
+            [=, this]()
             {
-                if (!m_sessionManager.addTorrentByMagnet(magnetUri, savePath))
+                auto torrentInfo    = saveDialog->getTorrentInfo();
+                auto filePriorities = saveDialog->getFilePriorities();
+                auto savePath       = saveDialog->getSavePath();
+
+                if (torrentInfo)
                 {
-                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                    if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
+                                                                  savePath))
+                    {
+                        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                    }
                 }
-            }
-        });
-        connect(saveDialog, &SaveTorrentDialog::finished, saveDialog, &SaveTorrentDialog::deleteLater);
+                else
+                {
+                    if (!m_sessionManager.addTorrentByMagnet(magnetUri, savePath))
+                    {
+                        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                    }
+                }
+            });
+        connect(saveDialog, &SaveTorrentDialog::finished, saveDialog,
+                &SaveTorrentDialog::deleteLater);
         saveDialog->open();
     }
     catch (const std::exception &ex)
@@ -279,12 +307,12 @@ void MainWindow::addTorrentByFile(const QString &filepath)
     try
     {
         SaveTorrentDialog saveDialog{torrent_file_tag{}, filepath, this};
-        if (saveDialog.exec() == QDialog::Accepted) {
-            auto savePath = saveDialog.getSavePath();
-            auto torrentInfo = saveDialog.getTorrentInfo();
+        if (saveDialog.exec() == QDialog::Accepted)
+        {
+            auto savePath       = saveDialog.getSavePath();
+            auto torrentInfo    = saveDialog.getTorrentInfo();
             auto filePriorities = saveDialog.getFilePriorities();
-            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
-                                                          savePath))
+            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities, savePath))
             {
                 QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
             }
@@ -297,18 +325,18 @@ void MainWindow::addTorrentByFile(const QString &filepath)
     }
 }
 
-
 void MainWindow::on_pushButton_clicked()
 {
     LoadMagnetDialog magnetDialog{this};
-    if (magnetDialog.exec() == QDialog::Accepted) {
+    if (magnetDialog.exec() == QDialog::Accepted)
+    {
         QList<QString> magnets = magnetDialog.getMagnets();
-        for (const auto& magnet : std::as_const(magnets)) {
+        for (const auto &magnet : std::as_const(magnets))
+        {
             addTorrentByMagnet(magnet);
         }
     }
 }
-
 
 void MainWindow::on_pushButton_2_clicked()
 {
@@ -321,9 +349,6 @@ void MainWindow::on_pushButton_2_clicked()
     }
     addTorrentByFile(filename);
 }
-
-
-
 
 void MainWindow::on_togglePropertiesBtn_clicked()
 {
@@ -338,7 +363,6 @@ void MainWindow::on_togglePropertiesBtn_clicked()
         closeAllTabs();
     }
 }
-
 
 void MainWindow::on_toggleGraphsButton_clicked()
 {
@@ -360,7 +384,6 @@ void MainWindow::closeAllTabs()
     ui->stackedWidget->setEnabled(false);
 }
 
-
 void MainWindow::on_categoriesList_currentTextChanged(const QString &currentText)
 {
     m_categoryFilter.setCategory(currentText);
@@ -373,4 +396,3 @@ void MainWindow::torrentClicked(const QModelIndex &index)
     m_sessionManager.setCurrentTorrentId(torrentId);
     m_sessionManager.forceUpdateProperties();
 }
-
