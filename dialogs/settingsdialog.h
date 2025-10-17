@@ -52,6 +52,8 @@ class SettingsDialog : public QDialog
 
     void on_themeBox_currentIndexChanged(int index);
 
+    void on_logsPathBtn_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 

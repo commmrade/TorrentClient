@@ -92,6 +92,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
             .value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
             .toBool();
     ui->enaleNotifBox->setChecked(showNotifs);
+
+    QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString();
+    ui->logsPathEdit->setText(logsPath);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -273,3 +276,17 @@ void SettingsDialog::on_themeBox_currentIndexChanged(int index)
     m_themeChanged    = true;
     m_restartRequired = true; // Can't change theme in runtime (i think)
 }
+
+void SettingsDialog::on_logsPathBtn_clicked()
+{
+    auto    homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    QString logsPath =
+        QFileDialog::getExistingDirectory(this, tr("Logs directory"), homePath);
+
+    if (!logsPath.isEmpty()) {
+        ui->logsPathEdit->setText(logsPath);
+        QSettings settings;
+        settings.setValue(SettingsNames::LOGS_PATH, logsPath);
+    }
+}
+

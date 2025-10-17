@@ -7,6 +7,7 @@ inline constexpr const char *STATE    = "state";
 inline constexpr const char *TORRENTS = "torrents";
 inline constexpr const char *METADATA = "metadata";
 inline constexpr const char *THEMES   = "themes";
+inline constexpr const char *LOGS     = "logs";
 } // namespace Dirs
 
 namespace FileEnding

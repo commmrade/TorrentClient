@@ -48,8 +48,8 @@ void MainWindow::customContextMenu(const QPoint &pos)
         return; /// indexAt() returns -1 when out of bounds
     auto torrentId = m_tableModel.getTorrentId(index.row());
 
-    auto torrentStatus =
-        m_tableModel.index(index.row(), getStatusIndex()).data().toString(); // Status was 4, now 3
+    // auto torrentStatus =
+    //     m_tableModel.index(index.row(), getStatusIndex()).data().toString(); // Status was 4, now 3
     bool  isPaused = m_sessionManager.isTorrentPaused(torrentId);
     QMenu menu(this);
     if (isPaused)

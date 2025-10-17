@@ -15,6 +15,8 @@ struct SettingsNames
     static inline constexpr const char *const SESSION_DEFAULT_SAVE_LOCATION =
         "session/defaultSavePath";
 
+    static inline constexpr const char* const LOGS_PATH = "logs/path";
+
     static inline constexpr const char *const TRANSFER_CONFIRM_DELETION = "transfer/deletion";
 
     static inline constexpr const char *const DESKTOP_EXIT_BEH = "desktop/exitBehaviour";
