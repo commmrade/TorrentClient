@@ -92,26 +92,22 @@ void SaveTorrentDialog::setupTableView()
             });
 }
 
-void SaveTorrentDialog::setupSignals()
-{
-    connect(this, &QDialog::finished, this,
-            [this](int result)
-            {
-                qDebug() << "Finshed" << result;
-                if (result == QDialog::Accepted)
-                {
-                    emit torrentConfirmed(m_torrentInfo, m_filePriorities);
-                }
-            });
-}
-
 void SaveTorrentDialog::init()
 {
     setupTableView();
-    setupSignals();
 }
 
 QString SaveTorrentDialog::getSavePath() const { return ui->savePathLineEdit->text(); }
+
+QList<libtorrent::download_priority_t> SaveTorrentDialog::getFilePriorities() const
+{
+    return m_filePriorities;
+}
+
+std::shared_ptr<const libtorrent::torrent_info> SaveTorrentDialog::getTorrentInfo() const
+{
+    return m_torrentInfo;
+}
 
 void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti)
 {
@@ -228,3 +224,5 @@ void SaveTorrentDialog::setDataFromTi()
     }
     m_fileModel.setFiles(files);
 }
+
+

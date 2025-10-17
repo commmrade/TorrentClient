@@ -243,30 +243,26 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
     try
     {
         SaveTorrentDialog saveDialog{magnet_tag{}, magnetUri, this};
-        // TODO: Why the fuck do i even use a signal here, i can just return what i need in get method
-        connect(
-            &saveDialog, &SaveTorrentDialog::torrentConfirmed, this,
-            [this, &saveDialog, &magnetUri](std::shared_ptr<const lt::torrent_info> torrentInfo,
-                                            QList<lt::download_priority_t>          filePriorities)
+        if (saveDialog.exec() == QDialog::Accepted) {
+            auto torrentInfo = saveDialog.getTorrentInfo();
+            auto filePriorities = saveDialog.getFilePriorities();
+            auto savePath = saveDialog.getSavePath();
+
+            if (torrentInfo) {
+                if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
+                                                              savePath))
+                {
+                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+                }
+            }
+            else
             {
-                auto savePath = saveDialog.getSavePath();
-                if (torrentInfo)
+                if (!m_sessionManager.addTorrentByMagnet(magnetUri, savePath))
                 {
-                    if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
-                                                                  savePath))
-                    {
-                        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
-                    }
+                    QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
                 }
-                else
-                {
-                    if (!m_sessionManager.addTorrentByMagnet(magnetUri, savePath))
-                    {
-                        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
-                    }
-                }
-            });
-        saveDialog.exec();
+            }
+        }
     }
     catch (const std::exception &ex)
     {
@@ -280,19 +276,16 @@ void MainWindow::addTorrentByFile(const QString &filepath)
     try
     {
         SaveTorrentDialog saveDialog{torrent_file_tag{}, filepath, this};
-        // TODO: Why the fuck do i even use a signal here, i can just return what i need in get method
-        connect(&saveDialog, &SaveTorrentDialog::torrentConfirmed, this,
-                [this, &saveDialog](std::shared_ptr<const lt::torrent_info> torrentInfo,
-                                    QList<lt::download_priority_t>          filePriorities)
-                {
-                    auto savePath = saveDialog.getSavePath();
-                    if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
-                                                                  savePath))
-                    {
-                        QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
-                    }
-                });
-        saveDialog.exec();
+        if (saveDialog.exec() == QDialog::Accepted) {
+            auto savePath = saveDialog.getSavePath();
+            auto torrentInfo = saveDialog.getTorrentInfo();
+            auto filePriorities = saveDialog.getFilePriorities();
+            if (!m_sessionManager.addTorrentByTorrentInfo(torrentInfo, filePriorities,
+                                                          savePath))
+            {
+                QMessageBox::critical(this, tr("Error"), tr("Could not add new torrent"));
+            }
+        }
     }
     catch (const std::exception &ex)
     {
