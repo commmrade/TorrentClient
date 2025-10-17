@@ -9,6 +9,7 @@ inline constexpr int SECONDS_IN_DAY    = 86400;
 inline constexpr int SECONDS_IN_HOUR   = 3600;
 inline constexpr int SECONDS_IN_MINUTE = 60;
 inline constexpr int SECONDS_IN_WEEK   = 604800;
+inline constexpr int SECONDS_IN_MONTH  = 2678400;
 inline constexpr int SECONDS_IN_YEAR   = 31449600;
 
 inline constexpr auto BYTES_IN_KB = 1024;

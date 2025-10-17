@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <cmath>
+#include <qdebug.h>
 
 namespace utils
 {
@@ -50,31 +51,46 @@ QString bytesToHigherPerSec(const std::uint64_t bytes)
 
 QString secsToFormattedTime(std::int64_t secs)
 {
-    if (secs == -1)
+    if (secs == -1 || secs > SECONDS_IN_YEAR)
         return QString("infinity");
 
     QString etaStr;
-    auto    years = secs / SECONDS_IN_YEAR;
-    if (years)
-    {
-        etaStr += QString::number(years) + " y ";
+    qDebug() << "Start:" << secs;
+    // auto    years = secs / SECONDS_IN_YEAR;
+    // if (years)
+    // {
+    //     etaStr += QString::number(years) + " y ";
+    // }
+
+    auto months = secs / SECONDS_IN_MONTH;
+    if (months) {
+        etaStr += QString::number(months) + " m ";
     }
+    secs -= months * SECONDS_IN_MONTH;
+
     auto weeks = secs / SECONDS_IN_WEEK;
     if (weeks)
     {
         etaStr += QString::number(weeks) + " w ";
     }
+    secs -= weeks * SECONDS_IN_WEEK;
+
     auto days = secs / SECONDS_IN_DAY;
     if (days)
     {
         etaStr += QString::number(days) + " d ";
     }
+    secs -= days * SECONDS_IN_DAY;
 
-    auto hrs     = secs % SECONDS_IN_YEAR % SECONDS_IN_WEEK % SECONDS_IN_DAY / SECONDS_IN_HOUR;
-    auto mins    = secs % SECONDS_IN_HOUR / SECONDS_IN_MINUTE;
-    auto seconds = secs % SECONDS_IN_MINUTE;
-    etaStr += QString("%1:%2:%3").arg(hrs).arg(mins).arg(seconds);
+    auto hrs     = secs / SECONDS_IN_HOUR;
+    secs -= hrs * SECONDS_IN_HOUR;
 
+    auto mins    = secs / SECONDS_IN_MINUTE;
+    secs -= mins * SECONDS_IN_MINUTE;
+
+    auto seconds = secs;
+    etaStr += QString("%1:%2:%3").arg(hrs, 2, 10, '0').arg(mins, 2, 10, '0').arg(seconds, 2, 10, '0');
+    qDebug() << "End:" << etaStr;
     return etaStr;
 }
 
