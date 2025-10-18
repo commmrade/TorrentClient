@@ -54,6 +54,10 @@ class SettingsDialog : public QDialog
 
     void on_logsPathBtn_clicked();
 
+    void on_maxLogFileSpinBox_valueChanged(int arg1);
+
+    void on_logsBox_clicked(bool checked);
+
   private:
     Ui::SettingsDialog *ui;
 
@@ -62,9 +66,22 @@ class SettingsDialog : public QDialog
     // General
     bool m_languageChanged{false};
     bool m_themeChanged{false};
+    bool m_confirmDeleteChanged{false};
+
     // Torrent
     bool m_downloadLimitChanged{false};
     bool m_uploadLimitChanged{false};
+    bool m_savePathChanged{false};
+
+    // Tray
+    bool m_showTrayChanged{false};
+    bool m_enableNotifChanged{false};
+    bool m_exitBehChanged{false};
+
+    // Logs
+    bool m_logsEnabledChanged{false};
+    bool m_mLogSizeChanged{false};
+    bool m_logsPathChanged{false};
 
     void applyApplicationSettings();
     void applyTorrentSettings();

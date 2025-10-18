@@ -15,7 +15,9 @@ struct SettingsNames
     static inline constexpr const char *const SESSION_DEFAULT_SAVE_LOCATION =
         "session/defaultSavePath";
 
+    static inline constexpr const char* const LOGS_ENABLED = "logs/enabled";
     static inline constexpr const char* const LOGS_PATH = "logs/path";
+    static inline constexpr const char* const LOGS_MAX_SIZE = "logs/maxSize";
 
     static inline constexpr const char *const TRANSFER_CONFIRM_DELETION = "transfer/deletion";
 
@@ -38,6 +40,9 @@ struct SettingsValues
     static inline constexpr int GUI_THEME_CUSTOM = 2;
 
     static inline constexpr bool TRANSFER_CONFIRM_DELETION_DEFAULT = true;
+
+    static inline constexpr unsigned int LOGS_MAX_SIZE_DEFAULT = 64 * 1024;
+    static inline constexpr bool LOGS_ENABLED_DEFAULT = true;
 
     static inline constexpr int DESKTOP_EXIT_BEH_CLOSE   = 0;
     static inline constexpr int DESKTOP_EXIT_BEH_TO_TRAY = 1;

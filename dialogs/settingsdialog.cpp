@@ -95,6 +95,12 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 
     QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString();
     ui->logsPathEdit->setText(logsPath);
+
+    unsigned int logsMax = settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT).toUInt();
+    ui->maxLogFileSpinBox->setValue(logsMax / 1024);
+
+    bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
+    ui->logsBox->setChecked(logsEnabled);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -147,6 +153,64 @@ void SettingsDialog::applyApplicationSettings()
         settings.setValue(SettingsNames::GUI_THEME, theme);
         m_themeChanged = false;
     }
+    if (m_confirmDeleteChanged) {
+        bool checked = ui->confirmDelBox->isChecked();
+        settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
+        m_confirmDeleteChanged = false;
+    }
+    if (m_logsEnabledChanged) {
+        settings.setValue(SettingsNames::LOGS_ENABLED, ui->logsBox->isChecked());
+        m_logsEnabledChanged = false;
+    }
+    if (m_showTrayChanged) {
+        bool checked = ui->showTrayBox->isChecked();
+        settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
+        if (!checked)
+        {
+            ui->enaleNotifBox->setChecked(false);
+            on_enaleNotifBox_clicked(false);
+            ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+            on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+        }
+        m_showTrayChanged = false;
+    }
+    if (m_enableNotifChanged) {
+        bool checked = ui->enaleNotifBox->isChecked();
+        if (checked && !ui->showTrayBox->isChecked())
+        {
+            QMessageBox::warning(this, tr("Warning"),
+                                 tr("You can't enable notifications when tray is disabled"));
+            ui->enaleNotifBox->setChecked(false);
+            return;
+        }
+
+        settings.setValue(SettingsNames::DESKTOP_SHOW_NOTIFS, checked);
+        m_enableNotifChanged = false;
+    }
+    if (m_exitBehChanged) {
+        int index = ui->exitBehBtn->currentIndex();
+        if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked())
+        {
+            QMessageBox::warning(this, tr("Warning"),
+                                 tr("You can't minimize to tray when tray is disabled"));
+            ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+            return;
+        }
+        settings.setValue(SettingsNames::DESKTOP_EXIT_BEH, index);
+        m_exitBehChanged = false;
+    }
+
+    if (m_mLogSizeChanged) {
+        int arg = ui->maxLogFileSpinBox->value();
+        settings.setValue(SettingsNames::LOGS_MAX_SIZE, arg * 1024);
+
+        m_mLogSizeChanged = false;
+    }
+    if (m_logsPathChanged) {
+        QString logsPath = ui->logsPathEdit->text();
+        settings.setValue(SettingsNames::LOGS_PATH, logsPath);
+        m_logsPathChanged = false;
+    }
 }
 
 void SettingsDialog::applyTorrentSettings()
@@ -166,16 +230,21 @@ void SettingsDialog::applyTorrentSettings()
         sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
         m_uploadLimitChanged = false;
     }
+    if (m_savePathChanged) {
+        QSettings settings;
+        QString defaultSavePath = ui->savePathLineEdit->text();
+        settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
+        m_savePathChanged = false;
+    }
 }
 
 void SettingsDialog::on_savePathButton_clicked()
 {
+    m_savePathChanged = true;
     QString defaultSavePath =
         QFileDialog::getExistingDirectory(this, tr("Choose a new default save directory"));
     if (!defaultSavePath.isEmpty())
     {
-        QSettings settings;
-        settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         ui->savePathLineEdit->setText(defaultSavePath);
     }
 }
@@ -207,51 +276,23 @@ void SettingsDialog::on_chooseThemeBtn_clicked()
 
 void SettingsDialog::on_confirmDelBox_clicked(bool checked)
 {
-    QSettings settings;
-    settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
+    m_confirmDeleteChanged = true;
 }
 
 void SettingsDialog::on_showTrayBox_clicked(bool checked)
 {
-    QSettings settings;
-    settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
-
-    if (!checked)
-    {
-        ui->enaleNotifBox->setChecked(false);
-        on_enaleNotifBox_clicked(false);
-        ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-        on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-    }
+    m_showTrayChanged = true;
     m_restartRequired = true; // Cant enable tray in runtime (i mean i can but aint doin it
 }
 
 void SettingsDialog::on_enaleNotifBox_clicked(bool checked)
 {
-    if (checked && !ui->showTrayBox->isChecked())
-    {
-        QMessageBox::warning(this, tr("Warning"),
-                             tr("You can't enable notifications when tray is disabled"));
-        ui->enaleNotifBox->setChecked(false);
-        return;
-    }
-
-    QSettings settings;
-    settings.setValue(SettingsNames::DESKTOP_SHOW_NOTIFS, checked);
-    // Can easily enable messages in runtime
+    m_enableNotifChanged = true;
 }
 
 void SettingsDialog::on_exitBehBtn_currentIndexChanged(int index)
 {
-    if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked())
-    {
-        QMessageBox::warning(this, tr("Warning"),
-                             tr("You can't minimize to tray when tray is disabled"));
-        ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-        return;
-    }
-    QSettings settings;
-    settings.setValue(SettingsNames::DESKTOP_EXIT_BEH, index);
+    m_exitBehChanged = true;
 }
 
 void SettingsDialog::on_languageBox_currentIndexChanged(int index)
@@ -285,8 +326,18 @@ void SettingsDialog::on_logsPathBtn_clicked()
 
     if (!logsPath.isEmpty()) {
         ui->logsPathEdit->setText(logsPath);
-        QSettings settings;
-        settings.setValue(SettingsNames::LOGS_PATH, logsPath);
     }
+    m_logsPathChanged = true;
+    m_restartRequired = true;
+}
+
+void SettingsDialog::on_maxLogFileSpinBox_valueChanged(int arg1)
+{
+    m_mLogSizeChanged = true;
+}
+
+void SettingsDialog::on_logsBox_clicked(bool checked)
+{
+    m_logsEnabledChanged = true;
 }
 

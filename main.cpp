@@ -40,32 +40,52 @@ struct f_deleter {
     }
 };
 
+
+QtMessageHandler originalHandler;
 void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString& text) {
-    QByteArray localMsg = text.toLocal8Bit();
-    auto curDatetime = QDateTime::currentDateTime();
-    const char* curDatePrintable = qPrintable(curDatetime.toString());
-
-    fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable, localMsg.constData());
-
     QSettings settings;
+    bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
+    if (!logsEnabled) {
+        originalHandler(t, ctx, text);
+        return;
+    }
+
+    QByteArray localMsg = text.toLocal8Bit();
+    QString curDatetime = QDateTime::currentDateTime().toString();
+    QByteArray curDatePrintable = curDatetime.toLocal8Bit();
+
+    fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
+
     QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString() + QDir::separator() + "torrentclient.log";
     static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
-    if (!f.get()) return;
+    if (!f) return; // how to handl this?
+
+    long seekPos = ftell(f.get());
+    unsigned int logMaxSize = settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT).toUInt();
+    if (seekPos > logMaxSize) {
+        std::FILE* oldFile = f.release();
+        std::FILE* newFile = std::freopen(NULL, "w", oldFile); // oldFile closed here
+        f.reset(newFile);
+        if (!f) {
+            return;
+        }
+    }
+
     switch (t) {
         case QtDebugMsg:
-            fprintf(f.get(), "Debug [%s]: %s\n", curDatePrintable, localMsg.constData());
+            fprintf(f.get(), "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
             break;
         case QtInfoMsg:
-            fprintf(f.get(), "Info [%s]: %s\n", curDatePrintable, localMsg.constData());
+            fprintf(f.get(), "Info [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
             break;
         case QtWarningMsg:
-            fprintf(f.get(), "Warning [%s]: %s\n", curDatePrintable, localMsg.constData());
+            fprintf(f.get(), "Warning [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
             break;
         case QtCriticalMsg:
-            fprintf(f.get(), "Critical [%s]: %s\n", curDatePrintable, localMsg.constData());
+            fprintf(f.get(), "Critical [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
             break;
         case QtFatalMsg:
-            fprintf(f.get(), "Fatal [%s]: %s\n", curDatePrintable, localMsg.constData());
+            fprintf(f.get(), "Fatal [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
             break;
     }
 }
@@ -94,7 +114,7 @@ int main(int argc, char *argv[])
 
 
     QApplication a(argc, argv);
-    qInstallMessageHandler(myMessageHandler);
+    originalHandler = qInstallMessageHandler(myMessageHandler);
     QSettings    settings;
     // Set theme
     int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
