@@ -25,6 +25,8 @@ struct SettingsNames
 
     static inline constexpr const char *const DESKTOP_SHOW_TRAY   = "desktop/showInTray";
     static inline constexpr const char *const DESKTOP_SHOW_NOTIFS = "desktop/showNotifications";
+
+    static inline constexpr const char *const LISTENING_PORT = "listening/port";
 };
 
 struct SettingsValues
@@ -49,6 +51,8 @@ struct SettingsValues
 
     static inline constexpr bool DESKTOP_SHOW_TRAY_DEFAULT   = true;
     static inline constexpr bool DESKTOP_SHOW_NOTIFS_DEFAULT = true;
+
+    static inline constexpr unsigned short LISTENING_PORT_DEFAULT = 6881;
 };
 
 #endif // SETTINGSVALUES_H

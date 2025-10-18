@@ -58,7 +58,9 @@ void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString&
 
     QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString() + QDir::separator() + "torrentclient.log";
     static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
-    if (!f) return; // how to handl this?
+    if (!f) {
+        return; // how to handl this?
+    }
 
     long seekPos = ftell(f.get());
     unsigned int logMaxSize = settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT).toUInt();

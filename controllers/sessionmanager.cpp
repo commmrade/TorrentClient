@@ -49,7 +49,7 @@ libtorrent::session_params SessionManager::loadSessionParams()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                            QDir::separator() + SESSION_FILENAME;
-    auto               sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
+    auto sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
     lt::session_params sessParams;
     if (sessionFileContents.empty())
     {
@@ -63,6 +63,14 @@ libtorrent::session_params SessionManager::loadSessionParams()
     {
         sessParams = std::move(lt::read_session_params(sessionFileContents));
     }
+
+    // Load session parameters that aren't explicitly set in SettingsDialog when changed
+    // (Port isn't, f.e)
+    QSettings settings;
+    int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toInt();
+    QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(port);
+    sessParams.settings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
+
     return sessParams;
 }
 
@@ -144,6 +152,7 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
 
+    // qDebug() << "Listen interface:" << m_session->get_settings().get_str(lt::settings_pack::listen_interfaces);
     // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 

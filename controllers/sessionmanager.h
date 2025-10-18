@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
-#include "dirs.h"
 #include "torrenthandle.h"
 #include "tracker.h"
 #include "file.h"

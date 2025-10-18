@@ -9,6 +9,7 @@
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include "dirs.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
 {
@@ -101,6 +102,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 
     bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
     ui->logsBox->setChecked(logsEnabled);
+
+
+    /// Connection stuff
+    int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toInt();
+    ui->portBox->setValue(port);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -114,6 +120,7 @@ void SettingsDialog::on_applyButton_clicked()
 {
     applyApplicationSettings();
     applyTorrentSettings();
+    applyConnectionSettings();
 
     // Prompt for restart after applied all the settings
     if (m_restartRequired)
@@ -126,8 +133,8 @@ void SettingsDialog::on_applyButton_clicked()
         if (ret == QMessageBox::Apply)
         {
             QString const binaryPath = QCoreApplication::applicationFilePath();
-            QProcess::startDetached(binaryPath);
-            QApplication::exit(); // Kill old app process and start a detached new one
+            QApplication::quit(); // Kill old app process and start a detached new one
+            QProcess::startDetached(binaryPath, qApp->arguments().mid(1));
         }
         m_restartRequired = false;
     }
@@ -219,6 +226,7 @@ void SettingsDialog::applyTorrentSettings()
 
     if (m_downloadLimitChanged)
     {
+        // TODO: Duplicate to settings
         auto downloadLimitValue = ui->downloadLimitSpin->value();
         sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
         m_downloadLimitChanged = false;
@@ -226,6 +234,7 @@ void SettingsDialog::applyTorrentSettings()
 
     if (m_uploadLimitChanged)
     {
+        // TODO: Duplicate to settings
         auto uploadLimitValue = ui->uploadLimitSpin->value();
         sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
         m_uploadLimitChanged = false;
@@ -235,6 +244,16 @@ void SettingsDialog::applyTorrentSettings()
         QString defaultSavePath = ui->savePathLineEdit->text();
         settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         m_savePathChanged = false;
+    }
+}
+
+void SettingsDialog::applyConnectionSettings()
+{
+    QSettings settings;
+    if (m_portChanged) {
+        int port = ui->portBox->value();
+        settings.setValue(SettingsNames::LISTENING_PORT, port);
+        // Probably can't change the port in runtime, so must restart
     }
 }
 
@@ -339,5 +358,19 @@ void SettingsDialog::on_maxLogFileSpinBox_valueChanged(int arg1)
 void SettingsDialog::on_logsBox_clicked(bool checked)
 {
     m_logsEnabledChanged = true;
+}
+
+
+void SettingsDialog::on_portBox_valueChanged(int arg1)
+{
+    m_portChanged = true;
+    m_restartRequired = true;
+}
+
+
+void SettingsDialog::on_resetPortBtn_clicked()
+{
+    ui->portBox->setValue(SettingsValues::LISTENING_PORT_DEFAULT);
+    on_portBox_valueChanged(SettingsValues::LISTENING_PORT_DEFAULT);
 }
 

@@ -12,7 +12,7 @@ enum SettingsTabs
 {
     APPLICATION,
     TORRENT,
-    ADVANCED
+    CONNECTION
 };
 
 class SettingsDialog : public QDialog
@@ -58,33 +58,39 @@ class SettingsDialog : public QDialog
 
     void on_logsBox_clicked(bool checked);
 
+    void on_portBox_valueChanged(int arg1);
+
+    void on_resetPortBtn_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 
     // Settings flags
     bool m_restartRequired{false};
-    // General
+    /// General
     bool m_languageChanged{false};
     bool m_themeChanged{false};
     bool m_confirmDeleteChanged{false};
-
-    // Torrent
-    bool m_downloadLimitChanged{false};
-    bool m_uploadLimitChanged{false};
-    bool m_savePathChanged{false};
-
     // Tray
     bool m_showTrayChanged{false};
     bool m_enableNotifChanged{false};
     bool m_exitBehChanged{false};
-
     // Logs
     bool m_logsEnabledChanged{false};
     bool m_mLogSizeChanged{false};
     bool m_logsPathChanged{false};
 
+    /// Torrent
+    bool m_downloadLimitChanged{false};
+    bool m_uploadLimitChanged{false};
+    bool m_savePathChanged{false};
+
+    /// Connection
+    bool m_portChanged{false};
+
     void applyApplicationSettings();
     void applyTorrentSettings();
+    void applyConnectionSettings();
 
   signals:
     void downloadLimitChanged(int value);
