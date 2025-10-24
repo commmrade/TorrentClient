@@ -11,7 +11,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(controllers widgets models delegates dialogs common proxy)
 
-find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBTORRENT REQUIRED libtorrent-rasterbar)
 
@@ -31,7 +30,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(torrent-client
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        widgets/torrentwidget.h widgets/torrentwidget.cpp widgets/torrentwidget.ui
+
         controllers/sessionmanager.h controllers/sessionmanager.cpp
         models/torrentstablemodel.h models/torrentstablemodel.cpp
         delegates/torrentitemdelegate.h delegates/torrentitemdelegate.cpp
@@ -65,6 +64,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         common/category.h
         common/dirs.h
         common/priority.h
+        dialogs/torrentsettingsdialog.h dialogs/torrentsettingsdialog.cpp dialogs/torrentsettingsdialog.ui
+        dialogs/loadmagnetdialog.h dialogs/loadmagnetdialog.cpp dialogs/loadmagnetdialog.ui
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -84,8 +85,14 @@ else()
     endif()
 endif()
 
-target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets spdlog::spdlog ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY} Qt${QT_VERSION_MAJOR}::Charts)
+target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY} Qt${QT_VERSION_MAJOR}::Charts)
 target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${MAXMINDDB_INCLUDE_DIR})
+
+# target_compile_options(torrent-client PRIVATE -fsanitize=address -g -O1 -fno-omit-frame-pointer -Wall -Wextra)
+# target_link_options(torrent-client PRIVATE -fsanitize=address)
+
+target_compile_options(torrent-client PRIVATE -Wall -Wextra)
+# target_link_options(torrent-client PRIVATE -fsanitize=address)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

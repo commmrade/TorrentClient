@@ -1,6 +1,5 @@
 #include "torrentstablemodel.h"
 #include <QList>
-#include <spdlog/spdlog.h>
 #include "utils.h"
 
 TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(parent) {}
@@ -247,7 +246,6 @@ bool TorrentsTableModel::updateTorrent(const Torrent &torrent)
                      [id = torrent.id](const auto &torrent) { return torrent.id == id; });
     if (torrentIterator == m_torrents.end())
     {
-        spdlog::warn("Such torrent does not exist, id: {}", torrent.id);
         return false;
     }
 
@@ -266,7 +264,6 @@ bool TorrentsTableModel::finishTorrent(const std::uint32_t id, const lt::torrent
                                         [id](const auto &torrent) { return torrent.id == id; });
     if (torrentIterator == m_torrents.end())
     {
-        spdlog::warn("Such torrent does not exist, id: {}", id);
         return false;
     }
 
@@ -281,7 +278,6 @@ bool TorrentsTableModel::removeTorrent(const std::uint32_t id)
                                         [id](const auto &torrent) { return torrent.id == id; });
     if (torrentIterator == m_torrents.end())
     {
-        spdlog::warn("Such torrent does not exist here, id: {}", id);
         return false;
     }
 

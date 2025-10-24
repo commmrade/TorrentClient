@@ -16,18 +16,18 @@ GeneralInfoWidget::~GeneralInfoWidget() { delete ui; }
 void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
     {
-        auto    hrs  = iInfo.activeTime / 3600;
-        auto    mins = iInfo.activeTime % 3600 / 60;
-        auto    secs = iInfo.activeTime % 60;
-        QString timeStr;
-        if (iInfo.activeTime == -1)
-        {
-            timeStr = tr("infinity");
-        }
-        else
-        {
-            timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
-        }
+        // auto    hrs  = iInfo.activeTime / 3600;
+        // auto    mins = iInfo.activeTime % 3600 / 60;
+        // auto    secs = iInfo.activeTime % 60;
+        // QString timeStr;
+        // if (iInfo.activeTime == -1)
+        // {
+        //     timeStr = tr("infinity");
+        // }
+        // else
+        // {
+        //     timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
+        auto timeStr = utils::secsToFormattedTime(iInfo.activeTime);
         ui->timeActValue->setText(timeStr);
     }
 

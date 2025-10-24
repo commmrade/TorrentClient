@@ -40,11 +40,16 @@ SessionManager::~SessionManager()
     }
 }
 
+const TorrentHandle SessionManager::getTorrentHandle(const std::uint32_t id) const
+{
+    return m_torrentHandles[id];
+}
+
 libtorrent::session_params SessionManager::loadSessionParams()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                            QDir::separator() + SESSION_FILENAME;
-    auto               sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
+    auto sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
     lt::session_params sessParams;
     if (sessionFileContents.empty())
     {
@@ -64,10 +69,14 @@ libtorrent::session_params SessionManager::loadSessionParams()
 void SessionManager::loadSessionSettingsFromSettings(lt::session_params &sessParams)
 {
     QSettings settings;
-    int       downloadSpeedLimit =
-        settings.value(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{0}).toInt();
-    int uploadSpeedLimit =
-        settings.value(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{0}).toInt();
+    int       downloadSpeedLimit = settings
+                                 .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
+                                        SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
+                                 .toInt();
+    int uploadSpeedLimit = settings
+                               .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
+                                      SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
+                               .toInt();
     sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
     sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
 }
@@ -85,8 +94,8 @@ void SessionManager::saveResumes()
 
 void SessionManager::eventLoop()
 {
-    QElapsedTimer timer;
-    timer.start();
+    // QElapsedTimer timer;
+    // timer.start();
 
     std::vector<lt::alert *> alerts;
     m_session->pop_alerts(&alerts);
@@ -102,6 +111,7 @@ void SessionManager::eventLoop()
         }
         else if (auto *metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert))
         {
+            qDebug() << "MDAta received";
             handleMetadataReceived(metadataReceivedAlert);
         }
         else if (auto *resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert))
@@ -120,12 +130,21 @@ void SessionManager::eventLoop()
         {
             handleTorrentErrorAlert(torrentErrorAlert);
         }
+        else if (auto *moveFailedAlert = lt::alert_cast<lt::storage_moved_failed_alert>(alert))
+        {
+            handleStorageMoveFailedAlert(moveFailedAlert);
+        }
+        else if (auto *renameFileFailedAlert = lt::alert_cast<lt::file_rename_failed_alert>(alert))
+        {
+            handleFileRenameFailedAlert(renameFileFailedAlert);
+        }
     }
 
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
 
+    // qDebug() << "Listen interface:" << m_session->get_settings().get_str(lt::settings_pack::listen_interfaces);
     // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
 }
 
@@ -167,7 +186,7 @@ void SessionManager::updateProperties()
 void SessionManager::updatePeersProp(TorrentHandle &handle)
 {
     std::vector<lt::peer_info> peers = handle.getPeerInfo();
-    emit                       peerInfo(handle.id(), std::move(peers));
+    emit                       peerInfo(handle.id(), peers);
 }
 
 void SessionManager::updateTrackersProp(TorrentHandle &handle)
@@ -249,13 +268,10 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
                                  static_cast<double>(status.total_wanted) * 100.0) *
                                 100) /
                       100.0;
-
     torrentHandle.resetCategory(); // sync category justin case
     Torrent torrent = {
         torrentHandle.id(),
-        torrentHandle.getCategory(), // Default category is All, TODO: This may fuck up category
-                                     // changing, in torrent table model i check if category is
-                                     // empty leave the current category
+        torrentHandle.getCategory(), // Default category is All,
         QString::fromStdString(status.name),
         // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
         status.total_wanted,
@@ -442,6 +458,16 @@ void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *al
     torrentHandle.setCategory(Categories::FAILED);
 }
 
+void SessionManager::handleStorageMoveFailedAlert(libtorrent::storage_moved_failed_alert *alert)
+{
+    emit torrentFileMoveFailed(QString::fromStdString(alert->message()), alert->torrent_name());
+}
+
+void SessionManager::handleFileRenameFailedAlert(libtorrent::file_rename_failed_alert *alert)
+{
+    emit torrentFileMoveFailed(QString::fromStdString(alert->message()), alert->torrent_name());
+}
+
 void SessionManager::loadResumes()
 {
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -461,13 +487,15 @@ void SessionManager::loadResumes()
         {
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
-            bool isPaused =
-                (params.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ? true
-                                                                                          : false;
-            if (isPaused)
-            {
-                params.flags &= ~lt::torrent_flags::auto_managed;
-            }
+            // bool isPaused =
+            //     (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ?
+            //     true
+            //                                                                                   :
+            //                                                                                   false;
+            // if (isPaused)
+            // {
+            //     params.flags &= ~lt::torrent_flags::auto_managed;
+            // }
             m_session->async_add_torrent(std::move(params));
         }
     }
@@ -478,9 +506,6 @@ void SessionManager::setDownloadLimit(int value)
     lt::settings_pack newSettings = m_session->get_settings();
     newSettings.set_int(lt::settings_pack::download_rate_limit, value);
     m_session->apply_settings(std::move(newSettings));
-
-    QSettings settings;
-    settings.setValue(SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{value});
 }
 
 void SessionManager::setUploadLimit(int value)
@@ -488,9 +513,43 @@ void SessionManager::setUploadLimit(int value)
     lt::settings_pack newSettings = m_session->get_settings();
     newSettings.set_int(lt::settings_pack::upload_rate_limit, value);
     m_session->apply_settings(std::move(newSettings));
+}
 
-    QSettings settings;
-    settings.setValue(SettingsValues::SESSION_UPLOAD_SPEED_LIMIT, QVariant{value});
+void SessionManager::setListenPort(unsigned short newPort)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(newPort);
+    newSettings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
+    m_session->apply_settings(std::move(newSettings));
+}
+
+void SessionManager::setListenProtocol(int protocolType)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    switch (protocolType) {
+        case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_TCP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, false);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_UTP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+    }
+    m_session->apply_settings(newSettings);
 }
 
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
@@ -554,12 +613,6 @@ void SessionManager::forceUpdateProperties()
     updateFilesProp(torrentHandle);
 }
 
-void SessionManager::forceUpdateCategory()
-{
-    // TODO: Upate category and signal so torrent list immediately changes after selecting different
-    // category
-}
-
 void SessionManager::emitClearSignals()
 {
     emit clearPeerInfo();
@@ -617,19 +670,12 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
 {
     if (m_currentTorrentId.has_value() && id == m_currentTorrentId.value())
     {
-        qWarning() << "Current torrent set to null";
         m_currentTorrentId = std::nullopt;
     }
 
-    if (removeWithContents)
-    {
-        m_session->remove_torrent(m_torrentHandles[id].handle(), lt::session::delete_files);
-    }
-    else
-    {
-        m_session->remove_torrent(m_torrentHandles[id].handle());
-    }
     auto &torrentHandle = m_torrentHandles[id];
+    m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files
+                                                                         : lt::remove_flags_t{});
 
     // Delete .fastresume and .torrent
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -655,6 +701,22 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     m_torrentHandles.remove(id);
     emit torrentDeleted(id);
     return true;
+}
+
+void SessionManager::setTorrentDownloadLimit(const uint32_t id, int newLimit)
+{
+    m_torrentHandles[id].setDownloadLimit(newLimit);
+}
+
+void SessionManager::setTorrentUploadLimit(const uint32_t id, int newLimit)
+{
+    m_torrentHandles[id].setUploadLimit(newLimit);
+}
+
+void SessionManager::setTorrentSavePath(const std::uint32_t id, const QString &newPath)
+{
+    // TODO: Might wanna handle failed/success alrts
+    m_torrentHandles[id].moveStorage(newPath);
 }
 
 bool SessionManager::addTorrent(libtorrent::add_torrent_params params)

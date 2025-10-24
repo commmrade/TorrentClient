@@ -74,6 +74,10 @@ QVariant FileItem::getValue(int column) const
         };
         return {priorityToString(m_fileData.priority)};
     }
+    case FileFields::ID:
+    {
+        return {m_fileData.id};
+    }
     default:
     {
         throw std::runtime_error("Out of bounds for columns");
@@ -182,10 +186,19 @@ QModelIndex FileTreeModel::parent(const QModelIndex &child) const
 
 QVariant FileTreeModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole)
+
+    if (!index.isValid() || (role != Qt::DisplayRole && role <= Qt::UserRole))
+    {
+
         return QVariant{};
+    }
+
     BaseItem *obj = static_cast<BaseItem *>(index.internalPointer());
-    return obj->getValue(index.column());
+    if (role == Qt::UserRole + 1)
+    { // TODO: Get rid of magic this
+        return {obj->getValue(role)};
+    }
+    return {obj->getValue(index.column())};
 }
 
 bool FileTreeModel::setData(const QModelIndex &index, const QVariant &value, int role)

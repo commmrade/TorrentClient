@@ -11,7 +11,7 @@ class TorrentHandle
     lt::torrent_handle m_handle;
 
     QString m_category{Categories::RUNNING};
-    // QStringList m_categories; // TODO: May be use a list
+    // QStringList m_categories; // TODO: Maybe use a list
 
   public:
     void resetCategory();
@@ -43,6 +43,11 @@ class TorrentHandle
 
     void setFilePriority(lt::file_index_t index, lt::download_priority_t priority);
     void renameFile(lt::file_index_t index, const QString &newName);
+    void setDownloadLimit(int newLimit);
+    int  getDownloadLimit() const;
+    void setUploadLimit(int newLimit);
+    int  getUploadLimit() const;
+    void moveStorage(const QString &newPath);
 
     void pause();
     bool isPaused() const
@@ -54,7 +59,11 @@ class TorrentHandle
     }
     void resume();
 
-    void saveResumeData() { m_handle.save_resume_data(); }
+    void saveResumeData()
+    {
+        auto a = lt::resume_data_flags_t{};
+        m_handle.save_resume_data(lt::torrent_handle::save_info_dict);
+    }
 
     std::uint64_t activeDur() { return m_handle.status().active_duration.count(); }
 

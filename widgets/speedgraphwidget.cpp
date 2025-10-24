@@ -6,8 +6,6 @@
 #include <QTimer>
 #include "sessionmanager.h"
 #include "utils.h"
-#include <execution>
-
 SpeedGraphWidget::SpeedGraphWidget(QWidget *parent) : QWidget(parent), ui(new Ui::SpeedGraphWidget)
 {
     ui->setupUi(this);

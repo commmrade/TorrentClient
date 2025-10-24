@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
-#include "dirs.h"
 #include "torrenthandle.h"
 #include "tracker.h"
 #include "file.h"
@@ -27,7 +26,6 @@ class SessionManager : public QObject
 
     std::unique_ptr<lt::session> m_session;
     void                         loadSessionSettingsFromSettings(lt::session_params &sessParams);
-    // QHash<std::uint32_t, lt::torrent_handle> m_torrentHandles;
     QHash<std::uint32_t, TorrentHandle> m_torrentHandles;
 
     QTimer m_alertTimer;
@@ -42,7 +40,6 @@ class SessionManager : public QObject
     explicit SessionManager(QObject *parent = nullptr);
 
   public:
-    // Q_DISABLE_COPY_MOVE(SessionManager); // Can't copy and move QObjects
     ~SessionManager();
 
     static SessionManager &instance()
@@ -51,22 +48,28 @@ class SessionManager : public QObject
         return sessionManager;
     }
 
-    bool addTorrentByFilename(QStringView filepath, QStringView outputDir);
-    bool addTorrentByMagnet(QString magnetURI, QStringView outputDir);
-    bool addTorrentByTorrentInfo(std::shared_ptr<const lt::torrent_info> ti,
-                                 const QList<lt::download_priority_t>   &filePriorities,
-                                 QStringView                             outputDir);
+    const TorrentHandle getTorrentHandle(const std::uint32_t id) const;
+    bool                addTorrentByFilename(QStringView filepath, QStringView outputDir);
+    bool                addTorrentByMagnet(QString magnetURI, QStringView outputDir);
+    bool                addTorrentByTorrentInfo(std::shared_ptr<const lt::torrent_info> ti,
+                                                const QList<lt::download_priority_t>   &filePriorities,
+                                                QStringView                             outputDir);
 
     bool isTorrentPaused(const std::uint32_t) const;
     void pauseTorrent(const std::uint32_t id);
     void resumeTorrent(const std::uint32_t id);
     bool removeTorrent(const std::uint32_t id, bool removeWithContents);
+    void setTorrentDownloadLimit(const std::uint32_t, int newLimit);
+    void setTorrentUploadLimit(const std::uint32_t, int newLimit);
+    void setTorrentSavePath(const std::uint32_t id, const QString &newPath);
 
     void loadResumes();
 
     // Managing session
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
+    void setListenPort(unsigned short newPort);
+    void setListenProtocol(int protocolType);
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
@@ -85,7 +88,6 @@ class SessionManager : public QObject
 
     // Utils
     void forceUpdateProperties();
-    void forceUpdateCategory();
 
   private:
     lt::session_params loadSessionParams();
@@ -111,6 +113,8 @@ class SessionManager : public QObject
     void handleAddTorrentAlert(lt::add_torrent_alert *alert);
     void handleSessionStatsAlert(lt::session_stats_alert *alert);
     void handleTorrentErrorAlert(lt::torrent_error_alert *alert);
+    void handleStorageMoveFailedAlert(lt::storage_moved_failed_alert *alert);
+    void handleFileRenameFailedAlert(lt::file_rename_failed_alert *alert);
 
     void saveResumes();
     bool addTorrent(lt::add_torrent_params params);
@@ -122,6 +126,9 @@ class SessionManager : public QObject
     void torrentUpdated(const Torrent &torrent);
     void torrentFinished(const std::uint32_t id, const lt::torrent_status &status);
     void torrentDeleted(const std::uint32_t id);
+    void torrentFileMoveFailed(const QString &message, const QString &torrentName);
+    // or
+    // void error(const QString& type, const QString& message);
 
     void peerInfo(const std::uint32_t id, const std::vector<lt::peer_info> &peers);
     void clearPeerInfo();

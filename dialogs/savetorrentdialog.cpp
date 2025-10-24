@@ -28,7 +28,7 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString &torrentPat
 
     QSettings settings;
     auto      savePath = settings
-                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                        .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
                                QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
                         .toString();
     ui->savePathLineEdit->setText(savePath);
@@ -50,7 +50,7 @@ SaveTorrentDialog::SaveTorrentDialog(magnet_tag, const QString &magnetUri, QWidg
 
     QSettings settings;
     auto      savePath = settings
-                        .value(SettingsValues::SESSION_DEFAULT_SAVE_LOCATION,
+                        .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
                                QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))
                         .toString();
     ui->savePathLineEdit->setText(savePath);
@@ -80,7 +80,6 @@ void SaveTorrentDialog::setupTableView()
     connect(&m_fileModel, &FileTreeModel::statusChanged, this,
             [this](int index, bool value)
             {
-                qDebug() << index << m_filePriorities.size();
                 m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
 
                 // Recalc total size TODO:
@@ -93,26 +92,19 @@ void SaveTorrentDialog::setupTableView()
             });
 }
 
-void SaveTorrentDialog::setupSignals()
-{
-    connect(this, &QDialog::finished, this,
-            [this](int result)
-            {
-                qDebug() << "Finshed" << result;
-                if (result == QDialog::Accepted)
-                {
-                    emit torrentConfirmed(m_torrentInfo, m_filePriorities);
-                }
-            });
-}
-
-void SaveTorrentDialog::init()
-{
-    setupTableView();
-    setupSignals();
-}
+void SaveTorrentDialog::init() { setupTableView(); }
 
 QString SaveTorrentDialog::getSavePath() const { return ui->savePathLineEdit->text(); }
+
+QList<libtorrent::download_priority_t> SaveTorrentDialog::getFilePriorities() const
+{
+    return m_filePriorities;
+}
+
+std::shared_ptr<const libtorrent::torrent_info> SaveTorrentDialog::getTorrentInfo() const
+{
+    return m_torrentInfo;
+}
 
 void SaveTorrentDialog::setData(std::shared_ptr<const lt::torrent_info> ti)
 {
