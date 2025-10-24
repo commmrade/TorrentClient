@@ -186,7 +186,7 @@ void SessionManager::updateProperties()
 void SessionManager::updatePeersProp(TorrentHandle &handle)
 {
     std::vector<lt::peer_info> peers = handle.getPeerInfo();
-    emit                       peerInfo(handle.id(), std::move(peers));
+    emit                       peerInfo(handle.id(), peers);
 }
 
 void SessionManager::updateTrackersProp(TorrentHandle &handle)
