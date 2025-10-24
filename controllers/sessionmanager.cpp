@@ -63,14 +63,6 @@ libtorrent::session_params SessionManager::loadSessionParams()
     {
         sessParams = std::move(lt::read_session_params(sessionFileContents));
     }
-
-    // Load session parameters that aren't explicitly set in SettingsDialog when changed
-    // (Port isn't, f.e)
-    QSettings settings;
-    int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toInt();
-    QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(port);
-    sessParams.settings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
-
     return sessParams;
 }
 
@@ -102,8 +94,8 @@ void SessionManager::saveResumes()
 
 void SessionManager::eventLoop()
 {
-    QElapsedTimer timer;
-    timer.start();
+    // QElapsedTimer timer;
+    // timer.start();
 
     std::vector<lt::alert *> alerts;
     m_session->pop_alerts(&alerts);
@@ -514,9 +506,6 @@ void SessionManager::setDownloadLimit(int value)
     lt::settings_pack newSettings = m_session->get_settings();
     newSettings.set_int(lt::settings_pack::download_rate_limit, value);
     m_session->apply_settings(std::move(newSettings));
-
-    QSettings settings;
-    settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{value});
 }
 
 void SessionManager::setUploadLimit(int value)
@@ -524,9 +513,43 @@ void SessionManager::setUploadLimit(int value)
     lt::settings_pack newSettings = m_session->get_settings();
     newSettings.set_int(lt::settings_pack::upload_rate_limit, value);
     m_session->apply_settings(std::move(newSettings));
+}
 
-    QSettings settings;
-    settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, QVariant{value});
+void SessionManager::setListenPort(unsigned short newPort)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(newPort);
+    newSettings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
+    m_session->apply_settings(std::move(newSettings));
+}
+
+void SessionManager::setListenProtocol(int protocolType)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    switch (protocolType) {
+        case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_TCP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, false);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_UTP: {
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
+            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+    }
+    m_session->apply_settings(newSettings);
 }
 
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)

@@ -62,6 +62,8 @@ class SettingsDialog : public QDialog
 
     void on_resetPortBtn_clicked();
 
+    void on_peerConnProtocolBox_currentIndexChanged(int index);
+
   private:
     Ui::SettingsDialog *ui;
 
@@ -87,6 +89,8 @@ class SettingsDialog : public QDialog
 
     /// Connection
     bool m_portChanged{false};
+    bool m_protocolChanged{false};
+
 
     void applyApplicationSettings();
     void applyTorrentSettings();

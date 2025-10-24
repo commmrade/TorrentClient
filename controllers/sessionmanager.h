@@ -68,6 +68,8 @@ class SessionManager : public QObject
     // Managing session
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
+    void setListenPort(unsigned short newPort);
+    void setListenProtocol(int protocolType);
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl

@@ -27,6 +27,7 @@ struct SettingsNames
     static inline constexpr const char *const DESKTOP_SHOW_NOTIFS = "desktop/showNotifications";
 
     static inline constexpr const char *const LISTENING_PORT = "listening/port";
+    static inline constexpr const char* const LISTENING_PROTOCOL = "listening/protocol";
 };
 
 struct SettingsValues
@@ -53,6 +54,9 @@ struct SettingsValues
     static inline constexpr bool DESKTOP_SHOW_NOTIFS_DEFAULT = true;
 
     static inline constexpr unsigned short LISTENING_PORT_DEFAULT = 6881;
+    static inline constexpr int LISTENING_PROTOCOL_TCP_AND_UTP = 0;
+    static inline constexpr int LISTENING_PROTOCOL_TCP = 1;
+    static inline constexpr int LISTENING_PROTOCOL_UTP = 2;
 };
 
 #endif // SETTINGSVALUES_H

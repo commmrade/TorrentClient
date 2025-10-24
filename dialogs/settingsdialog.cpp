@@ -223,24 +223,25 @@ void SettingsDialog::applyApplicationSettings()
 void SettingsDialog::applyTorrentSettings()
 {
     auto &sessionManager = SessionManager::instance();
-
+    QSettings settings;
     if (m_downloadLimitChanged)
     {
-        // TODO: Duplicate to settings
         auto downloadLimitValue = ui->downloadLimitSpin->value();
         sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
         m_downloadLimitChanged = false;
+
+        settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{downloadLimitValue});
     }
 
     if (m_uploadLimitChanged)
     {
-        // TODO: Duplicate to settings
         auto uploadLimitValue = ui->uploadLimitSpin->value();
         sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
         m_uploadLimitChanged = false;
+
+        settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, QVariant{uploadLimitValue});
     }
     if (m_savePathChanged) {
-        QSettings settings;
         QString defaultSavePath = ui->savePathLineEdit->text();
         settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         m_savePathChanged = false;
@@ -249,11 +250,17 @@ void SettingsDialog::applyTorrentSettings()
 
 void SettingsDialog::applyConnectionSettings()
 {
+    auto& sessionManager = SessionManager::instance();
     QSettings settings;
     if (m_portChanged) {
         int port = ui->portBox->value();
         settings.setValue(SettingsNames::LISTENING_PORT, port);
-        // Probably can't change the port in runtime, so must restart
+        sessionManager.setListenPort(port);
+    }
+    if (m_protocolChanged) {
+        int protocolType = ui->peerConnProtocolBox->currentIndex();
+        settings.setValue(SettingsNames::LISTENING_PROTOCOL, protocolType);
+        sessionManager.setListenProtocol(protocolType);
     }
 }
 
@@ -364,7 +371,6 @@ void SettingsDialog::on_logsBox_clicked(bool checked)
 void SettingsDialog::on_portBox_valueChanged(int arg1)
 {
     m_portChanged = true;
-    m_restartRequired = true;
 }
 
 
@@ -372,5 +378,11 @@ void SettingsDialog::on_resetPortBtn_clicked()
 {
     ui->portBox->setValue(SettingsValues::LISTENING_PORT_DEFAULT);
     on_portBox_valueChanged(SettingsValues::LISTENING_PORT_DEFAULT);
+}
+
+
+void SettingsDialog::on_peerConnProtocolBox_currentIndexChanged(int index)
+{
+    m_protocolChanged = true;
 }
 
