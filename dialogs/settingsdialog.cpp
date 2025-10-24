@@ -262,11 +262,15 @@ void SettingsDialog::applyConnectionSettings()
         int port = ui->portBox->value();
         settings.setValue(SettingsNames::LISTENING_PORT, port);
         sessionManager.setListenPort(port);
+
+        m_portChanged = false;
     }
     if (m_protocolChanged) {
         int protocolType = ui->peerConnProtocolBox->currentIndex();
         settings.setValue(SettingsNames::LISTENING_PROTOCOL, protocolType);
         sessionManager.setListenProtocol(protocolType);
+
+        m_protocolChanged = false;
     }
 }
 
