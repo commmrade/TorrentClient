@@ -107,6 +107,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     /// Connection stuff
     int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toInt();
     ui->portBox->setValue(port);
+
+    int protocolType = settings.value(SettingsNames::LISTENING_PROTOCOL, SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP).toInt();
+    ui->peerConnProtocolBox->blockSignals(true);
+    ui->peerConnProtocolBox->setCurrentIndex(protocolType);
+    ui->peerConnProtocolBox->blockSignals(false);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }

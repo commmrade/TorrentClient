@@ -886,17 +886,17 @@
                 <widget class="QComboBox" name="peerConnProtocolBox">
                  <item>
                   <property name="text">
-                   <string>TODO 1</string>
+                   <string>TCP &amp; uTP</string>
                   </property>
                  </item>
                  <item>
                   <property name="text">
-                   <string>TODO 2</string>
+                   <string>TCP</string>
                   </property>
                  </item>
                  <item>
                   <property name="text">
-                   <string>TODO 3</string>
+                   <string>uTP</string>
                   </property>
                  </item>
                 </widget>
