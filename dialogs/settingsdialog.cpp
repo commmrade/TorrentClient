@@ -48,6 +48,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     }
     ui->themeBox->blockSignals(false);
 
+    // TODO: Factor out in functions
     // Torrent category
     int downloadSpeedLimit = settings
                                  .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
