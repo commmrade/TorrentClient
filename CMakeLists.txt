@@ -88,8 +88,11 @@ endif()
 target_link_libraries(torrent-client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${LIBTORRENT_LIBRARIES} ${MAXMINDDB_LIBRARY} Qt${QT_VERSION_MAJOR}::Charts)
 target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${MAXMINDDB_INCLUDE_DIR})
 
-target_compile_options(torrent-client PRIVATE -fsanitize=address -g -O1 -fno-omit-frame-pointer -Wall -Wextra)
-target_link_options(torrent-client PRIVATE -fsanitize=address)
+# target_compile_options(torrent-client PRIVATE -fsanitize=address -g -O1 -fno-omit-frame-pointer -Wall -Wextra)
+# target_link_options(torrent-client PRIVATE -fsanitize=address)
+
+target_compile_options(torrent-client PRIVATE -Wall -Wextra)
+# target_link_options(torrent-client PRIVATE -fsanitize=address)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
