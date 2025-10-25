@@ -9,6 +9,7 @@
 #include <iostream>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QLockFile>
 
 static constexpr const char *ORG_NAME = "klewy";
 static constexpr const char *ORG_DOM  = "klewy.com";
@@ -92,13 +93,8 @@ void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString&
     }
 }
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication::setOrganizationName(ORG_NAME);
-    QCoreApplication::setOrganizationDomain(ORG_DOM);
-    QCoreApplication::setApplicationName(APP_NAME);
 
-
+void initDirsAndFiles() {
     auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!QDir().mkpath(basePath))
     {
@@ -113,11 +109,24 @@ int main(int argc, char *argv[])
     QDir().mkdir(basePath + QDir::separator() + Dirs::THEMES);
     QDir().mkdir(basePath + QDir::separator() + Dirs::LOGS);
 
+}
 
+int main(int argc, char *argv[])
+{
+    QCoreApplication::setOrganizationName(ORG_NAME);
+    QCoreApplication::setOrganizationDomain(ORG_DOM);
+    QCoreApplication::setApplicationName(APP_NAME);
 
+    QLockFile lockfile(QDir::temp().absoluteFilePath("torrent-client.lock"));
+    if (!lockfile.tryLock()) {
+        throw std::runtime_error("An instance of this application is already running");
+    }
+
+    initDirsAndFiles();
     QApplication a(argc, argv);
     originalHandler = qInstallMessageHandler(myMessageHandler);
     QSettings    settings;
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     // Set theme
     int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
     if (theme == SettingsValues::GUI_THEME_DARK)
