@@ -559,6 +559,7 @@ void SessionManager::setMaxNumberOfConnections(int value)
     m_session->apply_settings(newSettings);
 }
 
+
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
 {
     auto &handle = m_torrentHandles[id];
@@ -726,6 +727,11 @@ void SessionManager::setTorrentSavePath(const std::uint32_t id, const QString &n
     m_torrentHandles[id].moveStorage(newPath);
 }
 
+void SessionManager::setTorrentMaxConn(const uint32_t id, int newValue)
+{
+    m_torrentHandles[id].setMaxConn(newValue);
+}
+
 bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     if (isTorrentExists(params.info_hashes.get_best().is_all_zeros()
@@ -734,6 +740,11 @@ bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
     {
         return false;
     }
+    // Set per torrent parameters
+    QSettings settings;
+    int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    params.max_connections = numOfConPt;
+
     m_session->async_add_torrent(std::move(params));
     return true;
 }

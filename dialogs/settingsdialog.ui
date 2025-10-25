@@ -966,6 +966,9 @@
                  <property name="specialValueText">
                   <string notr="true"/>
                  </property>
+                 <property name="minimum">
+                  <number>-1</number>
+                 </property>
                  <property name="maximum">
                   <number>1000000000</number>
                  </property>
@@ -1007,6 +1010,9 @@
                 <widget class="QSpinBox" name="mNumOfConPTBox">
                  <property name="specialValueText">
                   <string notr="true"/>
+                 </property>
+                 <property name="minimum">
+                  <number>-1</number>
                  </property>
                  <property name="maximum">
                   <number>1000000000</number>
@@ -1050,6 +1056,9 @@
                  <property name="specialValueText">
                   <string notr="true"/>
                  </property>
+                 <property name="minimum">
+                  <number>-1</number>
+                 </property>
                  <property name="maximum">
                   <number>1000000000</number>
                  </property>
@@ -1091,6 +1100,9 @@
                 <widget class="QSpinBox" name="mNumOfUplBox_2">
                  <property name="specialValueText">
                   <string notr="true"/>
+                 </property>
+                 <property name="minimum">
+                  <number>-1</number>
                  </property>
                  <property name="maximum">
                   <number>1000000000</number>

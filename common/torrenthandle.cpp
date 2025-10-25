@@ -54,6 +54,16 @@ void TorrentHandle::moveStorage(const QString &newPath)
 {
     m_handle.move_storage(newPath.toStdString(), lt::move_flags_t::always_replace_files);
 }
+
+int TorrentHandle::getMaxConn() const
+{
+    return m_handle.max_connections();
+}
+
+void TorrentHandle::setMaxConn(int value)
+{
+    m_handle.set_max_connections(value);
+}
 void TorrentHandle::pause()
 {
     setCategory(Categories::STOPPED);

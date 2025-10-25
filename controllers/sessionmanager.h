@@ -62,6 +62,7 @@ class SessionManager : public QObject
     void setTorrentDownloadLimit(const std::uint32_t, int newLimit);
     void setTorrentUploadLimit(const std::uint32_t, int newLimit);
     void setTorrentSavePath(const std::uint32_t id, const QString &newPath);
+    void setTorrentMaxConn(const std::uint32_t id, int newValue);
 
     void loadResumes();
 
@@ -71,6 +72,7 @@ class SessionManager : public QObject
     void setListenPort(unsigned short newPort);
     void setListenProtocol(int protocolType);
     void setMaxNumberOfConnections(int value);
+
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl

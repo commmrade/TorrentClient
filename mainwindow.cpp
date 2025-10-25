@@ -118,6 +118,10 @@ void MainWindow::customContextMenu(const QPoint &pos)
                 connect(&settingsDialog, &TorrentSettingsDialog::savePathChanged, this,
                         [this, torrentId](const QString &newPath)
                         { m_sessionManager.setTorrentSavePath(torrentId, newPath); });
+                connect(&settingsDialog, &TorrentSettingsDialog::maxNumOfConChanged, this,
+                        [this, torrentId](int newValue) {
+                            m_sessionManager.setTorrentMaxConn(torrentId, newValue);
+                         });
                 settingsDialog.exec();
             });
     menu.addAction(settingsAction);

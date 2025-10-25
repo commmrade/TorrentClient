@@ -116,6 +116,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 
     int maxNumOfCon = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT).toInt();
     ui->mNumOfConBox->setValue(maxNumOfCon);
+
+    int maxNumOfConPT = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    ui->mNumOfConPTBox->setValue(maxNumOfConPT);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -282,6 +285,12 @@ void SettingsDialog::applyConnectionSettings()
 
         m_mNumOfConChanged = false;
     }
+    if (m_mNumOfConPTChanged) {
+        int value = ui->mNumOfConPTBox->value();
+        settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, value);
+
+        m_mNumOfConPTChanged = false;
+    }
 }
 
 void SettingsDialog::on_savePathButton_clicked()
@@ -415,6 +424,6 @@ void SettingsDialog::on_mNumOfConBox_valueChanged([[maybe_unused]] int arg1)
 
 void SettingsDialog::on_mNumOfConPTBox_valueChanged([[maybe_unused]] int arg1)
 {
-
+    m_mNumOfConPTChanged = true;
 }
 
