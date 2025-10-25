@@ -62,6 +62,7 @@ class SessionManager : public QObject
     void setTorrentDownloadLimit(const std::uint32_t, int newLimit);
     void setTorrentUploadLimit(const std::uint32_t, int newLimit);
     void setTorrentSavePath(const std::uint32_t id, const QString &newPath);
+    void setTorrentMaxConn(const std::uint32_t id, int newValue);
 
     void loadResumes();
 
@@ -70,13 +71,18 @@ class SessionManager : public QObject
     void setUploadLimit(int value);
     void setListenPort(unsigned short newPort);
     void setListenProtocol(int protocolType);
+    void setMaxNumberOfConnections(int value);
+
+
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
     void renameFile(std::uint32_t id, int fileIndex, const QString &newName);
 
     // Peer
-    void banPeers(const QList<QPair<QString, unsigned short>> &bannablePeers);
+    void banPeers(const QList<boost::asio::ip::address> &bannablePeers);
+    lt::ip_filter::filter_tuple_t getIpFilter() const;
+    void setIpFilter(const QList<boost::asio::ip::address>& addrs);
     void addPeerToTorrent(std::uint32_t torrentId, const boost::asio::ip::tcp::endpoint &ep);
     void addPeersToTorrent(std::uint32_t                                torrentId,
                            const QList<boost::asio::ip::tcp::endpoint> &eps);

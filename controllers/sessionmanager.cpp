@@ -61,7 +61,7 @@ libtorrent::session_params SessionManager::loadSessionParams()
     }
     else
     {
-        sessParams = std::move(lt::read_session_params(sessionFileContents));
+        sessParams = lt::read_session_params(sessionFileContents);
     }
     return sessParams;
 }
@@ -222,7 +222,7 @@ void SessionManager::updateTrackersProp(TorrentHandle &handle)
 void SessionManager::updateFilesProp(TorrentHandle &handle)
 {
     auto fileListFromTorrentInfo =
-        [this](const TorrentHandle                    &handle,
+        [](const TorrentHandle                    &handle,
                std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File>
     {
         const auto &files     = tinfo->files();
@@ -232,7 +232,7 @@ void SessionManager::updateFilesProp(TorrentHandle &handle)
         auto        fileProgresses = handle.handle().file_progress();
         for (auto i = 0; i < num_files; ++i)
         {
-            auto fileSize = files.file_size(i);
+            // auto fileSize = files.file_size(i);
             File file;
             file.id         = i;
             file.isEnabled  = handle.handle().file_priority(i) != lt::dont_download;
@@ -311,7 +311,6 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     for (auto &status : statuses)
     {
         auto &handle = status.handle;
-        auto &h      = m_torrentHandles[handle.id()];
 
         if (handle.id() == currentId)
         {
@@ -552,6 +551,14 @@ void SessionManager::setListenProtocol(int protocolType)
     m_session->apply_settings(newSettings);
 }
 
+void SessionManager::setMaxNumberOfConnections(int value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    newSettings.set_int(lt::settings_pack::connections_limit, value);
+    m_session->apply_settings(newSettings);
+}
+
+
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
 {
     auto &handle = m_torrentHandles[id];
@@ -566,15 +573,30 @@ void SessionManager::renameFile(uint32_t id, int fileIndex, const QString &newNa
     handle.renameFile(fileIndex, newName);
 }
 
-void SessionManager::banPeers(const QList<QPair<QString, unsigned short>> &bannablePeers)
+void SessionManager::banPeers(const QList<boost::asio::ip::address> &bannablePeers)
 {
     lt::ip_filter filter = m_session->get_ip_filter();
-    for (const auto &peer : bannablePeers)
+    for (const auto &peerAddr : bannablePeers)
     {
-        auto address = boost::asio::ip::make_address(peer.first.toUtf8().constData());
-        filter.add_rule(address, address, lt::ip_filter::blocked);
+        filter.add_rule(peerAddr, peerAddr, lt::ip_filter::blocked);
     }
-    m_session->set_ip_filter(filter);
+    m_session->set_ip_filter(std::move(filter));
+}
+
+void SessionManager::setIpFilter(const QList<boost::asio::ip::address> &addrs)
+{
+    lt::ip_filter filter{};
+    for (const auto& addr : addrs) {
+        filter.add_rule(addr, addr, lt::ip_filter::blocked);
+    }
+    m_session->set_ip_filter(std::move(filter));
+}
+
+lt::ip_filter::filter_tuple_t SessionManager::getIpFilter() const
+{
+    lt::ip_filter filter = m_session->get_ip_filter();
+    auto bannedPeers = filter.export_filter();
+    return bannedPeers;
 }
 
 void SessionManager::addPeerToTorrent(std::uint32_t id, const boost::asio::ip::tcp::endpoint &ep)
@@ -719,6 +741,11 @@ void SessionManager::setTorrentSavePath(const std::uint32_t id, const QString &n
     m_torrentHandles[id].moveStorage(newPath);
 }
 
+void SessionManager::setTorrentMaxConn(const uint32_t id, int newValue)
+{
+    m_torrentHandles[id].setMaxConn(newValue);
+}
+
 bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     if (isTorrentExists(params.info_hashes.get_best().is_all_zeros()
@@ -727,6 +754,11 @@ bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
     {
         return false;
     }
+    // Set per torrent parameters
+    QSettings settings;
+    int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    params.max_connections = numOfConPt;
+
     m_session->async_add_torrent(std::move(params));
     return true;
 }

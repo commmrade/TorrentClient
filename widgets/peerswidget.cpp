@@ -35,10 +35,13 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
             [this]
             {
                 const auto selectedRows = ui->peerTable->selectionModel()->selectedRows();
-                QList<QPair<QString, unsigned short>> banPeers;
+                QList<boost::asio::ip::address> banPeers;
                 for (const auto &modelIndex : selectedRows)
                 {
-                    banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
+                    // banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
+                    auto ipStr = m_peerModel.data(m_peerModel.index(modelIndex.row(), static_cast<int>(PeerFields::IP))).toString();
+                    auto addr = boost::asio::ip::make_address(ipStr.toStdString());
+                    banPeers.append(std::move(addr));
                 }
 
                 auto &sessionManager = SessionManager::instance();

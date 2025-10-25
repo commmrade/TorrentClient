@@ -21,12 +21,15 @@ class TorrentSettingsDialog : public QDialog
     void downloadLimitChanged(int newLimit);
     void uploadLimitChanged(int newLimit);
     void savePathChanged(const QString &newPath);
+    void maxNumOfConChanged(int newValue);
   private slots:
     void on_downloadLimitSpin_valueChanged(int arg1);
 
     void on_uploadLimitSpin_valueChanged(int arg1);
 
     void on_savePathButton_clicked();
+
+    void on_maxNumOfConBox_valueChanged(int arg1);
 
   private:
     Ui::TorrentSettingsDialog *ui;
@@ -36,6 +39,7 @@ class TorrentSettingsDialog : public QDialog
     bool m_uploadLimitChanged{false};
     bool m_downloadLimitChanged{false};
     bool m_saveLocChanged{false};
+    bool m_mNumOfConChanged{false};
 };
 
 #endif // TORRENTSETTINGSDIALOG_H

@@ -66,6 +66,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         common/priority.h
         dialogs/torrentsettingsdialog.h dialogs/torrentsettingsdialog.cpp dialogs/torrentsettingsdialog.ui
         dialogs/loadmagnetdialog.h dialogs/loadmagnetdialog.cpp dialogs/loadmagnetdialog.ui
+        dialogs/managepeersdialog.h dialogs/managepeersdialog.cpp dialogs/managepeersdialog.ui
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -91,8 +92,12 @@ target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${M
 # target_compile_options(torrent-client PRIVATE -fsanitize=address -g -O1 -fno-omit-frame-pointer -Wall -Wextra)
 # target_link_options(torrent-client PRIVATE -fsanitize=address)
 
-target_compile_options(torrent-client PRIVATE -Wall -Wextra)
-# target_link_options(torrent-client PRIVATE -fsanitize=address)
+if (MSVC)
+    target_compile_options(torrent-client PRIVATE /W4)
+else ()
+    target_compile_options(torrent-client PRIVATE -Wall -Wextra)
+endif ()
+# target_link_options(torrent-client PRIVATE -Wall -Wextra)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

@@ -64,6 +64,12 @@ class SettingsDialog : public QDialog
 
     void on_peerConnProtocolBox_currentIndexChanged(int index);
 
+    void on_mNumOfConBox_valueChanged(int arg1);
+
+    void on_mNumOfConPTBox_valueChanged(int arg1);
+
+    void on_managePeersButton_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 
@@ -90,6 +96,8 @@ class SettingsDialog : public QDialog
     /// Connection
     bool m_portChanged{false};
     bool m_protocolChanged{false};
+    bool m_mNumOfConChanged{false};
+    bool m_mNumOfConPTChanged{false};
 
 
     void applyApplicationSettings();

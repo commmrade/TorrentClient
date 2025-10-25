@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include "dirs.h"
+#include "managepeersdialog.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
 {
@@ -113,6 +114,12 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     ui->peerConnProtocolBox->blockSignals(true);
     ui->peerConnProtocolBox->setCurrentIndex(protocolType);
     ui->peerConnProtocolBox->blockSignals(false);
+
+    int maxNumOfCon = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT).toInt();
+    ui->mNumOfConBox->setValue(maxNumOfCon);
+
+    int maxNumOfConPT = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    ui->mNumOfConPTBox->setValue(maxNumOfConPT);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -272,6 +279,19 @@ void SettingsDialog::applyConnectionSettings()
 
         m_protocolChanged = false;
     }
+    if (m_mNumOfConChanged) {
+        int value = ui->mNumOfConBox->value();
+        settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, value);
+        sessionManager.setMaxNumberOfConnections(value);
+
+        m_mNumOfConChanged = false;
+    }
+    if (m_mNumOfConPTChanged) {
+        int value = ui->mNumOfConPTBox->value();
+        settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, value);
+
+        m_mNumOfConPTChanged = false;
+    }
 }
 
 void SettingsDialog::on_savePathButton_clicked()
@@ -310,28 +330,28 @@ void SettingsDialog::on_chooseThemeBtn_clicked()
     }
 }
 
-void SettingsDialog::on_confirmDelBox_clicked(bool checked)
+void SettingsDialog::on_confirmDelBox_clicked([[maybe_unused]] bool checked)
 {
     m_confirmDeleteChanged = true;
 }
 
-void SettingsDialog::on_showTrayBox_clicked(bool checked)
+void SettingsDialog::on_showTrayBox_clicked([[maybe_unused]] bool checked)
 {
     m_showTrayChanged = true;
     m_restartRequired = true; // Cant enable tray in runtime (i mean i can but aint doin it
 }
 
-void SettingsDialog::on_enaleNotifBox_clicked(bool checked)
+void SettingsDialog::on_enaleNotifBox_clicked([[maybe_unused]] bool checked)
 {
     m_enableNotifChanged = true;
 }
 
-void SettingsDialog::on_exitBehBtn_currentIndexChanged(int index)
+void SettingsDialog::on_exitBehBtn_currentIndexChanged([[maybe_unused]] int index)
 {
     m_exitBehChanged = true;
 }
 
-void SettingsDialog::on_languageBox_currentIndexChanged(int index)
+void SettingsDialog::on_languageBox_currentIndexChanged([[maybe_unused]] int index)
 {
     m_languageChanged = true;
     m_restartRequired = true; // Can't change language in runtime, (actually i can)
@@ -367,18 +387,18 @@ void SettingsDialog::on_logsPathBtn_clicked()
     m_restartRequired = true;
 }
 
-void SettingsDialog::on_maxLogFileSpinBox_valueChanged(int arg1)
+void SettingsDialog::on_maxLogFileSpinBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mLogSizeChanged = true;
 }
 
-void SettingsDialog::on_logsBox_clicked(bool checked)
+void SettingsDialog::on_logsBox_clicked([[maybe_unused]] bool checked)
 {
     m_logsEnabledChanged = true;
 }
 
 
-void SettingsDialog::on_portBox_valueChanged(int arg1)
+void SettingsDialog::on_portBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_portChanged = true;
 }
@@ -391,8 +411,37 @@ void SettingsDialog::on_resetPortBtn_clicked()
 }
 
 
-void SettingsDialog::on_peerConnProtocolBox_currentIndexChanged(int index)
+void SettingsDialog::on_peerConnProtocolBox_currentIndexChanged([[maybe_unused]] int index)
 {
     m_protocolChanged = true;
+}
+
+
+void SettingsDialog::on_mNumOfConBox_valueChanged([[maybe_unused]] int arg1)
+{
+    m_mNumOfConChanged = true;
+}
+
+
+void SettingsDialog::on_mNumOfConPTBox_valueChanged([[maybe_unused]] int arg1)
+{
+    m_mNumOfConPTChanged = true;
+}
+
+
+void SettingsDialog::on_managePeersButton_clicked()
+{
+    try {
+        ManagePeersDialog dialog(this);
+        if (QDialog::Accepted == dialog.exec()) {
+            auto addrs = dialog.getBannedPeers();
+            auto& sessionManager = SessionManager::instance();
+            sessionManager.setIpFilter(addrs);
+        }
+    } catch (const std::exception& ex) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("Could not parse addresses"));
+        qWarning() << "Could not parse all addresses in ManagePeersDialog";
+    }
 }
 

@@ -48,6 +48,8 @@ class TorrentHandle
     void setUploadLimit(int newLimit);
     int  getUploadLimit() const;
     void moveStorage(const QString &newPath);
+    int getMaxConn() const;
+    void setMaxConn(int value);
 
     void pause();
     bool isPaused() const
@@ -61,7 +63,6 @@ class TorrentHandle
 
     void saveResumeData()
     {
-        auto a = lt::resume_data_flags_t{};
         m_handle.save_resume_data(lt::torrent_handle::save_info_dict);
     }
 

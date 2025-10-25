@@ -11,12 +11,14 @@ TorrentSettingsDialog::TorrentSettingsDialog(const TorrentHandle &tHandle, QWidg
     auto downloadLimitKB    = downloadLimitBytes / 1024.0;
     auto uploadLimitBytes   = tHandle.handle().upload_limit();
     auto uploadLimitKB      = uploadLimitBytes / 1024.0;
+    auto maxNumOfCon        = tHandle.getMaxConn();
 
     auto    status   = tHandle.handle().status(lt::torrent_handle::query_save_path);
     QString savePath = QString::fromStdString(status.save_path);
     ui->savePathLineEdit->setText(savePath);
     ui->downloadLimitSpin->setValue(downloadLimitKB);
     ui->uploadLimitSpin->setValue(uploadLimitKB);
+    ui->maxNumOfConBox->setValue(maxNumOfCon);
 
     connect(this, &QDialog::finished, this,
             [this](int result)
@@ -49,14 +51,18 @@ void TorrentSettingsDialog::applySettings()
         auto newPath = ui->savePathLineEdit->text();
         emit savePathChanged(newPath);
     }
+    if (m_mNumOfConChanged) {
+        auto value = ui->maxNumOfConBox->value();
+        emit maxNumOfConChanged(value);
+    }
 }
 
-void TorrentSettingsDialog::on_downloadLimitSpin_valueChanged(int arg1)
+void TorrentSettingsDialog::on_downloadLimitSpin_valueChanged([[maybe_unused]] int arg1)
 {
     m_downloadLimitChanged = true;
 }
 
-void TorrentSettingsDialog::on_uploadLimitSpin_valueChanged(int arg1)
+void TorrentSettingsDialog::on_uploadLimitSpin_valueChanged([[maybe_unused]] int arg1)
 {
     m_uploadLimitChanged = true;
 }
@@ -71,3 +77,9 @@ void TorrentSettingsDialog::on_savePathButton_clicked()
         m_saveLocChanged = true;
     }
 }
+
+void TorrentSettingsDialog::on_maxNumOfConBox_valueChanged([[maybe_unused]] int arg1)
+{
+    m_mNumOfConChanged = true;
+}
+
