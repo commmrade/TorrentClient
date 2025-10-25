@@ -68,6 +68,8 @@ class SettingsDialog : public QDialog
 
     void on_mNumOfConPTBox_valueChanged(int arg1);
 
+    void on_managePeersButton_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 

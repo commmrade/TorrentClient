@@ -57,12 +57,12 @@ void TorrentSettingsDialog::applySettings()
     }
 }
 
-void TorrentSettingsDialog::on_downloadLimitSpin_valueChanged(int arg1)
+void TorrentSettingsDialog::on_downloadLimitSpin_valueChanged([[maybe_unused]] int arg1)
 {
     m_downloadLimitChanged = true;
 }
 
-void TorrentSettingsDialog::on_uploadLimitSpin_valueChanged(int arg1)
+void TorrentSettingsDialog::on_uploadLimitSpin_valueChanged([[maybe_unused]] int arg1)
 {
     m_uploadLimitChanged = true;
 }
@@ -78,7 +78,7 @@ void TorrentSettingsDialog::on_savePathButton_clicked()
     }
 }
 
-void TorrentSettingsDialog::on_maxNumOfConBox_valueChanged(int arg1)
+void TorrentSettingsDialog::on_maxNumOfConBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mNumOfConChanged = true;
 }

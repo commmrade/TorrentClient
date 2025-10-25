@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include "dirs.h"
+#include "managepeersdialog.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
 {
@@ -425,5 +426,22 @@ void SettingsDialog::on_mNumOfConBox_valueChanged([[maybe_unused]] int arg1)
 void SettingsDialog::on_mNumOfConPTBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mNumOfConPTChanged = true;
+}
+
+
+void SettingsDialog::on_managePeersButton_clicked()
+{
+    try {
+        ManagePeersDialog dialog(this);
+        if (QDialog::Accepted == dialog.exec()) {
+            auto addrs = dialog.getBannedPeers();
+            auto& sessionManager = SessionManager::instance();
+            sessionManager.setIpFilter(addrs);
+        }
+    } catch (const std::exception& ex) {
+        QMessageBox::warning(this, tr("Warning"),
+                             tr("Could not parse addresses"));
+        qWarning() << "Could not parse all addresses in ManagePeersDialog";
+    }
 }
 

@@ -582,7 +582,23 @@ void SessionManager::banPeers(const QList<QPair<QString, unsigned short>> &banna
         auto address = boost::asio::ip::make_address(peer.first.toUtf8().constData());
         filter.add_rule(address, address, lt::ip_filter::blocked);
     }
-    m_session->set_ip_filter(filter);
+    m_session->set_ip_filter(std::move(filter));
+}
+
+void SessionManager::setIpFilter(const QList<boost::asio::ip::address> &addrs)
+{
+    lt::ip_filter filter{};
+    for (const auto& addr : addrs) {
+        filter.add_rule(addr, addr, lt::ip_filter::blocked);
+    }
+    m_session->set_ip_filter(std::move(filter));
+}
+
+lt::ip_filter::filter_tuple_t SessionManager::getIpFilter() const
+{
+    lt::ip_filter filter = m_session->get_ip_filter();
+    auto bannedPeers = filter.export_filter();
+    return bannedPeers;
 }
 
 void SessionManager::addPeerToTorrent(std::uint32_t id, const boost::asio::ip::tcp::endpoint &ep)
