@@ -34,23 +34,23 @@ ManagePeersDialog::ManagePeersDialog(QWidget *parent)
         boost::asio::ip::address addr{bPeersV6[i].first};
         ui->textEdit->append(QString::fromStdString(addr.to_string()));
     }
-
-    // for (auto& addr : m_peers) {
-    //     ui->textEdit->append(QString::fromStdString(addr.to_string()));
-    // }
 }
 
 ManagePeersDialog::~ManagePeersDialog() { delete ui; }
 
-void ManagePeersDialog::on_buttonBox_accepted()
+QList<boost::asio::ip::address> ManagePeersDialog::getBannedPeers() const
 {
     auto peers = ui->textEdit->toPlainText();
     QTextStream stream(&peers);
 
+    QList<boost::asio::ip::address> m_peers;
     QString line;
     while (stream.readLineInto(&line)) {
+        if (line.isEmpty()) {
+            continue;
+        }
         auto addr = boost::asio::ip::make_address(line.toStdString());
         m_peers.append(std::move(addr));
     }
+    return m_peers;
 }
-

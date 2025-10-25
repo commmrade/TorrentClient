@@ -80,7 +80,7 @@ class SessionManager : public QObject
     void renameFile(std::uint32_t id, int fileIndex, const QString &newName);
 
     // Peer
-    void banPeers(const QList<QPair<QString, unsigned short>> &bannablePeers);
+    void banPeers(const QList<boost::asio::ip::address> &bannablePeers);
     lt::ip_filter::filter_tuple_t getIpFilter() const;
     void setIpFilter(const QList<boost::asio::ip::address>& addrs);
     void addPeerToTorrent(std::uint32_t torrentId, const boost::asio::ip::tcp::endpoint &ep);

@@ -17,17 +17,10 @@ class ManagePeersDialog : public QDialog
     explicit ManagePeersDialog(QWidget *parent = nullptr);
     ~ManagePeersDialog();
 
-    QList<boost::asio::ip::address> getBannedPeers() const {
-        return m_peers;
-    }
-  private slots:
-    void on_buttonBox_accepted();
-
+    QList<boost::asio::ip::address> getBannedPeers() const;
 
   private:
     Ui::ManagePeersDialog *ui;
-
-    QList<boost::asio::ip::address> m_peers;
 };
 
 #endif // MANAGEPEERSDIALOG_H

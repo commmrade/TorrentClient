@@ -61,7 +61,7 @@ libtorrent::session_params SessionManager::loadSessionParams()
     }
     else
     {
-        sessParams = std::move(lt::read_session_params(sessionFileContents));
+        sessParams = lt::read_session_params(sessionFileContents);
     }
     return sessParams;
 }
@@ -222,7 +222,7 @@ void SessionManager::updateTrackersProp(TorrentHandle &handle)
 void SessionManager::updateFilesProp(TorrentHandle &handle)
 {
     auto fileListFromTorrentInfo =
-        [this](const TorrentHandle                    &handle,
+        [](const TorrentHandle                    &handle,
                std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File>
     {
         const auto &files     = tinfo->files();
@@ -232,7 +232,7 @@ void SessionManager::updateFilesProp(TorrentHandle &handle)
         auto        fileProgresses = handle.handle().file_progress();
         for (auto i = 0; i < num_files; ++i)
         {
-            auto fileSize = files.file_size(i);
+            // auto fileSize = files.file_size(i);
             File file;
             file.id         = i;
             file.isEnabled  = handle.handle().file_priority(i) != lt::dont_download;
@@ -311,7 +311,6 @@ void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *aler
     for (auto &status : statuses)
     {
         auto &handle = status.handle;
-        auto &h      = m_torrentHandles[handle.id()];
 
         if (handle.id() == currentId)
         {
@@ -574,13 +573,12 @@ void SessionManager::renameFile(uint32_t id, int fileIndex, const QString &newNa
     handle.renameFile(fileIndex, newName);
 }
 
-void SessionManager::banPeers(const QList<QPair<QString, unsigned short>> &bannablePeers)
+void SessionManager::banPeers(const QList<boost::asio::ip::address> &bannablePeers)
 {
     lt::ip_filter filter = m_session->get_ip_filter();
-    for (const auto &peer : bannablePeers)
+    for (const auto &peerAddr : bannablePeers)
     {
-        auto address = boost::asio::ip::make_address(peer.first.toUtf8().constData());
-        filter.add_rule(address, address, lt::ip_filter::blocked);
+        filter.add_rule(peerAddr, peerAddr, lt::ip_filter::blocked);
     }
     m_session->set_ip_filter(std::move(filter));
 }
