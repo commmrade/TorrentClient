@@ -91,8 +91,12 @@ target_include_directories(torrent-client PRIVATE ${LIBTORRENT_INCLUDE_DIRS} ${M
 # target_compile_options(torrent-client PRIVATE -fsanitize=address -g -O1 -fno-omit-frame-pointer -Wall -Wextra)
 # target_link_options(torrent-client PRIVATE -fsanitize=address)
 
-target_compile_options(torrent-client PRIVATE -Wall -Wextra)
-# target_link_options(torrent-client PRIVATE -fsanitize=address)
+if (MSVC)
+    target_compile_options(torrent-client PRIVATE /W4)
+else ()
+    target_compile_options(torrent-client PRIVATE -Wall -Wextra)
+endif ()
+# target_link_options(torrent-client PRIVATE -Wall -Wextra)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

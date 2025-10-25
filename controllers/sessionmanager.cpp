@@ -552,6 +552,13 @@ void SessionManager::setListenProtocol(int protocolType)
     m_session->apply_settings(newSettings);
 }
 
+void SessionManager::setMaxNumberOfConnections(int value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    newSettings.set_int(lt::settings_pack::connections_limit, value);
+    m_session->apply_settings(newSettings);
+}
+
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
 {
     auto &handle = m_torrentHandles[id];

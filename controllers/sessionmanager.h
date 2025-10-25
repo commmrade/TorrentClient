@@ -70,6 +70,7 @@ class SessionManager : public QObject
     void setUploadLimit(int value);
     void setListenPort(unsigned short newPort);
     void setListenProtocol(int protocolType);
+    void setMaxNumberOfConnections(int value);
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl

@@ -28,6 +28,8 @@ struct SettingsNames
 
     static inline constexpr const char *const LISTENING_PORT = "listening/port";
     static inline constexpr const char* const LISTENING_PROTOCOL = "listening/protocol";
+
+    static inline constexpr const char* const LIMITS_MAX_NUM_OF_CONNECTIONS = "limits/mNumOfCon";
 };
 
 struct SettingsValues
@@ -57,6 +59,8 @@ struct SettingsValues
     static inline constexpr int LISTENING_PROTOCOL_TCP_AND_UTP = 0;
     static inline constexpr int LISTENING_PROTOCOL_TCP = 1;
     static inline constexpr int LISTENING_PROTOCOL_UTP = 2;
+
+    static inline constexpr int LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT = 200;
 };
 
 #endif // SETTINGSVALUES_H
