@@ -37,6 +37,8 @@ class SessionManager : public QObject
     std::int64_t lastSessionRecvPayloadBytes{0};
     std::int64_t lastSessionUploadPayloadBytes{0};
 
+    bool shouldResetParams{false};
+
     explicit SessionManager(QObject *parent = nullptr);
 
   public:
@@ -67,6 +69,7 @@ class SessionManager : public QObject
     void loadResumes();
 
     // Managing session
+    void resetSessionParams();
     void setDownloadLimit(int value);
     void setUploadLimit(int value);
     void setListenPort(unsigned short newPort);

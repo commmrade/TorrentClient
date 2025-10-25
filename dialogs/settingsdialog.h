@@ -70,6 +70,8 @@ class SettingsDialog : public QDialog
 
     void on_managePeersButton_clicked();
 
+    void on_resetSesionButton_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 
@@ -79,6 +81,7 @@ class SettingsDialog : public QDialog
     bool m_languageChanged{false};
     bool m_themeChanged{false};
     bool m_confirmDeleteChanged{false};
+    bool m_resetChanged{false};
     // Tray
     bool m_showTrayChanged{false};
     bool m_enableNotifChanged{false};

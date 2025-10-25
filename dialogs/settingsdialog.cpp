@@ -54,15 +54,13 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
     int downloadSpeedLimit = settings
                                  .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
                                         SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
-                                 .toInt() /
-                             1024;
+                                 .toInt() / 1024;
     ui->downloadLimitSpin->setValue(downloadSpeedLimit);
 
     int uploadSpeedLimit = settings
                                .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
                                       SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
-                               .toInt() /
-                           1024;
+                               .toInt() / 1024;
     ui->uploadLimitSpin->setValue(uploadSpeedLimit);
 
     QString defaultSavePath =
@@ -132,8 +130,8 @@ void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
 void SettingsDialog::on_applyButton_clicked()
 {
     applyApplicationSettings();
-    applyTorrentSettings();
     applyConnectionSettings();
+    applyTorrentSettings();
 
     // Prompt for restart after applied all the settings
     if (m_restartRequired)
@@ -239,25 +237,31 @@ void SettingsDialog::applyTorrentSettings()
     QSettings settings;
     if (m_downloadLimitChanged)
     {
+        qDebug() << "Limit download:" << ui->downloadLimitSpin->value();
         auto downloadLimitValue = ui->downloadLimitSpin->value();
         sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
+
+        settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, downloadLimitValue * 1024);
         m_downloadLimitChanged = false;
-
-        settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, QVariant{downloadLimitValue});
     }
-
     if (m_uploadLimitChanged)
     {
         auto uploadLimitValue = ui->uploadLimitSpin->value();
         sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
-        m_uploadLimitChanged = false;
 
-        settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, QVariant{uploadLimitValue});
+        settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, uploadLimitValue * 1024);
+        m_uploadLimitChanged = false;
     }
     if (m_savePathChanged) {
         QString defaultSavePath = ui->savePathLineEdit->text();
         settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         m_savePathChanged = false;
+    }
+    if (m_resetChanged) {
+        sessionManager.resetSessionParams();
+        settings.clear();
+        settings.sync();
+        m_resetChanged = false;
     }
 }
 
@@ -273,6 +277,7 @@ void SettingsDialog::applyConnectionSettings()
         m_portChanged = false;
     }
     if (m_protocolChanged) {
+
         int protocolType = ui->peerConnProtocolBox->currentIndex();
         settings.setValue(SettingsNames::LISTENING_PROTOCOL, protocolType);
         sessionManager.setListenProtocol(protocolType);
@@ -280,6 +285,7 @@ void SettingsDialog::applyConnectionSettings()
         m_protocolChanged = false;
     }
     if (m_mNumOfConChanged) {
+        qDebug() << "change";
         int value = ui->mNumOfConBox->value();
         settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, value);
         sessionManager.setMaxNumberOfConnections(value);
@@ -287,6 +293,7 @@ void SettingsDialog::applyConnectionSettings()
         m_mNumOfConChanged = false;
     }
     if (m_mNumOfConPTChanged) {
+        qDebug() << "change";
         int value = ui->mNumOfConPTBox->value();
         settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, value);
 
@@ -442,6 +449,16 @@ void SettingsDialog::on_managePeersButton_clicked()
         QMessageBox::warning(this, tr("Warning"),
                              tr("Could not parse addresses"));
         qWarning() << "Could not parse all addresses in ManagePeersDialog";
+    }
+}
+
+
+void SettingsDialog::on_resetSesionButton_clicked()
+{
+    int r = QMessageBox::warning(this, tr("Warning"), tr("Are you sure that you want to reset all the settings completelty?"), QMessageBox::StandardButton::Ok | QMessageBox::StandardButton::Cancel);
+    if (r == QMessageBox::Ok ) {
+        m_resetChanged = true;
+        m_restartRequired = true;
     }
 }
 

@@ -29,14 +29,19 @@ SessionManager::~SessionManager()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                            QDir::separator() + SESSION_FILENAME;
-
-    QFile file{sessionFilePath};
-    if (file.open(QIODevice::WriteOnly))
-    {
-        auto sessionData = lt::write_session_params_buf(m_session->session_state());
-        file.write(sessionData.data(), sessionData.size());
-        file.flush();
-        file.close();
+    if (shouldResetParams) {
+        if (!QFile::remove(sessionFilePath)) {
+            qWarning() << "Failed to delete .session";
+        }
+    } else {
+        QFile file{sessionFilePath};
+        if (file.open(QIODevice::WriteOnly))
+        {
+            auto sessionData = lt::write_session_params_buf(m_session->session_state());
+            file.write(sessionData.data(), sessionData.size());
+            file.flush();
+            file.close();
+        }
     }
 }
 
@@ -498,6 +503,11 @@ void SessionManager::loadResumes()
             m_session->async_add_torrent(std::move(params));
         }
     }
+}
+
+void SessionManager::resetSessionParams()
+{
+    shouldResetParams = true;
 }
 
 void SessionManager::setDownloadLimit(int value)
