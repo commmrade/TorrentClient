@@ -435,6 +435,7 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
                        0,
                        0,
                        0,
+                       0,
                        0};
 
     emit torrentAdded(torrent);
