@@ -72,6 +72,12 @@ class SettingsDialog : public QDialog
 
     void on_resetSesionButton_clicked();
 
+    void on_dhtCheck_clicked();
+
+    void on_peerExCheck_clicked();
+
+    void on_localPeerDiscCheck_clicked();
+
   private:
     Ui::SettingsDialog *ui;
 
@@ -95,6 +101,9 @@ class SettingsDialog : public QDialog
     bool m_downloadLimitChanged{false};
     bool m_uploadLimitChanged{false};
     bool m_savePathChanged{false};
+    bool m_dhtChanged{false};
+    bool m_peerExChanged{false};
+    bool m_localPeerDiscChanged{false};
 
     /// Connection
     bool m_portChanged{false};

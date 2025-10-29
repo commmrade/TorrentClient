@@ -31,6 +31,10 @@ struct SettingsNames
 
     static inline constexpr const char* const LIMITS_MAX_NUM_OF_CONNECTIONS = "limits/mNumOfCon";
     static inline constexpr const char* const LIMITS_MAX_NUM_OF_CONNECTIONS_PT = "limits/mNumOfConPT"; // per torrent
+
+    static inline constexpr const char* const PRIVACY_DHT_ENABLED = "privacy/dht";
+    static inline constexpr const char* const PRIVACY_PEEREX_ENABLED = "privacy/peerex";
+    static inline constexpr const char* const PRIVACY_LOCAL_PEER_DESC = "privacy/localDiscovery";
 };
 
 struct SettingsValues
@@ -63,6 +67,10 @@ struct SettingsValues
 
     static inline constexpr int LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT = 200;
     static inline constexpr int LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT = 100;
+
+    static inline constexpr bool PRIVACY_DHT_ENABLED_DEFAULT = true;
+    static inline constexpr bool PRIVACY_PEEREX_ENABLED_DEFAULT = true;
+    static inline constexpr bool PRIVACY_LOCAL_PEER_DESC_DEFAULT = true;
 };
 
 #endif // SETTINGSVALUES_H

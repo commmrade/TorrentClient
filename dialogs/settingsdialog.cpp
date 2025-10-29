@@ -118,6 +118,15 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 
     int maxNumOfConPT = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
     ui->mNumOfConPTBox->setValue(maxNumOfConPT);
+
+    bool dhtEnabled = settings.value(SettingsNames::PRIVACY_DHT_ENABLED, SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT).toBool();
+    ui->dhtCheck->setChecked(dhtEnabled);
+
+    bool peerExEnabled = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
+    ui->peerExCheck->setChecked(peerExEnabled);
+
+    bool localDiscEnabled = settings.value(SettingsNames::PRIVACY_LOCAL_PEER_DESC, SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT).toBool();
+    ui->localPeerDiscCheck->setChecked(localDiscEnabled);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -262,6 +271,18 @@ void SettingsDialog::applyTorrentSettings()
         settings.clear();
         settings.sync();
         m_resetChanged = false;
+    }
+    if (m_dhtChanged) {
+        bool val = ui->dhtCheck->isChecked();
+        settings.setValue(SettingsNames::PRIVACY_DHT_ENABLED, {val});
+    }
+    if (m_peerExChanged) {
+        bool val = ui->peerExCheck->isChecked();
+        settings.setValue(SettingsNames::PRIVACY_PEEREX_ENABLED, {val});
+    }
+    if (m_localPeerDiscChanged) {
+        bool val = ui->localPeerDiscCheck->isChecked();
+        settings.setValue(SettingsNames::PRIVACY_LOCAL_PEER_DESC, {val});
     }
 }
 
@@ -460,5 +481,23 @@ void SettingsDialog::on_resetSesionButton_clicked()
         m_resetChanged = true;
         m_restartRequired = true;
     }
+}
+
+
+void SettingsDialog::on_dhtCheck_clicked()
+{
+    m_dhtChanged = true;
+}
+
+
+void SettingsDialog::on_peerExCheck_clicked()
+{
+    m_peerExChanged = true;
+}
+
+
+void SettingsDialog::on_localPeerDiscCheck_clicked()
+{
+    m_localPeerDiscChanged = true;
 }
 
