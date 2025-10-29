@@ -12,173 +12,34 @@
 #include "dirs.h"
 #include "managepeersdialog.h"
 #include <QSignalBlocker>
+#include "applicationsettings.h"
+#include "torrentsettings.h"
+#include "connectionsettings.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
+
+SettingsDialog::SettingsDialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::SettingsDialog)
+    , appSettings(new ApplicationSettings)
+    , torSettings(new TorrentSettings)
+    , connSettings(new ConnectionSettings)
 {
+    setFixedSize(900, 600);
+
     ui->setupUi(this);
+    ui->applyButton->setEnabled(false);
 
-           // Default size
-    this->setFixedSize(900, 600); // TODO: maybe get rid of it
+    ui->stackedWidget->addWidget(appSettings.get());
+    ui->stackedWidget->addWidget(torSettings.get());
+    ui->stackedWidget->addWidget(connSettings.get());
 
-           // Disable cutom theme stuff
-    ui->chooseThemeBtn->setVisible(false);
-    ui->customThemeEdit->setVisible(false);
+    connect(appSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
+    connect(torSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
+    connect(connSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
 
-    QSettings settings;
-
-           // Application category
-    {
-        int language =
-            settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH).toInt();
-        QSignalBlocker blocker{ui->languageBox};
-        ui->languageBox->setCurrentIndex(language);
-    }
-
-    {
-        QSignalBlocker blocker{ui->themeBox};
-        int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
-        ui->themeBox->setCurrentIndex(theme);
-        if (theme == SettingsValues::GUI_THEME_CUSTOM)
-        { // if theme is custom set custom theme edit, if empty set to dark (default)
-            QString customTheme = settings.value(SettingsNames::GUI_CUSTOM_THEME).toString();
-            if (!customTheme.isEmpty())
-            {
-                ui->customThemeEdit->blockSignals(true);
-                ui->customThemeEdit->setText(customTheme);
-                ui->customThemeEdit->blockSignals(false);
-            }
-            else
-            {
-                ui->themeBox->setCurrentIndex(SettingsValues::GUI_THEME_DARK);
-            }
-        }
-    }
-
-           // TODO: Factor out in functions
-           // Torrent category
-    {
-        int downloadSpeedLimit = settings
-                                     .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
-                                            SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
-                                     .toInt() / 1024;
-        QSignalBlocker blocker{ui->downloadLimitSpin};
-        ui->downloadLimitSpin->setValue(downloadSpeedLimit);
-    }
-
-    {
-        int uploadSpeedLimit = settings
-                                   .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
-                                          SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
-                                   .toInt() / 1024;
-        QSignalBlocker blocker{ui->uploadLimitSpin};
-        ui->uploadLimitSpin->setValue(uploadSpeedLimit);
-    }
-
-    {
-        QString defaultSavePath =
-            settings
-                .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
-                       QVariant{QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)})
-                .toString();
-        QSignalBlocker blocker{ui->savePathLineEdit};
-        ui->savePathLineEdit->setText(defaultSavePath);
-    }
-
-    {
-        bool confirmDeletion = settings
-                                   .value(SettingsNames::TRANSFER_CONFIRM_DELETION,
-                                          SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT)
-                                   .toBool();
-        QSignalBlocker blocker{ui->confirmDelBox};
-        ui->confirmDelBox->setChecked(confirmDeletion);
-    }
-
-    {
-        int exitBeh =
-            settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE)
-                .toInt();
-        QSignalBlocker blocker{ui->exitBehBtn};
-        ui->exitBehBtn->setCurrentIndex(exitBeh);
-    }
-
-    {
-        bool showTray =
-            settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
-                .toBool();
-        QSignalBlocker blocker{ui->showTrayBox};
-        ui->showTrayBox->setChecked(showTray);
-    }
-
-    {
-        bool showNotifs =
-            settings
-                .value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
-                .toBool();
-        QSignalBlocker blocker{ui->enaleNotifBox};
-        ui->enaleNotifBox->setChecked(showNotifs);
-    }
-
-    {
-        QString logsPath = settings.value(SettingsNames::LOGS_PATH,
-                                          QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString();
-        QSignalBlocker blocker{ui->logsPathEdit};
-        ui->logsPathEdit->setText(logsPath);
-    }
-
-    {
-        unsigned int logsMax = settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT).toUInt();
-        QSignalBlocker blocker{ui->maxLogFileSpinBox};
-        ui->maxLogFileSpinBox->setValue(logsMax / 1024);
-    }
-
-    {
-        bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
-        QSignalBlocker blocker{ui->logsBox};
-        ui->logsBox->setChecked(logsEnabled);
-    }
-
-           /// Connection stuff
-    {
-        int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toInt();
-        QSignalBlocker blocker{ui->portBox};
-        ui->portBox->setValue(port);
-    }
-
-    {
-        int protocolType = settings.value(SettingsNames::LISTENING_PROTOCOL, SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP).toInt();
-        QSignalBlocker blocker{ui->peerConnProtocolBox};
-        ui->peerConnProtocolBox->setCurrentIndex(protocolType);
-    }
-
-    {
-        int maxNumOfCon = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT).toInt();
-        QSignalBlocker blocker{ui->mNumOfConBox};
-        ui->mNumOfConBox->setValue(maxNumOfCon);
-    }
-
-    {
-        int maxNumOfConPT = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
-        QSignalBlocker blocker{ui->mNumOfConPTBox};
-        ui->mNumOfConPTBox->setValue(maxNumOfConPT);
-    }
-
-    {
-        bool dhtEnabled = settings.value(SettingsNames::PRIVACY_DHT_ENABLED, SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT).toBool();
-        QSignalBlocker blocker{ui->dhtCheck};
-        ui->dhtCheck->setChecked(dhtEnabled);
-    }
-
-    {
-        bool peerExEnabled = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
-        QSignalBlocker blocker{ui->peerExCheck};
-        ui->peerExCheck->setChecked(peerExEnabled);
-    }
-
-    {
-        bool localDiscEnabled = settings.value(SettingsNames::PRIVACY_LOCAL_PEER_DESC, SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT).toBool();
-        QSignalBlocker blocker{ui->localPeerDiscCheck};
-        ui->localPeerDiscCheck->setChecked(localDiscEnabled);
-    }
+    connect(appSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
+    connect(torSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
+    connect(connSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
 }
 
 
@@ -189,11 +50,22 @@ void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
     ui->stackedWidget->setCurrentIndex(currentRow);
 }
 
+void SettingsDialog::onRestartRequired()
+{
+    m_restartRequired = true;
+}
+
+void SettingsDialog::onOptionChanged()
+{
+    ui->applyButton->setEnabled(true);
+    m_optionChanged = true;
+}
+
 void SettingsDialog::on_applyButton_clicked()
 {
-    applyApplicationSettings();
-    applyConnectionSettings();
-    applyTorrentSettings();
+    appSettings->apply();
+    torSettings->apply();
+    connSettings->apply();
 
     // Prompt for restart after applied all the settings
     if (m_restartRequired)
@@ -213,350 +85,15 @@ void SettingsDialog::on_applyButton_clicked()
     }
 }
 
-void SettingsDialog::applyApplicationSettings()
-{
-    QSettings settings;
-    // Language
-    if (m_languageChanged)
-    {
-        settings.setValue(SettingsNames::GUI_LANGUAGE, ui->languageBox->currentIndex());
-        m_languageChanged = false;
-    }
-    // Theme
-    if (m_themeChanged)
-    {
-        auto theme = ui->themeBox->currentIndex();
-        if (theme == SettingsValues::GUI_THEME_CUSTOM)
-        {
-            settings.setValue(SettingsNames::GUI_CUSTOM_THEME, ui->customThemeEdit->text());
-        }
-        settings.setValue(SettingsNames::GUI_THEME, theme);
-        m_themeChanged = false;
-    }
-    if (m_confirmDeleteChanged) {
-        bool checked = ui->confirmDelBox->isChecked();
-        settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
-        m_confirmDeleteChanged = false;
-    }
-    if (m_logsEnabledChanged) {
-        settings.setValue(SettingsNames::LOGS_ENABLED, ui->logsBox->isChecked());
-        m_logsEnabledChanged = false;
-    }
-    if (m_showTrayChanged) {
-        bool checked = ui->showTrayBox->isChecked();
-        settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
-        if (!checked)
-        {
-            ui->enaleNotifBox->setChecked(false);
-            on_enaleNotifBox_clicked(false);
-            ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-            on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-        }
-        m_showTrayChanged = false;
-    }
-    if (m_enableNotifChanged) {
-        bool checked = ui->enaleNotifBox->isChecked();
-        if (checked && !ui->showTrayBox->isChecked())
-        {
-            QMessageBox::warning(this, tr("Warning"),
-                                 tr("You can't enable notifications when tray is disabled"));
-            ui->enaleNotifBox->setChecked(false);
-            return;
-        }
-
-        settings.setValue(SettingsNames::DESKTOP_SHOW_NOTIFS, checked);
-        m_enableNotifChanged = false;
-    }
-    if (m_exitBehChanged) {
-        int index = ui->exitBehBtn->currentIndex();
-        if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked())
-        {
-            QMessageBox::warning(this, tr("Warning"),
-                                 tr("You can't minimize to tray when tray is disabled"));
-            ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
-            return;
-        }
-        settings.setValue(SettingsNames::DESKTOP_EXIT_BEH, index);
-        m_exitBehChanged = false;
-    }
-
-    if (m_mLogSizeChanged) {
-        int arg = ui->maxLogFileSpinBox->value();
-        settings.setValue(SettingsNames::LOGS_MAX_SIZE, arg * 1024);
-
-        m_mLogSizeChanged = false;
-    }
-    if (m_logsPathChanged) {
-        QString logsPath = ui->logsPathEdit->text();
-        settings.setValue(SettingsNames::LOGS_PATH, logsPath);
-        m_logsPathChanged = false;
-    }
-}
-
-void SettingsDialog::applyTorrentSettings()
-{
-    auto &sessionManager = SessionManager::instance();
-    QSettings settings;
-    if (m_downloadLimitChanged)
-    {
-        qDebug() << "Limit download:" << ui->downloadLimitSpin->value();
-        auto downloadLimitValue = ui->downloadLimitSpin->value();
-        sessionManager.setDownloadLimit(downloadLimitValue * 1024); // Convert to bytes
-
-        settings.setValue(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT, downloadLimitValue * 1024);
-        m_downloadLimitChanged = false;
-    }
-    if (m_uploadLimitChanged)
-    {
-        auto uploadLimitValue = ui->uploadLimitSpin->value();
-        sessionManager.setUploadLimit(uploadLimitValue * 1024); // Convert to bytes
-
-        settings.setValue(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT, uploadLimitValue * 1024);
-        m_uploadLimitChanged = false;
-    }
-    if (m_savePathChanged) {
-        QString defaultSavePath = ui->savePathLineEdit->text();
-        settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
-        m_savePathChanged = false;
-    }
-    if (m_resetChanged) {
-        sessionManager.resetSessionParams();
-        settings.clear();
-        settings.sync();
-        m_resetChanged = false;
-    }
-    if (m_dhtChanged) {
-        bool val = ui->dhtCheck->isChecked();
-        settings.setValue(SettingsNames::PRIVACY_DHT_ENABLED, {val});
-        sessionManager.setDht(val);
-
-        m_dhtChanged = false;
-    }
-    if (m_peerExChanged) {
-        bool val = ui->peerExCheck->isChecked();
-        settings.setValue(SettingsNames::PRIVACY_PEEREX_ENABLED, {val});
-
-        m_peerExChanged = false;
-    }
-    if (m_localPeerDiscChanged) {
-        bool val = ui->localPeerDiscCheck->isChecked();
-        settings.setValue(SettingsNames::PRIVACY_LOCAL_PEER_DESC, {val});
-        sessionManager.setLsd(val);
-
-        m_localPeerDiscChanged = false;
-    }
-}
-
-void SettingsDialog::applyConnectionSettings()
-{
-    auto& sessionManager = SessionManager::instance();
-    QSettings settings;
-    if (m_portChanged) {
-        int port = ui->portBox->value();
-        settings.setValue(SettingsNames::LISTENING_PORT, port);
-        sessionManager.setListenPort(port);
-
-        m_portChanged = false;
-    }
-    if (m_protocolChanged) {
-
-        int protocolType = ui->peerConnProtocolBox->currentIndex();
-        settings.setValue(SettingsNames::LISTENING_PROTOCOL, protocolType);
-        sessionManager.setListenProtocol(protocolType);
-
-        m_protocolChanged = false;
-    }
-    if (m_mNumOfConChanged) {
-        int value = ui->mNumOfConBox->value();
-        settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, value);
-        sessionManager.setMaxNumberOfConnections(value);
-
-        m_mNumOfConChanged = false;
-    }
-    if (m_mNumOfConPTChanged) {
-        int value = ui->mNumOfConPTBox->value();
-        settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, value);
-
-        m_mNumOfConPTChanged = false;
-    }
-}
-
-void SettingsDialog::on_savePathButton_clicked()
-{
-    m_savePathChanged = true;
-    QString defaultSavePath =
-        QFileDialog::getExistingDirectory(this, tr("Choose a new default save directory"));
-    if (!defaultSavePath.isEmpty())
-    {
-        ui->savePathLineEdit->setText(defaultSavePath);
-    }
-}
-
-void SettingsDialog::on_downloadLimitSpin_valueChanged(int arg1) { m_downloadLimitChanged = true; }
-
-void SettingsDialog::on_uploadLimitSpin_valueChanged(int arg1) { m_uploadLimitChanged = true; }
-
 void SettingsDialog::on_okButton_clicked()
 {
     on_applyButton_clicked();
     close();
 }
 
-void SettingsDialog::on_closeButton_clicked() { close(); }
 
-void SettingsDialog::on_chooseThemeBtn_clicked()
+void SettingsDialog::on_closeButton_clicked()
 {
-    auto    homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    QString themePath =
-        QFileDialog::getOpenFileName(this, tr("Style file"), homePath, tr("Style (*.qss)"));
-
-    if (!themePath.isEmpty())
-    {
-        ui->customThemeEdit->setText(themePath);
-        m_themeChanged = true;
-    }
-}
-
-void SettingsDialog::on_confirmDelBox_clicked([[maybe_unused]] bool checked)
-{
-    m_confirmDeleteChanged = true;
-}
-
-void SettingsDialog::on_showTrayBox_clicked([[maybe_unused]] bool checked)
-{
-    m_showTrayChanged = true;
-    m_restartRequired = true; // Cant enable tray in runtime (i mean i can but aint doin it
-}
-
-void SettingsDialog::on_enaleNotifBox_clicked([[maybe_unused]] bool checked)
-{
-    m_enableNotifChanged = true;
-}
-
-void SettingsDialog::on_exitBehBtn_currentIndexChanged([[maybe_unused]] int index)
-{
-    m_exitBehChanged = true;
-}
-
-void SettingsDialog::on_languageBox_currentIndexChanged([[maybe_unused]] int index)
-{
-    m_languageChanged = true;
-    m_restartRequired = true; // Can't change language in runtime, (actually i can)
-}
-
-void SettingsDialog::on_themeBox_currentIndexChanged(int index)
-{
-    if (index == SettingsValues::GUI_THEME_CUSTOM)
-    {
-        ui->customThemeEdit->setVisible(true);
-        ui->chooseThemeBtn->setVisible(true);
-    }
-    else
-    {
-        ui->customThemeEdit->setVisible(false);
-        ui->chooseThemeBtn->setVisible(false);
-    }
-
-    m_themeChanged    = true;
-    m_restartRequired = true; // Can't change theme in runtime (i think)
-}
-
-void SettingsDialog::on_logsPathBtn_clicked()
-{
-    auto    homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    QString logsPath =
-        QFileDialog::getExistingDirectory(this, tr("Logs directory"), homePath);
-
-    if (!logsPath.isEmpty()) {
-        ui->logsPathEdit->setText(logsPath);
-    }
-    m_logsPathChanged = true;
-    m_restartRequired = true;
-}
-
-void SettingsDialog::on_maxLogFileSpinBox_valueChanged([[maybe_unused]] int arg1)
-{
-    m_mLogSizeChanged = true;
-}
-
-void SettingsDialog::on_logsBox_clicked([[maybe_unused]] bool checked)
-{
-    m_logsEnabledChanged = true;
-}
-
-
-void SettingsDialog::on_portBox_valueChanged([[maybe_unused]] int arg1)
-{
-    m_portChanged = true;
-}
-
-
-void SettingsDialog::on_resetPortBtn_clicked()
-{
-    ui->portBox->setValue(SettingsValues::LISTENING_PORT_DEFAULT);
-    on_portBox_valueChanged(SettingsValues::LISTENING_PORT_DEFAULT);
-}
-
-
-void SettingsDialog::on_peerConnProtocolBox_currentIndexChanged([[maybe_unused]] int index)
-{
-    m_protocolChanged = true;
-}
-
-
-void SettingsDialog::on_mNumOfConBox_valueChanged([[maybe_unused]] int arg1)
-{
-    m_mNumOfConChanged = true;
-}
-
-
-void SettingsDialog::on_mNumOfConPTBox_valueChanged([[maybe_unused]] int arg1)
-{
-    m_mNumOfConPTChanged = true;
-}
-
-
-void SettingsDialog::on_managePeersButton_clicked()
-{
-    try {
-        ManagePeersDialog dialog(this);
-        if (QDialog::Accepted == dialog.exec()) {
-            auto addrs = dialog.getBannedPeers();
-            auto& sessionManager = SessionManager::instance();
-            sessionManager.setIpFilter(addrs);
-        }
-    } catch (const std::exception& ex) {
-        QMessageBox::warning(this, tr("Warning"),
-                             tr("Could not parse addresses"));
-        qWarning() << "Could not parse all addresses in ManagePeersDialog";
-    }
-}
-
-
-void SettingsDialog::on_resetSesionButton_clicked()
-{
-    int r = QMessageBox::warning(this, tr("Warning"), tr("Are you sure that you want to reset all the settings completelty?"), QMessageBox::StandardButton::Ok | QMessageBox::StandardButton::Cancel);
-    if (r == QMessageBox::Ok ) {
-        m_resetChanged = true;
-        m_restartRequired = true;
-    }
-}
-
-
-void SettingsDialog::on_dhtCheck_clicked()
-{
-    m_dhtChanged = true;
-}
-
-
-void SettingsDialog::on_peerExCheck_clicked()
-{
-    m_peerExChanged = true;
-}
-
-
-void SettingsDialog::on_localPeerDiscCheck_clicked()
-{
-    m_localPeerDiscChanged = true;
+    close();
 }
 
