@@ -111,12 +111,11 @@ void SessionManager::eventLoop()
             handleFinishedAlert(finished_alert);
         }
         else if (auto *statusAlert = lt::alert_cast<lt::state_update_alert>(alert))
-        {
+        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would become fucked up, so fix this
             handleStateUpdateAlert(statusAlert);
         }
         else if (auto *metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert))
         {
-            qDebug() << "MDAta received";
             handleMetadataReceived(metadataReceivedAlert);
         }
         else if (auto *resumeDataAlert = lt::alert_cast<lt::save_resume_data_alert>(alert))
@@ -128,7 +127,7 @@ void SessionManager::eventLoop()
             handleAddTorrentAlert(addTorrentAlert);
         }
         else if (auto *stateAlert = lt::alert_cast<lt::session_stats_alert>(alert))
-        { // if happens every second so i think i wont use chrono stuff
+        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would become fucked up, so fix this
             handleSessionStatsAlert(stateAlert);
         }
         else if (auto *torrentErrorAlert = lt::alert_cast<lt::torrent_error_alert>(alert))
@@ -312,7 +311,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
     auto statuses  = alert->status;
-    int  currentId = m_currentTorrentId.has_value() ? m_currentTorrentId.value() : -1;
+    auto  currentId = m_currentTorrentId.has_value() ? m_currentTorrentId.value() : -1;
     for (auto &status : statuses)
     {
         auto &handle = status.handle;
@@ -452,6 +451,8 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
     auto newUpload                = uploadPayloadBytes - lastSessionUploadPayloadBytes;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
+    qDebug() << "Dht nodes:" << counters[lt::counters::dht_nodes];
+
     emit chartPoint(newRecv, newUpload);
 }
 
@@ -514,23 +515,29 @@ void SessionManager::resetSessionParams()
 void SessionManager::setDownloadLimit(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    newSettings.set_int(lt::settings_pack::download_rate_limit, value);
-    m_session->apply_settings(std::move(newSettings));
+    if (int oldVal = newSettings.get_int(lt::settings_pack::download_rate_limit); oldVal != value) {
+        newSettings.set_int(lt::settings_pack::download_rate_limit, value);
+        m_session->apply_settings(std::move(newSettings));
+    }
 }
 
 void SessionManager::setUploadLimit(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    newSettings.set_int(lt::settings_pack::upload_rate_limit, value);
-    m_session->apply_settings(std::move(newSettings));
+    if (int oldVal = newSettings.get_int(lt::settings_pack::upload_rate_limit); oldVal != value) {
+        newSettings.set_int(lt::settings_pack::upload_rate_limit, value);
+        m_session->apply_settings(std::move(newSettings));
+    }
 }
 
 void SessionManager::setListenPort(unsigned short newPort)
 {
     lt::settings_pack newSettings = m_session->get_settings();
     QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(newPort);
-    newSettings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
-    m_session->apply_settings(std::move(newSettings));
+    if (auto oldVal = QString::fromStdString(newSettings.get_str(lt::settings_pack::listen_interfaces)); oldVal != listeningInterfaces) {
+        newSettings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
+        m_session->apply_settings(std::move(newSettings));
+    }
 }
 
 void SessionManager::setListenProtocol(int protocolType)
@@ -565,10 +572,29 @@ void SessionManager::setListenProtocol(int protocolType)
 void SessionManager::setMaxNumberOfConnections(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    newSettings.set_int(lt::settings_pack::connections_limit, value);
-    m_session->apply_settings(newSettings);
+    if (int oldVal = newSettings.get_int(lt::settings_pack::connections_limit); oldVal != value) {
+        newSettings.set_int(lt::settings_pack::connections_limit, value);
+        m_session->apply_settings(newSettings);
+    }
 }
 
+void SessionManager::setDht(bool value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_dht); oldVal != value) {
+        newSettings.set_bool(lt::settings_pack::enable_dht, value);
+        m_session->apply_settings(newSettings);
+    }
+}
+
+void SessionManager::setLsd(bool value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_lsd); oldVal != value) {
+        newSettings.set_bool(lt::settings_pack::enable_lsd, value);
+        m_session->apply_settings(newSettings);
+    }
+}
 
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
 {
@@ -766,9 +792,15 @@ bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
         return false;
     }
     // Set per torrent parameters
+    // TODO: Factor out in a function?
     QSettings settings;
     int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
     params.max_connections = numOfConPt;
+
+    bool enablePeerEx = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
+    if (!enablePeerEx) {
+        params.flags |= lt::torrent_flags::disable_pex;
+    }
 
     m_session->async_add_torrent(std::move(params));
     return true;

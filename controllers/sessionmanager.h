@@ -75,6 +75,8 @@ class SessionManager : public QObject
     void setListenPort(unsigned short newPort);
     void setListenProtocol(int protocolType);
     void setMaxNumberOfConnections(int value);
+    void setDht(bool value);
+    void setLsd(bool value);
 
 
 
