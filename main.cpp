@@ -44,6 +44,7 @@ struct f_deleter {
 
 
 QtMessageHandler originalHandler;
+bool isLogLocked = false;
 void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString& text) {
     QSettings settings;
     bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
@@ -59,10 +60,14 @@ void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString&
     fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
 
     QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString() + QDir::separator() + "torrentclient.log";
-    static QLockFile lock{logsPath};
-    if (!lock.tryLock()) {
-        fprintf(stderr, "Can't lock log file yet\n");
-        return;
+    static QLockFile lock{logsPath + ".lock"}; // TODO: Is there a better way?, its kinda expensive to lock every write
+    if (!isLogLocked) {
+        if (!lock.tryLock()) {
+            fprintf(stderr, "Can't lock log file yet\n");
+            return;
+        } else {
+            isLogLocked = true;
+        }
     }
 
     static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
