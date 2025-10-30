@@ -6,6 +6,7 @@
 #include "sessionmanager.h"
 #include <QClipboard>
 #include "addpeersdialog.h"
+#include <QMessageBox>
 
 PeersWidget::PeersWidget(QWidget *parent) : QWidget(parent), ui(new Ui::PeersWidget)
 {
@@ -67,18 +68,25 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
     connect(addPeerAction, &QAction::triggered, this,
             [this]
             {
-                AddPeersDialog dialog(this);
-
-                if (dialog.exec() == QDialog::Accepted)
+                try
                 {
-                    auto  eps              = dialog.getAddrs();
-                    auto &sessionManager   = SessionManager::instance();
-                    auto  currentTorrentId = sessionManager.getCurrentTorrentId();
+                    AddPeersDialog dialog(this);
 
-                    if (currentTorrentId.has_value())
+                    if (dialog.exec() == QDialog::Accepted)
                     {
-                        sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
+                        auto  eps              = dialog.parseEndpoints();
+                        auto &sessionManager   = SessionManager::instance();
+                        auto  currentTorrentId = sessionManager.getCurrentTorrentId();
+
+                        if (currentTorrentId.has_value())
+                        {
+                            sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
+                        }
                     }
+                } catch (const std::exception& ex)
+                {
+                    QMessageBox::warning(this, tr("Warning"),
+                                         tr("Could not parse all addresses, make sure they are correct"));
                 }
             });
 

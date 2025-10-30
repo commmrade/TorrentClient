@@ -170,6 +170,7 @@ namespace detail
 void writeTorrentFile(std::shared_ptr<const lt::torrent_info> ti);
 void saveResumeData(std::shared_ptr<const lt::torrent_info> ti, const std::vector<char> &buf);
 std::vector<char> readFile(const char *filename);
+void setupTorrentSettings(lt::add_torrent_params& params);
 } // namespace detail
 
 #endif // SESSIONMANAGER_H

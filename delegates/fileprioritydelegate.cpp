@@ -27,7 +27,7 @@ QWidget *FilePriorityDelegate::createEditor(QWidget *parent, const QStyleOptionV
 }
 
 void FilePriorityDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                                                const QModelIndex &index) const
+                                                [[maybe_unused]] const QModelIndex &index) const
 {
     editor->setGeometry(option.rect);
 }

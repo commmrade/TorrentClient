@@ -29,12 +29,9 @@ SpeedGraphWidget::SpeedGraphWidget(QWidget *parent) : QWidget(parent), ui(new Ui
     auto *verticalAxis =
         static_cast<QValueAxis *>(m_chartView->chart()->axes(Qt::Vertical).first());
     verticalAxis->setLabelFormat("%.0f B/s");
-    // auto* horizontalAxis =
-    // static_cast<QValueAxis*>(m_chartView->chart()->axes(Qt::Horizontal).first());
 
     auto &sessionManager =
-        SessionManager::instance(); // TODO: Maybe call this from torrentWidget to reduce coupling
-                                    // between this class and SessionManager
+        SessionManager::instance();
     connect(&sessionManager, &SessionManager::chartPoint, this, &SpeedGraphWidget::addLine);
 }
 
@@ -52,26 +49,6 @@ static double toBytesfromFormat(double value, const QString &format)
     }
     return value;
 }
-static double toValueByFormat(double bytes, const QString &format)
-{
-    if (format.contains("KB/s"))
-    {
-        return bytes / utils::DBYTES_IN_KB;
-    }
-    else if (format.contains("MB/s"))
-    {
-        return bytes / utils::DBYTES_IN_MB;
-    }
-    return bytes;
-}
-
-// static void scaleSeries(QLineSeries* series, double factor) {
-//     auto points = series->points();
-//     for (auto& p : points) {
-//         p.setY(p.y() / factor);
-//     }
-//     series->replace(points);
-// }
 
 static void scaleSeries(QLineSeries *series, double factor)
 {

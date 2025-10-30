@@ -17,16 +17,9 @@ class AddPeersDialog : public QDialog
     explicit AddPeersDialog(QWidget *parent = nullptr);
     ~AddPeersDialog();
 
-    bool parseEndpoints();
-    void done(int) override;
-
-    // Usable only 1 time, since addresses are moved
-    QList<boost::asio::ip::tcp::endpoint> getAddrs() { return std::move(m_addrs); }
-
+    QList<boost::asio::ip::tcp::endpoint> parseEndpoints();
   private:
     Ui::AddPeersDialog *ui;
-
-    QList<boost::asio::ip::tcp::endpoint> m_addrs;
 };
 
 #endif // ADDPEERSDIALOG_H

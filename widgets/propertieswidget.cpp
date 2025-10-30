@@ -37,8 +37,6 @@ PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent), ui(new Ui
 
     connect(&sessionManager, &SessionManager::filesInfo, this, &PropertiesWidget::setFiles);
     connect(&sessionManager, &SessionManager::clearFiles, this, &PropertiesWidget::clearFiles);
-    // TODO: think about optimization - i can disconnect signals from all tabs besides the choosen
-    // one
 }
 
 PropertiesWidget::~PropertiesWidget() { delete ui; }

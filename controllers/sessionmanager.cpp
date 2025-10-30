@@ -843,15 +843,7 @@ bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
         return false;
     }
     // Set per torrent parameters
-    // TODO: Factor out in a function?
-    QSettings settings;
-    int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
-    params.max_connections = numOfConPt;
-
-    bool enablePeerEx = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
-    if (!enablePeerEx) {
-        params.flags |= lt::torrent_flags::disable_pex;
-    }
+    detail::setupTorrentSettings(params);
 
     m_session->async_add_torrent(std::move(params));
     return true;
@@ -915,6 +907,18 @@ std::vector<char> readFile(const char *filename)
         return std::vector<char>{bytes.begin(), bytes.end()};
     }
     return {};
+}
+
+void setupTorrentSettings(libtorrent::add_torrent_params &params)
+{
+    QSettings settings;
+    int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    params.max_connections = numOfConPt;
+
+    bool enablePeerEx = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
+    if (!enablePeerEx) {
+        params.flags |= lt::torrent_flags::disable_pex;
+    }
 }
 
 } // namespace detail
