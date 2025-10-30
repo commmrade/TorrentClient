@@ -13,12 +13,20 @@ TorrentSettingsDialog::TorrentSettingsDialog(const TorrentHandle &tHandle, QWidg
     auto uploadLimitKB      = uploadLimitBytes / 1024.0;
     auto maxNumOfCon        = tHandle.getMaxConn();
 
+    auto tflags = tHandle.handle().flags();
+    auto isDhtDisabled = (tflags & lt::torrent_flags::disable_dht);
+    auto isPexDisabled = (tflags & lt::torrent_flags::disable_pex);
+    auto isLpdDisabled = (tflags & lt::torrent_flags::disable_lsd);
     auto    status   = tHandle.handle().status(lt::torrent_handle::query_save_path);
     QString savePath = QString::fromStdString(status.save_path);
+
     ui->savePathLineEdit->setText(savePath);
     ui->downloadLimitSpin->setValue(downloadLimitKB);
     ui->uploadLimitSpin->setValue(uploadLimitKB);
     ui->maxNumOfConBox->setValue(maxNumOfCon);
+    ui->dhtCheckBox->setChecked(isDhtDisabled);
+    ui->pexCheckBox->setChecked(isPexDisabled);
+    ui->lpdCheckBox->setChecked(isLpdDisabled);
 
     connect(this, &QDialog::finished, this,
             [this](int result)

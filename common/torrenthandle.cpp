@@ -73,7 +73,7 @@ void TorrentHandle::setDht(bool enabled)
     } else {
         newFlags |= lt::torrent_flags::disable_dht;
     }
-    m_handle.set_flags(newFlags);
+    m_handle.set_flags(newFlags, lt::torrent_flags::disable_dht);
 }
 void TorrentHandle::setPex(bool enabled)
 {
@@ -83,7 +83,7 @@ void TorrentHandle::setPex(bool enabled)
     } else {
         newFlags |= lt::torrent_flags::disable_pex;
     }
-    m_handle.set_flags(newFlags);
+    m_handle.set_flags(newFlags, lt::torrent_flags::disable_pex);
 }
 void TorrentHandle::setLsd(bool enabled)
 {
@@ -93,7 +93,7 @@ void TorrentHandle::setLsd(bool enabled)
     } else {
         newFlags |= lt::torrent_flags::disable_lsd;
     }
-    m_handle.set_flags(newFlags);
+    m_handle.set_flags(newFlags, lt::torrent_flags::disable_lsd);
 }
 
 
