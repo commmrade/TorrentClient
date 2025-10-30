@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <libtorrent/alert_types.hpp>
 #include <QTime>
-#include "utils.h"
 
 void MetadataFetcher::stopRunning() { m_isRunning = false; }
 
