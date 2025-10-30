@@ -65,6 +65,9 @@ class SessionManager : public QObject
     void setTorrentUploadLimit(const std::uint32_t, int newLimit);
     void setTorrentSavePath(const std::uint32_t id, const QString &newPath);
     void setTorrentMaxConn(const std::uint32_t id, int newValue);
+    void setTorrentDht(const std::uint32_t id, bool enabled);
+    void setTorrentPex(const std::uint32_t id, bool enabled);
+    void setTorrentLsd(const std::uint32_t id, bool enabled);
 
     void loadResumes();
 

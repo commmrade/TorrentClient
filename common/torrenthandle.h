@@ -50,6 +50,9 @@ class TorrentHandle
     void moveStorage(const QString &newPath);
     int getMaxConn() const;
     void setMaxConn(int value);
+    void setDht(bool enabled);
+    void setPex(bool enabled);
+    void setLsd(bool enabled);
 
     void pause();
     bool isPaused() const

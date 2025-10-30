@@ -64,6 +64,39 @@ void TorrentHandle::setMaxConn(int value)
 {
     m_handle.set_max_connections(value);
 }
+
+void TorrentHandle::setDht(bool enabled)
+{
+    auto newFlags = m_handle.flags();
+    if (enabled) {
+        newFlags &= (~lt::torrent_flags::disable_dht);
+    } else {
+        newFlags |= lt::torrent_flags::disable_dht;
+    }
+    m_handle.set_flags(newFlags);
+}
+void TorrentHandle::setPex(bool enabled)
+{
+    auto newFlags = m_handle.flags();
+    if (enabled) {
+        newFlags &= (~lt::torrent_flags::disable_pex);
+    } else {
+        newFlags |= lt::torrent_flags::disable_pex;
+    }
+    m_handle.set_flags(newFlags);
+}
+void TorrentHandle::setLsd(bool enabled)
+{
+    auto newFlags = m_handle.flags();
+    if (enabled) {
+        newFlags &= (~lt::torrent_flags::disable_lsd);
+    } else {
+        newFlags |= lt::torrent_flags::disable_lsd;
+    }
+    m_handle.set_flags(newFlags);
+}
+
+
 void TorrentHandle::pause()
 {
     setCategory(Categories::STOPPED);

@@ -274,6 +274,13 @@
     </widget>
    </item>
    <item row="4" column="0">
+    <widget class="QCheckBox" name="lpdCheckBox">
+     <property name="text">
+      <string>DIsable Local Peer Discovery for this torrent</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>

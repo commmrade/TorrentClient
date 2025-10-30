@@ -122,6 +122,16 @@ void MainWindow::customContextMenu(const QPoint &pos)
                         [this, torrentId](int newValue) {
                             m_sessionManager.setTorrentMaxConn(torrentId, newValue);
                          });
+                connect(&settingsDialog, &TorrentSettingsDialog::dhtChanged, this,
+                        [this, torrentId](bool disabled)
+                        { m_sessionManager.setTorrentDht(torrentId, !disabled); });
+                connect(&settingsDialog, &TorrentSettingsDialog::pexChanged, this,
+                        [this, torrentId](bool disabled)
+                        { m_sessionManager.setTorrentPex(torrentId, !disabled); });
+                connect(&settingsDialog, &TorrentSettingsDialog::lsdChanged, this,
+                        [this, torrentId](bool disabled) {
+                            m_sessionManager.setTorrentLsd(torrentId, !disabled);
+                        });
                 settingsDialog.exec();
             });
     menu.addAction(settingsAction);

@@ -783,6 +783,19 @@ void SessionManager::setTorrentMaxConn(const uint32_t id, int newValue)
     m_torrentHandles[id].setMaxConn(newValue);
 }
 
+void SessionManager::setTorrentDht(const uint32_t id, bool enabled)
+{
+    m_torrentHandles[id].setDht(enabled);
+}
+void SessionManager::setTorrentPex(const std::uint32_t id, bool enabled)
+{
+    m_torrentHandles[id].setPex(enabled);
+}
+void SessionManager::setTorrentLsd(const std::uint32_t id, bool enabled)
+{
+    m_torrentHandles[id].setLsd(enabled);
+}
+
 bool SessionManager::addTorrent(libtorrent::add_torrent_params params)
 {
     if (isTorrentExists(params.info_hashes.get_best().is_all_zeros()

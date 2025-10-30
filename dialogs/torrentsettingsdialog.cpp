@@ -55,6 +55,18 @@ void TorrentSettingsDialog::applySettings()
         auto value = ui->maxNumOfConBox->value();
         emit maxNumOfConChanged(value);
     }
+    if (m_dhtChanged) {
+        bool value = ui->dhtCheckBox->isChecked();
+        emit dhtChanged(value);
+    }
+    if (m_pexChanged) {
+        bool value = ui->pexCheckBox->isChecked();
+        emit pexChanged(value);
+    }
+    if (m_lsdChanged) {
+        bool value = ui->lpdCheckBox->isChecked();
+        emit lsdChanged(value);
+    }
 }
 
 void TorrentSettingsDialog::on_downloadLimitSpin_valueChanged([[maybe_unused]] int arg1)
@@ -81,5 +93,22 @@ void TorrentSettingsDialog::on_savePathButton_clicked()
 void TorrentSettingsDialog::on_maxNumOfConBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mNumOfConChanged = true;
+}
+
+void TorrentSettingsDialog::on_dhtCheckBox_clicked()
+{
+    m_dhtChanged = true;
+}
+
+
+void TorrentSettingsDialog::on_pexCheckBox_clicked()
+{
+    m_pexChanged = true;
+}
+
+
+void TorrentSettingsDialog::on_lpdCheckBox_clicked()
+{
+    m_lsdChanged = true;
 }
 
