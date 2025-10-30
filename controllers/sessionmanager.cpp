@@ -19,7 +19,7 @@ SessionManager::SessionManager(QObject *parent) : QObject{parent}
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
     m_alertTimer.start(
-        1000); // !!!!: Dont change, breaks graphs and other stuff that require something per second
+        1000); // !!!!: Dont change, breaks graphs and other stuff that require something per second, FIXME
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(
         2000); // Check if torrent handles need save_resume, and then save .fastresume
@@ -84,6 +84,44 @@ void SessionManager::loadSessionSettingsFromSettings(lt::session_params &sessPar
                                .toInt();
     sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
     sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
+
+    unsigned int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toUInt();
+    QString listenInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(port);
+    sessParams.settings.set_str(lt::settings_pack::listen_interfaces, listenInterfaces.toStdString());
+
+    int protocolType = settings.value(SettingsNames::LISTENING_PROTOCOL, SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP).toInt();
+    switch (protocolType) {
+        case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP: {
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_TCP: {
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, false);
+            break;
+        }
+        case SettingsValues::LISTENING_PROTOCOL_UTP: {
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
+            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+            break;
+        }
+    }
+
+    int connLimit = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT).toInt();
+    sessParams.settings.set_int(lt::settings_pack::connections_limit, connLimit);
+
+    bool dhtEnabled = settings.value(SettingsNames::PRIVACY_DHT_ENABLED, SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT).toBool();
+    sessParams.settings.set_bool(lt::settings_pack::enable_dht, dhtEnabled);
+
+    bool lsdEnabled = settings.value(SettingsNames::PRIVACY_LOCAL_PEER_DESC, SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT).toBool();
+    sessParams.settings.set_bool(lt::settings_pack::enable_lsd, lsdEnabled);
 }
 
 void SessionManager::saveResumes()

@@ -135,7 +135,6 @@ void MainWindow::customContextMenu(const QPoint &pos)
                 settingsDialog.exec();
             });
     menu.addAction(settingsAction);
-
     menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));
 }
 
