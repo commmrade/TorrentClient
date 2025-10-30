@@ -489,8 +489,6 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
     auto newUpload                = uploadPayloadBytes - lastSessionUploadPayloadBytes;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
-    qDebug() << "Dht nodes:" << counters[lt::counters::dht_nodes];
-
     emit chartPoint(newRecv, newUpload);
 }
 

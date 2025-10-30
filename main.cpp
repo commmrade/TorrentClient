@@ -10,6 +10,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QLockFile>
+#include <sys/file.h>
 
 static constexpr const char *ORG_NAME = "klewy";
 static constexpr const char *ORG_DOM  = "klewy.com";
@@ -58,6 +59,12 @@ void myMessageHandler(QtMsgType t, const QMessageLogContext& ctx, const QString&
     fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
 
     QString logsPath = settings.value(SettingsNames::LOGS_PATH, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString() + QDir::separator() + "torrentclient.log";
+    static QLockFile lock{logsPath};
+    if (!lock.tryLock()) {
+        fprintf(stderr, "Can't lock log file yet\n");
+        return;
+    }
+
     static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
     if (!f) {
         return; // how to handl this?
@@ -175,7 +182,6 @@ int main(int argc, char *argv[])
         }
     }
     MainWindow w;
-    qDebug() << "Starting the app";
     w.show();
     return a.exec();
 }
