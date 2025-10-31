@@ -39,6 +39,7 @@ struct SettingsNames
 
     static inline constexpr const char *const DATA_TORRENTS_HEADER = "data/torrentsTable";
     static inline constexpr const char *const DATA_PEERS_HEADER = "data/peersTable";
+    static inline constexpr const char *const DATA_TRACKERS_HEADER = "data/trackersTable";
 };
 
 struct SettingsValues

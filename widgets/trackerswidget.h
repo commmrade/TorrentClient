@@ -24,6 +24,9 @@ class TrackersWidget : public QWidget
   private:
     Ui::TrackersWidget *ui;
     TrackerTableModel   m_trackerModel;
+
+    void setupHeader();
+    void headerMenuRequested(const QPoint &pos);
 };
 
 #endif // TRACKERSWIDGET_H
