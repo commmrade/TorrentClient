@@ -311,24 +311,26 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
                                 100) /
                       100.0;
     torrentHandle.resetCategory(); // sync category justin case
+
+    double ratio;
+    if (status.all_time_download < std::numeric_limits<double>::epsilon()) {
+        ratio = 0.0;
+    } else {
+        ratio = std::ceil(status.all_time_upload / static_cast<double>(status.all_time_download) * 100.0) / 100.0;
+    }
     Torrent torrent = {
-        torrentHandle.id(),
-        torrentHandle.getCategory(), // Default category is All,
-        QString::fromStdString(status.name),
-        // QString::number(status.total_wanted / 1024.0 / 1024.0) + " MB",
-        status.total_wanted,
-        progress,
-        !isPaused ? torrentStateToString(status.state) : "Stopped",
-        status.num_seeds,
-        status.num_peers,
-        // QString::number(std::ceil(status.download_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + "
-        // MB/s",
-        status.download_payload_rate, // count only pieces, without protocol stuff
-        // status.download_rate,
-        // QString::number(std::ceil(status.upload_rate / 1024.0 / 1024.0 * 100.0) / 100.0) + "
-        // MB/s",
-        status.upload_rate,
-        status.download_rate == 0
+        .id = torrentHandle.id(),
+        .category = torrentHandle.getCategory(), // Default category is All,
+        .name = QString::fromStdString(status.name),
+        .size = status.total_wanted,
+        .progress = progress,
+        .status = !isPaused ? torrentStateToString(status.state) : "Stopped",
+        .seeds = status.num_seeds,
+        .peers = status.num_peers,
+        .downSpeed = status.download_payload_rate, // count only pieces, without protocol stuff
+        .upSpeed = status.upload_rate,
+        .ratio = ratio,
+        .eta = status.download_rate == 0
             ? -1
             : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };

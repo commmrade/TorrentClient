@@ -6,11 +6,9 @@
 #include "settingsvalues.h"
 #include <QDebug>
 #include "dirs.h"
-#include <iostream>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QLockFile>
-#include <sys/file.h>
 
 static constexpr const char *ORG_NAME = "klewy";
 static constexpr const char *ORG_DOM  = "klewy.com";

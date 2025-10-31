@@ -11,17 +11,14 @@ struct Torrent
     std::uint32_t id;
     QString       category{Categories::ALL};
     QString       name;
-    // QString size;
     std::int64_t size;
     double       progress; // 0.0% to 100.0%
     QString      status;
     int          seeds;
     int          peers;
-    // QString downSpeed;
-    int downSpeed; // Int is sufficient enough
-    // QString upSpeed;
+    int downSpeed;
     int upSpeed;
-    // int eta; // In seconds
+    double ratio;
     std::int64_t eta; // signed for -1 if inf
 };
 
@@ -37,6 +34,7 @@ enum TorrentsFields
     PEERS,
     DOWN_SPEED,
     UP_SPEED,
+    RATIO,
     ETA,
 
 };

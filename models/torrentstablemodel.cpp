@@ -61,7 +61,11 @@ QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::Di
             {
                 auto    sizeInBytes = torrent.upSpeed;
                 QString sizeStr     = utils::bytesToHigherPerSec(sizeInBytes);
-                return QVariant{sizeStr};
+                return sizeStr;
+            }
+            case RATIO: {
+                auto ratio = torrent.ratio;
+                return ratio;
             }
             case ETA:
             {
@@ -150,6 +154,10 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
             torrent.upSpeed = value.toULongLong();
             break;
         }
+        case RATIO: {
+            torrent.ratio = value.toDouble();
+            break;
+        }
         case ETA:
         {
             torrent.eta = value.toInt();
@@ -211,6 +219,9 @@ QVariant TorrentsTableModel::headerData(int section, Qt::Orientation orientation
         case UP_SPEED:
         {
             return QVariant{tr("Up Speed")};
+        }
+        case RATIO: {
+            return QVariant{tr("Ratio")};
         }
         case ETA:
         {
