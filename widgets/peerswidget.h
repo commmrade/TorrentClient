@@ -21,11 +21,17 @@ class PeersWidget : public QWidget
     void setPeers(const std::uint32_t id, const std::vector<lt::peer_info> &peers);
     void clearPeers();
 
-    void contextMenuRequested(const QPoint &pos);
+
 
   private:
     Ui::PeersWidget *ui;
     PeerTableModel   m_peerModel;
+
+  private slots:
+    void setupHeader();
+    void headerMenuRequested(const QPoint &pos);
+
+    void contextMenuRequested(const QPoint &pos);
 };
 
 #endif // PEERSWIDGET_H

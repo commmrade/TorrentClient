@@ -242,13 +242,12 @@ void MainWindow::headerContextMenu(const QPoint &pos)
     bool  isChanged = false;
 
     QMenu menu(this);
-    qDebug() << header->count();
     for (auto i = 0; i < header->count(); ++i)
     {
         QString headerName = table->model()->headerData(i, Qt::Horizontal).toString();
         bool    isHidden   = header->isSectionHidden(i);
 
-        QAction *action = new QAction(headerName, this);
+        QAction *action = menu.addAction(headerName);
         action->setCheckable(true);
         action->setChecked(!isHidden);
 
@@ -316,7 +315,6 @@ void MainWindow::setupTorrentHeader()
     QHeaderView *header      = ui->torrentsView->horizontalHeader();
     if (!headerState.isEmpty())
     {
-        qDebug() << "LOADED TORRENT HEADER";
         header->restoreState(headerState);
     }
 

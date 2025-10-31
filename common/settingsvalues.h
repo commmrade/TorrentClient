@@ -38,6 +38,7 @@ struct SettingsNames
     static inline constexpr const char *const PRIVACY_LOCAL_PEER_DESC = "privacy/localDiscovery";
 
     static inline constexpr const char *const DATA_TORRENTS_HEADER = "data/torrentsTable";
+    static inline constexpr const char *const DATA_PEERS_HEADER = "data/peersTable";
 };
 
 struct SettingsValues
