@@ -43,8 +43,8 @@ class SettingsDialog : public QDialog
     bool m_optionChanged{false};
 
     QPointer<ApplicationSettings> appSettings;
-    QPointer<TorrentSettings> torSettings;
-    QPointer<ConnectionSettings> connSettings;
+    QPointer<TorrentSettings>     torSettings;
+    QPointer<ConnectionSettings>  connSettings;
 };
 
 #endif // SETTINGSDIALOG_H

@@ -55,22 +55,19 @@ void TorrentHandle::moveStorage(const QString &newPath)
     m_handle.move_storage(newPath.toStdString(), lt::move_flags_t::always_replace_files);
 }
 
-int TorrentHandle::getMaxConn() const
-{
-    return m_handle.max_connections();
-}
+int TorrentHandle::getMaxConn() const { return m_handle.max_connections(); }
 
-void TorrentHandle::setMaxConn(int value)
-{
-    m_handle.set_max_connections(value);
-}
+void TorrentHandle::setMaxConn(int value) { m_handle.set_max_connections(value); }
 
 void TorrentHandle::setDht(bool enabled)
 {
     auto newFlags = m_handle.flags();
-    if (enabled) {
+    if (enabled)
+    {
         newFlags &= (~lt::torrent_flags::disable_dht);
-    } else {
+    }
+    else
+    {
         newFlags |= lt::torrent_flags::disable_dht;
     }
     m_handle.set_flags(newFlags, lt::torrent_flags::disable_dht);
@@ -78,9 +75,12 @@ void TorrentHandle::setDht(bool enabled)
 void TorrentHandle::setPex(bool enabled)
 {
     auto newFlags = m_handle.flags();
-    if (enabled) {
+    if (enabled)
+    {
         newFlags &= (~lt::torrent_flags::disable_pex);
-    } else {
+    }
+    else
+    {
         newFlags |= lt::torrent_flags::disable_pex;
     }
     m_handle.set_flags(newFlags, lt::torrent_flags::disable_pex);
@@ -88,14 +88,16 @@ void TorrentHandle::setPex(bool enabled)
 void TorrentHandle::setLsd(bool enabled)
 {
     auto newFlags = m_handle.flags();
-    if (enabled) {
+    if (enabled)
+    {
         newFlags &= (~lt::torrent_flags::disable_lsd);
-    } else {
+    }
+    else
+    {
         newFlags |= lt::torrent_flags::disable_lsd;
     }
     m_handle.set_flags(newFlags, lt::torrent_flags::disable_lsd);
 }
-
 
 void TorrentHandle::pause()
 {

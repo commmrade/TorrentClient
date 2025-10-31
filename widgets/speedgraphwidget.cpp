@@ -30,8 +30,7 @@ SpeedGraphWidget::SpeedGraphWidget(QWidget *parent) : QWidget(parent), ui(new Ui
         static_cast<QValueAxis *>(m_chartView->chart()->axes(Qt::Vertical).first());
     verticalAxis->setLabelFormat("%.0f B/s");
 
-    auto &sessionManager =
-        SessionManager::instance();
+    auto &sessionManager = SessionManager::instance();
     connect(&sessionManager, &SessionManager::chartPoint, this, &SpeedGraphWidget::addLine);
 }
 

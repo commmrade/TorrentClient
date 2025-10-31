@@ -18,14 +18,16 @@ ApplicationSettings::ApplicationSettings(QWidget *parent)
     QSettings settings;
     {
         int language =
-            settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH).toInt();
+            settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH)
+                .toInt();
         QSignalBlocker blocker{ui->languageBox};
         ui->languageBox->setCurrentIndex(language);
     }
 
     {
         QSignalBlocker blocker{ui->themeBox};
-        int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
+        int            theme =
+            settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
         ui->themeBox->setCurrentIndex(theme);
         if (theme == SettingsValues::GUI_THEME_CUSTOM)
         { // if theme is custom set custom theme edit, if empty set to dark (default)
@@ -54,17 +56,18 @@ ApplicationSettings::ApplicationSettings(QWidget *parent)
 
     {
         bool showTray =
-            settings.value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
+            settings
+                .value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
                 .toBool();
         QSignalBlocker blocker{ui->showTrayBox};
         ui->showTrayBox->setChecked(showTray);
     }
 
     {
-        bool showNotifs =
-            settings
-                .value(SettingsNames::DESKTOP_SHOW_NOTIFS, SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
-                .toBool();
+        bool showNotifs = settings
+                              .value(SettingsNames::DESKTOP_SHOW_NOTIFS,
+                                     SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
+                              .toBool();
         QSignalBlocker blocker{ui->enaleNotifBox};
         ui->enaleNotifBox->setChecked(showNotifs);
     }
@@ -78,18 +81,26 @@ ApplicationSettings::ApplicationSettings(QWidget *parent)
     }
 
     {
-       bool logsEnabled = settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
-       QSignalBlocker blocker{ui->logsBox};
-       ui->logsBox->setChecked(logsEnabled);
+        bool logsEnabled =
+            settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT)
+                .toBool();
+        QSignalBlocker blocker{ui->logsBox};
+        ui->logsBox->setChecked(logsEnabled);
     }
     {
-        QString logsPath = settings.value(SettingsNames::LOGS_PATH,
-                                          QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + Dirs::LOGS + QDir::separator()).toString();
+        QString logsPath =
+            settings
+                .value(SettingsNames::LOGS_PATH,
+                       QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                           QDir::separator() + Dirs::LOGS + QDir::separator())
+                .toString();
         QSignalBlocker blocker{ui->logsPathEdit};
         ui->logsPathEdit->setText(logsPath);
     }
     {
-        unsigned int logsMax = settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT).toUInt();
+        unsigned int logsMax =
+            settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT)
+                .toUInt();
         QSignalBlocker blocker{ui->maxLogFileSpinBox};
         ui->maxLogFileSpinBox->setValue(logsMax / 1024);
     }
@@ -117,16 +128,19 @@ void ApplicationSettings::apply()
         settings.setValue(SettingsNames::GUI_THEME, theme);
         m_themeChanged = false;
     }
-    if (m_confirmDeleteChanged) {
+    if (m_confirmDeleteChanged)
+    {
         bool checked = ui->confirmDelBox->isChecked();
         settings.setValue(SettingsNames::TRANSFER_CONFIRM_DELETION, checked);
         m_confirmDeleteChanged = false;
     }
-    if (m_logsEnabledChanged) {
+    if (m_logsEnabledChanged)
+    {
         settings.setValue(SettingsNames::LOGS_ENABLED, ui->logsBox->isChecked());
         m_logsEnabledChanged = false;
     }
-    if (m_showTrayChanged) {
+    if (m_showTrayChanged)
+    {
         bool checked = ui->showTrayBox->isChecked();
         settings.setValue(SettingsNames::DESKTOP_SHOW_TRAY, checked);
         if (!checked)
@@ -138,7 +152,8 @@ void ApplicationSettings::apply()
         }
         m_showTrayChanged = false;
     }
-    if (m_enableNotifChanged) {
+    if (m_enableNotifChanged)
+    {
         bool checked = ui->enaleNotifBox->isChecked();
         if (checked && !ui->showTrayBox->isChecked())
         {
@@ -151,7 +166,8 @@ void ApplicationSettings::apply()
         settings.setValue(SettingsNames::DESKTOP_SHOW_NOTIFS, checked);
         m_enableNotifChanged = false;
     }
-    if (m_exitBehChanged) {
+    if (m_exitBehChanged)
+    {
         int index = ui->exitBehBtn->currentIndex();
         if (index == SettingsValues::DESKTOP_EXIT_BEH_TO_TRAY && !ui->showTrayBox->isChecked())
         {
@@ -164,13 +180,15 @@ void ApplicationSettings::apply()
         m_exitBehChanged = false;
     }
 
-    if (m_mLogSizeChanged) {
+    if (m_mLogSizeChanged)
+    {
         int arg = ui->maxLogFileSpinBox->value();
         settings.setValue(SettingsNames::LOGS_MAX_SIZE, arg * 1024);
 
         m_mLogSizeChanged = false;
     }
-    if (m_logsPathChanged) {
+    if (m_logsPathChanged)
+    {
         QString logsPath = ui->logsPathEdit->text();
         settings.setValue(SettingsNames::LOGS_PATH, logsPath);
         m_logsPathChanged = false;
@@ -183,7 +201,6 @@ void ApplicationSettings::on_languageBox_currentIndexChanged([[maybe_unused]] in
     emit restartRequired();
     emit optionChanged();
 }
-
 
 void ApplicationSettings::on_themeBox_currentIndexChanged([[maybe_unused]] int index)
 {
@@ -198,11 +215,10 @@ void ApplicationSettings::on_themeBox_currentIndexChanged([[maybe_unused]] int i
         ui->chooseThemeBtn->setVisible(false);
     }
 
-    m_themeChanged    = true;
+    m_themeChanged = true;
     emit restartRequired();
     emit optionChanged();
 }
-
 
 void ApplicationSettings::on_chooseThemeBtn_clicked()
 {
@@ -217,13 +233,11 @@ void ApplicationSettings::on_chooseThemeBtn_clicked()
     }
 }
 
-
 void ApplicationSettings::on_confirmDelBox_clicked([[maybe_unused]] bool checked)
 {
     m_confirmDeleteChanged = true;
     emit optionChanged();
 }
-
 
 void ApplicationSettings::on_enaleNotifBox_clicked([[maybe_unused]] bool checked)
 {
@@ -231,13 +245,11 @@ void ApplicationSettings::on_enaleNotifBox_clicked([[maybe_unused]] bool checked
     emit optionChanged();
 }
 
-
 void ApplicationSettings::on_exitBehBtn_currentIndexChanged([[maybe_unused]] int index)
 {
     m_exitBehChanged = true;
     emit optionChanged();
 }
-
 
 void ApplicationSettings::on_logsBox_clicked([[maybe_unused]] bool checked)
 {
@@ -245,21 +257,19 @@ void ApplicationSettings::on_logsBox_clicked([[maybe_unused]] bool checked)
     emit optionChanged();
 }
 
-
 void ApplicationSettings::on_logsPathBtn_clicked()
 {
     auto    homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    QString logsPath =
-        QFileDialog::getExistingDirectory(this, tr("Logs directory"), homePath);
+    QString logsPath = QFileDialog::getExistingDirectory(this, tr("Logs directory"), homePath);
 
-    if (!logsPath.isEmpty()) {
+    if (!logsPath.isEmpty())
+    {
         ui->logsPathEdit->setText(logsPath);
     }
     m_logsPathChanged = true;
     emit optionChanged();
     emit restartRequired();
 }
-
 
 void ApplicationSettings::on_maxLogFileSpinBox_valueChanged([[maybe_unused]] int arg1)
 {

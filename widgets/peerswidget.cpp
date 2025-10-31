@@ -7,6 +7,8 @@
 #include <QClipboard>
 #include "addpeersdialog.h"
 #include <QMessageBox>
+#include <QSettings>
+#include "settingsvalues.h"
 
 PeersWidget::PeersWidget(QWidget *parent) : QWidget(parent), ui(new Ui::PeersWidget)
 {
@@ -20,11 +22,53 @@ PeersWidget::PeersWidget(QWidget *parent) : QWidget(parent), ui(new Ui::PeersWid
 
     connect(ui->peerTable, &QTableView::customContextMenuRequested, this,
             &PeersWidget::contextMenuRequested);
+
+    setupHeader();
 }
 
 PeersWidget::~PeersWidget() { delete ui; }
 
 void PeersWidget::clearPeers() { m_peerModel.clearPeers(); }
+
+void PeersWidget::setupHeader()
+{
+    QSettings settings;
+    QByteArray headerState = settings.value(SettingsNames::DATA_PEERS_HEADER).toByteArray();
+    QHeaderView* header = ui->peerTable->horizontalHeader();
+    if (!headerState.isEmpty()) {
+        header->restoreState(headerState);
+    }
+    header->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(header, &QHeaderView::customContextMenuRequested, this, &PeersWidget::headerMenuRequested);
+}
+
+void PeersWidget::headerMenuRequested(const QPoint &pos)
+{
+    auto* table = ui->peerTable;
+    auto* header = table->horizontalHeader();
+    bool isChanged = false;
+
+    QMenu menu(this);
+    for (auto i = 0; i < header->count(); ++i) {
+        QString headerName = table->model()->headerData(i, Qt::Horizontal).toString();
+        bool isHidden = header->isSectionHidden(i);
+
+        QAction* action = menu.addAction(headerName);
+        action->setCheckable(true);
+        action->setChecked(!isHidden);
+        connect(action, &QAction::triggered, this, [header, i, isHidden, &isChanged]() mutable {
+            header->setSectionHidden(i, !isHidden);
+            isChanged = true;
+        });
+    }
+    menu.exec(table->mapToGlobal(pos));
+
+    if (isChanged) {
+        QSettings settings;
+        QByteArray headerState = header->saveState();
+        settings.setValue(SettingsNames::DATA_PEERS_HEADER, headerState);
+    }
+}
 
 void PeersWidget::contextMenuRequested(const QPoint &pos)
 {
@@ -40,7 +84,10 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
                 for (const auto &modelIndex : selectedRows)
                 {
                     // banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
-                    auto ipStr = m_peerModel.data(m_peerModel.index(modelIndex.row(), static_cast<int>(PeerFields::IP))).toString();
+                    auto ipStr = m_peerModel
+                                     .data(m_peerModel.index(modelIndex.row(),
+                                                             static_cast<int>(PeerFields::IP)))
+                                     .toString();
                     auto addr = boost::asio::ip::make_address(ipStr.toStdString());
                     banPeers.append(std::move(addr));
                 }
@@ -83,10 +130,12 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
                             sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
                         }
                     }
-                } catch (const std::exception& ex)
+                }
+                catch (const std::exception &ex)
                 {
-                    QMessageBox::warning(this, tr("Warning"),
-                                         tr("Could not parse all addresses, make sure they are correct"));
+                    QMessageBox::warning(
+                        this, tr("Warning"),
+                        tr("Could not parse all addresses, make sure they are correct"));
                 }
             });
 

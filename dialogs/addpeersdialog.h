@@ -18,6 +18,7 @@ class AddPeersDialog : public QDialog
     ~AddPeersDialog();
 
     QList<boost::asio::ip::tcp::endpoint> parseEndpoints();
+
   private:
     Ui::AddPeersDialog *ui;
 };

@@ -29,7 +29,8 @@ void FileStatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 }
 
 bool FileStatusDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
-                                    [[maybe_unused]] const QStyleOptionViewItem &option, const QModelIndex &index)
+                                     [[maybe_unused]] const QStyleOptionViewItem &option,
+                                     const QModelIndex                           &index)
 {
     if (event->type() == QEvent::MouseButtonRelease)
     {

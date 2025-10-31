@@ -2,13 +2,14 @@
 #define BASESETTINGS_H
 #include <QWidget>
 
-class BaseSettings : public QWidget {
+class BaseSettings : public QWidget
+{
     Q_OBJECT
-public:
-    BaseSettings(QWidget* parent = nullptr) : QWidget(parent) {}
+  public:
+    BaseSettings(QWidget *parent = nullptr) : QWidget(parent) {}
     virtual ~BaseSettings() = default;
-    virtual void apply() = 0;
-signals:
+    virtual void apply()    = 0;
+  signals:
     void restartRequired();
     void optionChanged();
 };

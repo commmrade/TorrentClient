@@ -41,7 +41,6 @@ class ConnectionSettings : public BaseSettings
     bool m_protocolChanged{false};
     bool m_mNumOfConChanged{false};
     bool m_mNumOfConPTChanged{false};
-
 };
 
 #endif // CONNECTIONSETTINGS_H
