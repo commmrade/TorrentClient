@@ -381,17 +381,21 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle &handle)
     iInfo.upSpeed  = status.upload_rate;
     iInfo.upLimit  = handle.upload_limit();
 
+    if (status.all_time_download < std::numeric_limits<double>::epsilon()) {
+        iInfo.ratio = 0.0;
+    } else {
+        iInfo.ratio = std::ceil(status.all_time_upload / static_cast<double>(status.all_time_download) * 100.0) / 100.0;
+    }
+
     iInfo.connections = status.num_connections;
     iInfo.seeds       = status.num_seeds;
     iInfo.peers       = status.num_peers;
 
     TorrentInfo tInfo;
-    // qDebug() << "Compl time:" << status.completed_time;
     tInfo.completedTime = status.completed_time;
     tInfo.size          = status.total_wanted;
     tInfo.startTime     = status.added_time;
 
-    // tInfo.hashBest = utils::toHex(handle.info_hashes().get_best().to_string());
     tInfo.hashV1 = utils::toHex(handle.info_hashes().v1.to_string());
 
     auto hashV2  = handle.info_hashes().v2;
