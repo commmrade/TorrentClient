@@ -54,6 +54,9 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     ui->uploadLimValue->setText(iInfo.upLimit == -1 ? tr("Unlimited")
                                                     : utils::bytesToHigherPerSec(iInfo.upLimit));
 
+    auto ratio = QString::number(iInfo.ratio);
+    ui->ratioValue->setText(ratio);
+
     auto conns = QString::number(iInfo.connections);
     ui->connectionsValue->setText(conns);
 

@@ -17,6 +17,8 @@ struct InternetInfo
     int          upSpeed;
     int          upLimit;
 
+    double ratio;
+
     int connections;
     int seeds;
     int peers;
