@@ -13,12 +13,12 @@ TorrentSettingsDialog::TorrentSettingsDialog(const TorrentHandle &tHandle, QWidg
     auto uploadLimitKB      = uploadLimitBytes / 1024.0;
     auto maxNumOfCon        = tHandle.getMaxConn();
 
-    auto tflags = tHandle.handle().flags();
-    auto isDhtDisabled = (tflags & lt::torrent_flags::disable_dht);
-    auto isPexDisabled = (tflags & lt::torrent_flags::disable_pex);
-    auto isLpdDisabled = (tflags & lt::torrent_flags::disable_lsd);
-    auto    status   = tHandle.handle().status(lt::torrent_handle::query_save_path);
-    QString savePath = QString::fromStdString(status.save_path);
+    auto    tflags        = tHandle.handle().flags();
+    auto    isDhtDisabled = (tflags & lt::torrent_flags::disable_dht);
+    auto    isPexDisabled = (tflags & lt::torrent_flags::disable_pex);
+    auto    isLpdDisabled = (tflags & lt::torrent_flags::disable_lsd);
+    auto    status        = tHandle.handle().status(lt::torrent_handle::query_save_path);
+    QString savePath      = QString::fromStdString(status.save_path);
 
     ui->savePathLineEdit->setText(savePath);
     ui->downloadLimitSpin->setValue(downloadLimitKB);
@@ -59,19 +59,23 @@ void TorrentSettingsDialog::applySettings()
         auto newPath = ui->savePathLineEdit->text();
         emit savePathChanged(newPath);
     }
-    if (m_mNumOfConChanged) {
+    if (m_mNumOfConChanged)
+    {
         auto value = ui->maxNumOfConBox->value();
         emit maxNumOfConChanged(value);
     }
-    if (m_dhtChanged) {
+    if (m_dhtChanged)
+    {
         bool value = ui->dhtCheckBox->isChecked();
         emit dhtChanged(value);
     }
-    if (m_pexChanged) {
+    if (m_pexChanged)
+    {
         bool value = ui->pexCheckBox->isChecked();
         emit pexChanged(value);
     }
-    if (m_lsdChanged) {
+    if (m_lsdChanged)
+    {
         bool value = ui->lpdCheckBox->isChecked();
         emit lsdChanged(value);
     }
@@ -103,20 +107,8 @@ void TorrentSettingsDialog::on_maxNumOfConBox_valueChanged([[maybe_unused]] int 
     m_mNumOfConChanged = true;
 }
 
-void TorrentSettingsDialog::on_dhtCheckBox_clicked()
-{
-    m_dhtChanged = true;
-}
+void TorrentSettingsDialog::on_dhtCheckBox_clicked() { m_dhtChanged = true; }
 
+void TorrentSettingsDialog::on_pexCheckBox_clicked() { m_pexChanged = true; }
 
-void TorrentSettingsDialog::on_pexCheckBox_clicked()
-{
-    m_pexChanged = true;
-}
-
-
-void TorrentSettingsDialog::on_lpdCheckBox_clicked()
-{
-    m_lsdChanged = true;
-}
-
+void TorrentSettingsDialog::on_lpdCheckBox_clicked() { m_lsdChanged = true; }

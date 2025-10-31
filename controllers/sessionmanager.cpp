@@ -18,8 +18,8 @@ SessionManager::SessionManager(QObject *parent) : QObject{parent}
     m_session       = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(
-        1000); // !!!!: Dont change, breaks graphs and other stuff that require something per second, FIXME
+    m_alertTimer.start(1000); // !!!!: Dont change, breaks graphs and other stuff that require
+                              // something per second, FIXME
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(
         2000); // Check if torrent handles need save_resume, and then save .fastresume
@@ -29,11 +29,15 @@ SessionManager::~SessionManager()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                            QDir::separator() + SESSION_FILENAME;
-    if (shouldResetParams) {
-        if (!QFile::remove(sessionFilePath)) {
+    if (shouldResetParams)
+    {
+        if (!QFile::remove(sessionFilePath))
+        {
             qWarning() << "Failed to delete .session";
         }
-    } else {
+    }
+    else
+    {
         QFile file{sessionFilePath};
         if (file.open(QIODevice::WriteOnly))
         {
@@ -54,7 +58,7 @@ libtorrent::session_params SessionManager::loadSessionParams()
 {
     auto sessionFilePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                            QDir::separator() + SESSION_FILENAME;
-    auto sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
+    auto               sessionFileContents = detail::readFile(sessionFilePath.toUtf8().constData());
     lt::session_params sessParams;
     if (sessionFileContents.empty())
     {
@@ -85,42 +89,61 @@ void SessionManager::loadSessionSettingsFromSettings(lt::session_params &sessPar
     sessParams.settings.set_int(lt::settings_pack::download_rate_limit, downloadSpeedLimit);
     sessParams.settings.set_int(lt::settings_pack::upload_rate_limit, uploadSpeedLimit);
 
-    unsigned int port = settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT).toUInt();
+    unsigned int port =
+        settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT)
+            .toUInt();
     QString listenInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(port);
-    sessParams.settings.set_str(lt::settings_pack::listen_interfaces, listenInterfaces.toStdString());
+    sessParams.settings.set_str(lt::settings_pack::listen_interfaces,
+                                listenInterfaces.toStdString());
 
-    int protocolType = settings.value(SettingsNames::LISTENING_PROTOCOL, SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP).toInt();
-    switch (protocolType) {
-        case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP: {
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
-            break;
-        }
-        case SettingsValues::LISTENING_PROTOCOL_TCP: {
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, false);
-            break;
-        }
-        case SettingsValues::LISTENING_PROTOCOL_UTP: {
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
-            sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
-            sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
-            break;
-        }
+    int protocolType = settings
+                           .value(SettingsNames::LISTENING_PROTOCOL,
+                                  SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP)
+                           .toInt();
+    switch (protocolType)
+    {
+    case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP:
+    {
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+        break;
+    }
+    case SettingsValues::LISTENING_PROTOCOL_TCP:
+    {
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, false);
+        break;
+    }
+    case SettingsValues::LISTENING_PROTOCOL_UTP:
+    {
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
+        sessParams.settings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+        sessParams.settings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+        break;
+    }
     }
 
-    int connLimit = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT).toInt();
+    int connLimit = settings
+                        .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS,
+                               SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT)
+                        .toInt();
     sessParams.settings.set_int(lt::settings_pack::connections_limit, connLimit);
 
-    bool dhtEnabled = settings.value(SettingsNames::PRIVACY_DHT_ENABLED, SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT).toBool();
+    bool dhtEnabled =
+        settings
+            .value(SettingsNames::PRIVACY_DHT_ENABLED, SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT)
+            .toBool();
     sessParams.settings.set_bool(lt::settings_pack::enable_dht, dhtEnabled);
 
-    bool lsdEnabled = settings.value(SettingsNames::PRIVACY_LOCAL_PEER_DESC, SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT).toBool();
+    bool lsdEnabled = settings
+                          .value(SettingsNames::PRIVACY_LOCAL_PEER_DESC,
+                                 SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT)
+                          .toBool();
     sessParams.settings.set_bool(lt::settings_pack::enable_lsd, lsdEnabled);
 }
 
@@ -149,7 +172,8 @@ void SessionManager::eventLoop()
             handleFinishedAlert(finished_alert);
         }
         else if (auto *statusAlert = lt::alert_cast<lt::state_update_alert>(alert))
-        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would become fucked up, so fix this
+        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would
+          // become fucked up, so fix this
             handleStateUpdateAlert(statusAlert);
         }
         else if (auto *metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert))
@@ -165,7 +189,8 @@ void SessionManager::eventLoop()
             handleAddTorrentAlert(addTorrentAlert);
         }
         else if (auto *stateAlert = lt::alert_cast<lt::session_stats_alert>(alert))
-        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would become fucked up, so fix this
+        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would
+          // become fucked up, so fix this
             handleSessionStatsAlert(stateAlert);
         }
         else if (auto *torrentErrorAlert = lt::alert_cast<lt::torrent_error_alert>(alert))
@@ -186,8 +211,9 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
 
-    // qDebug() << "Listen interface:" << m_session->get_settings().get_str(lt::settings_pack::listen_interfaces);
-    // qDebug() << "Loop elapsed:" << timer.elapsed() << "Msecs";
+    // qDebug() << "Listen interface:" <<
+    // m_session->get_settings().get_str(lt::settings_pack::listen_interfaces); qDebug() << "Loop
+    // elapsed:" << timer.elapsed() << "Msecs";
 }
 
 // HERE: Separate function for each emit thingy
@@ -263,9 +289,8 @@ void SessionManager::updateTrackersProp(TorrentHandle &handle)
 
 void SessionManager::updateFilesProp(TorrentHandle &handle)
 {
-    auto fileListFromTorrentInfo =
-        [](const TorrentHandle                    &handle,
-               std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File>
+    auto fileListFromTorrentInfo = [](const TorrentHandle                    &handle,
+                                      std::shared_ptr<const lt::torrent_info> tinfo) -> QList<File>
     {
         const auto &files     = tinfo->files();
         auto        num_files = files.num_files();
@@ -313,26 +338,31 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
     torrentHandle.resetCategory(); // sync category justin case
 
     double ratio;
-    if (status.all_time_download < std::numeric_limits<double>::epsilon()) {
+    if (status.all_time_download < std::numeric_limits<double>::epsilon())
+    {
         ratio = 0.0;
-    } else {
-        ratio = std::ceil(status.all_time_upload / static_cast<double>(status.all_time_download) * 100.0) / 100.0;
+    }
+    else
+    {
+        ratio = std::ceil(status.all_time_upload / static_cast<double>(status.all_time_download) *
+                          100.0) /
+                100.0;
     }
     Torrent torrent = {
-        .id = torrentHandle.id(),
-        .category = torrentHandle.getCategory(), // Default category is All,
-        .name = QString::fromStdString(status.name),
-        .size = status.total_wanted,
-        .progress = progress,
-        .status = !isPaused ? torrentStateToString(status.state) : "Stopped",
-        .seeds = status.num_seeds,
-        .peers = status.num_peers,
+        .id        = torrentHandle.id(),
+        .category  = torrentHandle.getCategory(), // Default category is All,
+        .name      = QString::fromStdString(status.name),
+        .size      = status.total_wanted,
+        .progress  = progress,
+        .status    = !isPaused ? torrentStateToString(status.state) : "Stopped",
+        .seeds     = status.num_seeds,
+        .peers     = status.num_peers,
         .downSpeed = status.download_payload_rate, // count only pieces, without protocol stuff
-        .upSpeed = status.upload_rate,
-        .ratio = ratio,
-        .eta = status.download_rate == 0
-            ? -1
-            : (status.total_wanted - status.total_wanted_done) / status.download_rate,
+        .upSpeed   = status.upload_rate,
+        .ratio     = ratio,
+        .eta       = status.download_rate == 0
+                         ? -1
+                         : (status.total_wanted - status.total_wanted_done) / status.download_rate,
     };
     emit torrentUpdated(torrent);
 }
@@ -351,7 +381,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 void SessionManager::handleStateUpdateAlert(libtorrent::state_update_alert *alert)
 {
     auto statuses  = alert->status;
-    auto  currentId = m_currentTorrentId.has_value() ? m_currentTorrentId.value() : -1;
+    auto currentId = m_currentTorrentId.has_value() ? m_currentTorrentId.value() : -1;
     for (auto &status : statuses)
     {
         auto &handle = status.handle;
@@ -381,10 +411,15 @@ void SessionManager::updateGeneralProperty(const lt::torrent_handle &handle)
     iInfo.upSpeed  = status.upload_rate;
     iInfo.upLimit  = handle.upload_limit();
 
-    if (status.all_time_download < std::numeric_limits<double>::epsilon()) {
+    if (status.all_time_download < std::numeric_limits<double>::epsilon())
+    {
         iInfo.ratio = 0.0;
-    } else {
-        iInfo.ratio = std::ceil(status.all_time_upload / static_cast<double>(status.all_time_download) * 100.0) / 100.0;
+    }
+    else
+    {
+        iInfo.ratio = std::ceil(status.all_time_upload /
+                                static_cast<double>(status.all_time_download) * 100.0) /
+                      100.0;
     }
 
     iInfo.connections = status.num_connections;
@@ -549,15 +584,13 @@ void SessionManager::loadResumes()
     }
 }
 
-void SessionManager::resetSessionParams()
-{
-    shouldResetParams = true;
-}
+void SessionManager::resetSessionParams() { shouldResetParams = true; }
 
 void SessionManager::setDownloadLimit(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (int oldVal = newSettings.get_int(lt::settings_pack::download_rate_limit); oldVal != value) {
+    if (int oldVal = newSettings.get_int(lt::settings_pack::download_rate_limit); oldVal != value)
+    {
         newSettings.set_int(lt::settings_pack::download_rate_limit, value);
         m_session->apply_settings(std::move(newSettings));
     }
@@ -566,7 +599,8 @@ void SessionManager::setDownloadLimit(int value)
 void SessionManager::setUploadLimit(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (int oldVal = newSettings.get_int(lt::settings_pack::upload_rate_limit); oldVal != value) {
+    if (int oldVal = newSettings.get_int(lt::settings_pack::upload_rate_limit); oldVal != value)
+    {
         newSettings.set_int(lt::settings_pack::upload_rate_limit, value);
         m_session->apply_settings(std::move(newSettings));
     }
@@ -574,10 +608,14 @@ void SessionManager::setUploadLimit(int value)
 
 void SessionManager::setListenPort(unsigned short newPort)
 {
-    lt::settings_pack newSettings = m_session->get_settings();
-    QString listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(newPort);
-    if (auto oldVal = QString::fromStdString(newSettings.get_str(lt::settings_pack::listen_interfaces)); oldVal != listeningInterfaces) {
-        newSettings.set_str(lt::settings_pack::listen_interfaces, listeningInterfaces.toStdString());
+    lt::settings_pack newSettings         = m_session->get_settings();
+    QString           listeningInterfaces = QString{"0.0.0.0:%1,[::]:%1"}.arg(newPort);
+    if (auto oldVal =
+            QString::fromStdString(newSettings.get_str(lt::settings_pack::listen_interfaces));
+        oldVal != listeningInterfaces)
+    {
+        newSettings.set_str(lt::settings_pack::listen_interfaces,
+                            listeningInterfaces.toStdString());
         m_session->apply_settings(std::move(newSettings));
     }
 }
@@ -585,28 +623,32 @@ void SessionManager::setListenPort(unsigned short newPort)
 void SessionManager::setListenProtocol(int protocolType)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    switch (protocolType) {
-        case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP: {
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
-            break;
-        }
-        case SettingsValues::LISTENING_PROTOCOL_TCP: {
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, false);
-            break;
-        }
-        case SettingsValues::LISTENING_PROTOCOL_UTP: {
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
-            newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
-            newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
-            break;
-        }
+    switch (protocolType)
+    {
+    case SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP:
+    {
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+        break;
+    }
+    case SettingsValues::LISTENING_PROTOCOL_TCP:
+    {
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, true);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, true);
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, false);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_utp, false);
+        break;
+    }
+    case SettingsValues::LISTENING_PROTOCOL_UTP:
+    {
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_tcp, false);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_tcp, false);
+        newSettings.set_bool(lt::settings_pack::enable_outgoing_utp, true);
+        newSettings.set_bool(lt::settings_pack::enable_incoming_utp, true);
+        break;
+    }
     }
     m_session->apply_settings(newSettings);
 }
@@ -614,7 +656,8 @@ void SessionManager::setListenProtocol(int protocolType)
 void SessionManager::setMaxNumberOfConnections(int value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (int oldVal = newSettings.get_int(lt::settings_pack::connections_limit); oldVal != value) {
+    if (int oldVal = newSettings.get_int(lt::settings_pack::connections_limit); oldVal != value)
+    {
         newSettings.set_int(lt::settings_pack::connections_limit, value);
         m_session->apply_settings(newSettings);
     }
@@ -623,7 +666,8 @@ void SessionManager::setMaxNumberOfConnections(int value)
 void SessionManager::setDht(bool value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_dht); oldVal != value) {
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_dht); oldVal != value)
+    {
         newSettings.set_bool(lt::settings_pack::enable_dht, value);
         m_session->apply_settings(newSettings);
     }
@@ -632,7 +676,8 @@ void SessionManager::setDht(bool value)
 void SessionManager::setLsd(bool value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_lsd); oldVal != value) {
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_lsd); oldVal != value)
+    {
         newSettings.set_bool(lt::settings_pack::enable_lsd, value);
         m_session->apply_settings(newSettings);
     }
@@ -665,7 +710,8 @@ void SessionManager::banPeers(const QList<boost::asio::ip::address> &bannablePee
 void SessionManager::setIpFilter(const QList<boost::asio::ip::address> &addrs)
 {
     lt::ip_filter filter{};
-    for (const auto& addr : addrs) {
+    for (const auto &addr : addrs)
+    {
         filter.add_rule(addr, addr, lt::ip_filter::blocked);
     }
     m_session->set_ip_filter(std::move(filter));
@@ -673,8 +719,8 @@ void SessionManager::setIpFilter(const QList<boost::asio::ip::address> &addrs)
 
 lt::ip_filter::filter_tuple_t SessionManager::getIpFilter() const
 {
-    lt::ip_filter filter = m_session->get_ip_filter();
-    auto bannedPeers = filter.export_filter();
+    lt::ip_filter filter      = m_session->get_ip_filter();
+    auto          bannedPeers = filter.export_filter();
     return bannedPeers;
 }
 
@@ -916,11 +962,18 @@ std::vector<char> readFile(const char *filename)
 void setupTorrentSettings(libtorrent::add_torrent_params &params)
 {
     QSettings settings;
-    int numOfConPt = settings.value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT).toInt();
+    int       numOfConPt = settings
+                         .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT,
+                                SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT)
+                         .toInt();
     params.max_connections = numOfConPt;
 
-    bool enablePeerEx = settings.value(SettingsNames::PRIVACY_PEEREX_ENABLED, SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT).toBool();
-    if (!enablePeerEx) {
+    bool enablePeerEx = settings
+                            .value(SettingsNames::PRIVACY_PEEREX_ENABLED,
+                                   SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT)
+                            .toBool();
+    if (!enablePeerEx)
+    {
         params.flags |= lt::torrent_flags::disable_pex;
     }
 }

@@ -40,7 +40,10 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
                 for (const auto &modelIndex : selectedRows)
                 {
                     // banPeers.append(m_peerModel.getPeerShortInfo(modelIndex.row()));
-                    auto ipStr = m_peerModel.data(m_peerModel.index(modelIndex.row(), static_cast<int>(PeerFields::IP))).toString();
+                    auto ipStr = m_peerModel
+                                     .data(m_peerModel.index(modelIndex.row(),
+                                                             static_cast<int>(PeerFields::IP)))
+                                     .toString();
                     auto addr = boost::asio::ip::make_address(ipStr.toStdString());
                     banPeers.append(std::move(addr));
                 }
@@ -83,10 +86,12 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
                             sessionManager.addPeersToTorrent(currentTorrentId.value(), eps);
                         }
                     }
-                } catch (const std::exception& ex)
+                }
+                catch (const std::exception &ex)
                 {
-                    QMessageBox::warning(this, tr("Warning"),
-                                         tr("Could not parse all addresses, make sure they are correct"));
+                    QMessageBox::warning(
+                        this, tr("Warning"),
+                        tr("Could not parse all addresses, make sure they are correct"));
                 }
             });
 

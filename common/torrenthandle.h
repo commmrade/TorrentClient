@@ -48,7 +48,7 @@ class TorrentHandle
     void setUploadLimit(int newLimit);
     int  getUploadLimit() const;
     void moveStorage(const QString &newPath);
-    int getMaxConn() const;
+    int  getMaxConn() const;
     void setMaxConn(int value);
     void setDht(bool enabled);
     void setPex(bool enabled);
@@ -64,10 +64,7 @@ class TorrentHandle
     }
     void resume();
 
-    void saveResumeData()
-    {
-        m_handle.save_resume_data(lt::torrent_handle::save_info_dict);
-    }
+    void saveResumeData() { m_handle.save_resume_data(lt::torrent_handle::save_info_dict); }
 
     std::uint64_t activeDur() { return m_handle.status().active_duration.count(); }
 

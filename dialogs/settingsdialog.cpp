@@ -16,7 +16,6 @@
 #include "torrentsettings.h"
 #include "connectionsettings.h"
 
-
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::SettingsDialog)
@@ -42,7 +41,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     connect(connSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
 }
 
-
 SettingsDialog::~SettingsDialog() { delete ui; }
 
 void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
@@ -50,10 +48,7 @@ void SettingsDialog::on_listWidget_currentRowChanged(int currentRow)
     ui->stackedWidget->setCurrentIndex(currentRow);
 }
 
-void SettingsDialog::onRestartRequired()
-{
-    m_restartRequired = true;
-}
+void SettingsDialog::onRestartRequired() { m_restartRequired = true; }
 
 void SettingsDialog::onOptionChanged()
 {
@@ -91,9 +86,4 @@ void SettingsDialog::on_okButton_clicked()
     close();
 }
 
-
-void SettingsDialog::on_closeButton_clicked()
-{
-    close();
-}
-
+void SettingsDialog::on_closeButton_clicked() { close(); }

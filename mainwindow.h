@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow
 
     void closeEvent(QCloseEvent *event) override;
   private slots:
-    void headerContextMenu(const QPoint& pos);
+    void headerContextMenu(const QPoint &pos);
 
   private:
     Ui::MainWindow *ui;
