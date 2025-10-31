@@ -5,6 +5,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QInputDialog>
+#include "settingsvalues.h"
+#include <QSettings>
 
 FileListWidget::FileListWidget(QWidget *parent) : QWidget(parent), ui(new Ui::FileListWidget)
 {
@@ -37,6 +39,7 @@ FileListWidget::FileListWidget(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
 
     connect(ui->treeView, &QTreeView::customContextMenuRequested, this,
             &FileListWidget::contextMenuRequested);
+    setupHeader();
 }
 
 FileListWidget::~FileListWidget() { delete ui; }
@@ -148,4 +151,44 @@ void FileListWidget::setupTableView()
     ui->treeView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);
     ui->treeView->setItemDelegateForColumn(static_cast<int>(FileFields::PRIORITY),
                                            &m_priorityDelegate);
+}
+
+void FileListWidget::setupHeader()
+{
+    QSettings settings;
+    QByteArray headerState = settings.value(SettingsNames::DATA_FILES_HEADER).toByteArray();
+    QHeaderView* header = ui->treeView->header();
+    if (!headerState.isEmpty()) {
+        header->restoreState(headerState);
+    }
+    header->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(header, &QHeaderView::customContextMenuRequested, this, &FileListWidget::headerMenuRequested);
+}
+
+void FileListWidget::headerMenuRequested(const QPoint &pos)
+{
+    auto* table = ui->treeView;
+    auto* header = table->header();
+    bool isChanged = false;
+
+    QMenu menu(this);
+    for (auto i = 0; i < header->count(); ++i) {
+        QString headerName = table->model()->headerData(i, Qt::Horizontal).toString();
+        bool isHidden = header->isSectionHidden(i);
+
+        QAction* action = menu.addAction(headerName);
+        action->setCheckable(true);
+        action->setChecked(!isHidden);
+        connect(action, &QAction::triggered, this, [header, i, isHidden, &isChanged]() mutable {
+            header->setSectionHidden(i, !isHidden);
+            isChanged = true;
+        });
+    }
+    menu.exec(table->mapToGlobal(pos));
+
+    if (isChanged) {
+        QSettings settings;
+        QByteArray headerState = header->saveState();
+        settings.setValue(SettingsNames::DATA_FILES_HEADER, headerState);
+    }
 }

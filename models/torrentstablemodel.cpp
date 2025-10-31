@@ -114,6 +114,7 @@ bool TorrentsTableModel::setData(const QModelIndex &index, const QVariant &value
         case CATEGORY:
         {
             torrent.category = value.toString();
+            break;
         }
         case NAME:
         {

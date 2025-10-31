@@ -504,17 +504,20 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
                               // paused
 
     // No point setting status fields, since they are zeroed and will be filled on status alert
-    Torrent torrent = {torrent_handle.id(),
-                       QString{},
-                       QString::fromStdString(torrent_handle.status().name),
-                       0,
-                       0.0,
-                       torrentStateToString(torrent_handle.status().state),
-                       0,
-                       0,
-                       0,
-                       0,
-                       0};
+    Torrent torrent = {
+                       .id = torrent_handle.id(),
+                       .category = QString{},
+                       .name = QString::fromStdString(torrent_handle.status().name),
+                       .size = 0,
+                       .progress = 0.0,
+                       .status =torrentStateToString(torrent_handle.status().state),
+                       .seeds =0,
+                       .peers = 0,
+                       .downSpeed = 0,
+                       .upSpeed = 0,
+                       .ratio = 0,
+                       .eta = 0
+                    };
 
     emit torrentAdded(torrent);
 }
