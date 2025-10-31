@@ -267,3 +267,18 @@ void ApplicationSettings::on_maxLogFileSpinBox_valueChanged([[maybe_unused]] int
     emit optionChanged();
 }
 
+
+void ApplicationSettings::on_showTrayBox_clicked()
+{
+    m_showTrayChanged = true;
+
+    bool checked = ui->showTrayBox->isChecked();
+    if (!checked)
+    {
+        ui->enaleNotifBox->setChecked(false);
+        on_enaleNotifBox_clicked(false);
+        ui->exitBehBtn->setCurrentIndex(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+        on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
+    }
+}
+

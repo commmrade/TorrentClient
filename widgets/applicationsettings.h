@@ -35,6 +35,8 @@ class ApplicationSettings : public BaseSettings
 
     void on_maxLogFileSpinBox_valueChanged(int arg1);
 
+    void on_showTrayBox_clicked();
+
   private:
     Ui::ApplicationSettings *ui;
 
