@@ -35,6 +35,8 @@ struct SettingsNames
     static inline constexpr const char* const PRIVACY_DHT_ENABLED = "privacy/dht";
     static inline constexpr const char* const PRIVACY_PEEREX_ENABLED = "privacy/peerex";
     static inline constexpr const char* const PRIVACY_LOCAL_PEER_DESC = "privacy/localDiscovery";
+
+    static inline constexpr const char* const DATA_TORRENTS_HEADER = "data/torrentsTable";
 };
 
 struct SettingsValues

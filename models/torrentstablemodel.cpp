@@ -304,3 +304,4 @@ void TorrentsTableModel::setTorrentCategory(const uint32_t id, const QString &ca
 {
     m_torrents[id].category = category;
 }
+

@@ -20,8 +20,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , m_speedGraph(new SpeedGraphWidget)
     , m_sessionManager(SessionManager::instance())
-    , m_speedGraph(new SpeedGraphWidget{})
     , m_categoryFilter(this)
 {
     ui->setupUi(this);
@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupTableView();
     setupTray();
     setupSession();
+    setupTorrentHeader();
 
     connect(ui->torrentsView, &QTableView::clicked, this, &MainWindow::torrentClicked);
     ui->torrentsView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -235,6 +236,37 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::headerContextMenu(const QPoint &pos)
+{
+    auto* table = ui->torrentsView;
+    auto* header = table->horizontalHeader();
+    bool isChanged = false;
+
+    QMenu menu(this);
+    qDebug() << header->count();
+    for (auto i = 0; i < header->count(); ++i) {
+        QString headerName = table->model()->headerData(i, Qt::Horizontal).toString();
+        bool isHidden = header->isSectionHidden(i);
+
+        QAction* action = new QAction(headerName, this);
+        action->setCheckable(true);
+        action->setChecked(!isHidden);
+
+        connect(action, &QAction::triggered, this, [header, i, isHidden, &isChanged]() mutable {
+            header->setSectionHidden(i, !isHidden);
+            isChanged = true;
+        });
+        menu.addAction(action);
+    }
+
+    menu.exec(table->mapToGlobal(pos));
+    if (isChanged) {
+        QSettings settings;
+        QByteArray headerState = header->saveState();
+        settings.setValue(SettingsNames::DATA_TORRENTS_HEADER, headerState);
+    }
+}
+
 void MainWindow::showMessage(QStringView msg)
 {
     if (m_trayIcon)
@@ -272,6 +304,20 @@ void MainWindow::setupSession()
             });
     m_sessionManager.loadResumes(); // Have to take care of resumes here, because otherwise i don't
                                     // get torrentAdded signal
+}
+
+void MainWindow::setupTorrentHeader()
+{
+    QSettings settings;
+    QByteArray headerState = settings.value(SettingsNames::DATA_TORRENTS_HEADER).toByteArray();
+    QHeaderView* header = ui->torrentsView->horizontalHeader();
+    if (!headerState.isEmpty()) {
+        qDebug() << "LOADED TORRENT HEADER";
+        header->restoreState(headerState);
+    }
+
+    header->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(header, &QHeaderView::customContextMenuRequested, this, &MainWindow::headerContextMenu);
 }
 
 void MainWindow::addTorrentByMagnet(const QString &magnetUri)

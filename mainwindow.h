@@ -44,6 +44,8 @@ class MainWindow : public QMainWindow
     void torrentClicked(const QModelIndex &index);
 
     void closeEvent(QCloseEvent *event) override;
+  private slots:
+    void headerContextMenu(const QPoint& pos);
 
   private:
     Ui::MainWindow *ui;
@@ -65,6 +67,7 @@ class MainWindow : public QMainWindow
     void setupTableView();
     void setupTray();
     void setupSession();
+    void setupTorrentHeader();
 
     void addTorrentByMagnet(const QString &magnetUri);
     void addTorrentByFile(const QString &filepath);
