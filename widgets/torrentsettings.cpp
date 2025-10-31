@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include "settingsvalues.h"
+#include "dirs.h"
 
 TorrentSettings::TorrentSettings(QWidget *parent)
     : BaseSettings(parent), ui(new Ui::TorrentSettings)
@@ -96,11 +97,8 @@ void TorrentSettings::apply()
         settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         m_savePathChanged = false;
     }
-    if (m_resetChanged)
-    {
-        sessionManager.resetSessionParams();
-        settings.clear();
-        settings.sync();
+    if (m_resetChanged) {
+        resetApp();
         m_resetChanged = false;
     }
     if (m_dhtChanged)
@@ -149,8 +147,7 @@ void TorrentSettings::on_resetSessionButton_clicked()
     if (r == QMessageBox::Ok)
     {
         m_resetChanged = true;
-        emit optionChanged();
-        emit restartRequired();
+        resetApp();
     }
 }
 
@@ -184,3 +181,29 @@ void TorrentSettings::on_localPeerDiscCheck_clicked(bool checked)
     m_localPeerDiscChanged = true;
     emit optionChanged();
 }
+
+void TorrentSettings::resetApp()
+{
+    auto& sessionManager = SessionManager::instance();
+    QSettings settings;
+    sessionManager.resetSessionParams();
+    settings.clear();
+    settings.sync();
+
+    auto basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir logs{basePath + QDir::separator() + Dirs::LOGS};
+    QDir metadata{basePath + QDir::separator() + Dirs::METADATA};
+    QDir state{basePath + QDir::separator() + Dirs::STATE};
+    // QDir themes{basePath + QDir::separator() + Dirs::THEMES};
+    QDir torrents{basePath + QDir::separator() + Dirs::TORRENTS};
+
+    int result = logs.removeRecursively() +
+                metadata.removeRecursively() +
+                state.removeRecursively() +
+                // themes.removeRecursively() +
+                 torrents.removeRecursively();
+    if (result < 5) {
+        qFatal() << "Failed to remove application's files, it may be broken now in some ways";
+    }
+}
+

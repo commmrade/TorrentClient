@@ -42,6 +42,8 @@ class TorrentSettings : public BaseSettings
     bool m_dhtChanged{false};
     bool m_peerExChanged{false};
     bool m_localPeerDiscChanged{false};
+
+    void resetApp();
 };
 
 #endif // TORRENTSETTINGS_H

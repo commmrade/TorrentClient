@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
     int theme = settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
     if (theme == SettingsValues::GUI_THEME_DARK)
     {
-        auto darkThemePath =
-            basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
-        QFile file(darkThemePath);
+        // auto darkThemePath =
+        //     basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "dark.qss";
+        QFile file(":/dark.qss");
         if (file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             a.setStyleSheet(file.readAll());
@@ -171,9 +171,9 @@ int main(int argc, char *argv[])
     }
     else if (theme == SettingsValues::GUI_THEME_LIGHT)
     {
-        auto lightThemePath =
-            basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "light.qss";
-        QFile file(lightThemePath);
+        // auto lightThemePath = Q
+        //     basePath + QDir::separator() + Dirs::THEMES + QDir::separator() + "light.qss";
+        QFile file(":/light.qss");
         if (file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             a.setStyleSheet(file.readAll());
