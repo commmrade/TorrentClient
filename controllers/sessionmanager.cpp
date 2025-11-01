@@ -18,8 +18,8 @@ SessionManager::SessionManager(QObject *parent) : QObject{parent}
     m_session       = std::make_unique<lt::session>(std::move(sessParams));
 
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(1000); // !!!!: Dont change, breaks graphs and other stuff that require
-                              // something per second, FIXME
+    m_alertTimer.start(1000);
+
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(
         2000); // Check if torrent handles need save_resume, and then save .fastresume
@@ -172,8 +172,7 @@ void SessionManager::eventLoop()
             handleFinishedAlert(finished_alert);
         }
         else if (auto *statusAlert = lt::alert_cast<lt::state_update_alert>(alert))
-        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would
-          // become fucked up, so fix this
+        {
             handleStateUpdateAlert(statusAlert);
         }
         else if (auto *metadataReceivedAlert = lt::alert_cast<lt::metadata_received_alert>(alert))
@@ -371,7 +370,7 @@ void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *ale
 {
     auto handles = m_torrentHandles.values();
     auto pos     = std::find_if(handles.begin(), handles.end(),
-                                [alert](auto &&handle) { return handle.id() == alert->handle.id(); });
+                                [alert](const auto &handle) { return handle.id() == alert->handle.id(); });
 
     pos->saveResumeData(); // Without it it does weird stuff
     pos->setCategory(Categories::SEEDING);
@@ -524,16 +523,24 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
 
 void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *alert)
 {
+    static auto last = std::chrono::high_resolution_clock::now();
+
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last).count();
+    double multiplier = static_cast<double>(std::chrono::milliseconds(1000).count()) / (diff == 0 ? std::chrono::milliseconds(1000).count() : diff);
+
     const auto &counters         = alert->counters();
     auto        recvPayloadBytes = counters[lt::counters::recv_payload_bytes];
     auto        newRecv          = recvPayloadBytes - lastSessionRecvPayloadBytes;
+    newRecv = newRecv * multiplier;
     lastSessionRecvPayloadBytes  = recvPayloadBytes;
 
     auto uploadPayloadBytes       = counters[lt::counters::sent_bytes];
     auto newUpload                = uploadPayloadBytes - lastSessionUploadPayloadBytes;
+    newUpload = newUpload * multiplier;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
     emit chartPoint(newRecv, newUpload);
+    last = std::chrono::high_resolution_clock::now();
 }
 
 void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *alert)
