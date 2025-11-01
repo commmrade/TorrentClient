@@ -22,6 +22,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     , appSettings(new ApplicationSettings)
     , torSettings(new TorrentSettings)
     , connSettings(new ConnectionSettings)
+    , advSettings(new AdvancedSettings)
 {
     setFixedSize(900, 600);
 
@@ -31,14 +32,17 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->stackedWidget->addWidget(appSettings.get());
     ui->stackedWidget->addWidget(torSettings.get());
     ui->stackedWidget->addWidget(connSettings.get());
+    ui->stackedWidget->addWidget(advSettings.get());
 
     connect(appSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
     connect(torSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
     connect(connSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
+    connect(advSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
 
     connect(appSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
     connect(torSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
     connect(connSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
+    connect(advSettings, &BaseSettings::optionChanged, this, &SettingsDialog::onOptionChanged);
 }
 
 SettingsDialog::~SettingsDialog() { delete ui; }
@@ -61,6 +65,7 @@ void SettingsDialog::on_applyButton_clicked()
     appSettings->apply();
     torSettings->apply();
     connSettings->apply();
+    advSettings->apply();
 
     // Prompt for restart after applied all the settings
     if (m_restartRequired)

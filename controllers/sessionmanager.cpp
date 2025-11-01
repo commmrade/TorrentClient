@@ -17,8 +17,11 @@ SessionManager::SessionManager(QObject *parent) : QObject{parent}
     auto sessParams = loadSessionParams();
     m_session       = std::make_unique<lt::session>(std::move(sessParams));
 
+
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
-    m_alertTimer.start(1000);
+    QSettings settings;
+    int loopDur = settings.value(SettingsNames::ADVANCED_LOOP_DURATION, SettingsValues::ADVANCED_LOOP_DURATION).toInt();
+    m_alertTimer.start(loopDur);
 
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
     m_resumeDataTimer.start(
@@ -213,6 +216,13 @@ void SessionManager::eventLoop()
     // qDebug() << "Listen interface:" <<
     // m_session->get_settings().get_str(lt::settings_pack::listen_interfaces); qDebug() << "Loop
     // elapsed:" << timer.elapsed() << "Msecs";
+}
+
+void SessionManager::setLoopDuration(int ms)
+{
+    assert(ms > 0 && ms < 10000);
+    m_alertTimer.stop();
+    m_alertTimer.start(ms);
 }
 
 // HERE: Separate function for each emit thingy
@@ -831,9 +841,9 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     }
 
     auto &torrentHandle = m_torrentHandles[id];
+
     m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files
                                                                          : lt::remove_flags_t{});
-
     // Delete .fastresume and .torrent
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsPath = basePath + QDir::separator() + Dirs::TORRENTS;

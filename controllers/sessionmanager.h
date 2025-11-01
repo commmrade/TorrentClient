@@ -40,7 +40,6 @@ class SessionManager : public QObject
     bool shouldResetParams{false};
 
     explicit SessionManager(QObject *parent = nullptr);
-
   public:
     ~SessionManager();
 
@@ -72,6 +71,7 @@ class SessionManager : public QObject
     void loadResumes();
 
     // Managing session
+    void setLoopDuration(int ms);
     void resetSessionParams();
     void setDownloadLimit(int value);
     void setUploadLimit(int value);

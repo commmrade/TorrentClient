@@ -41,6 +41,9 @@ struct SettingsNames
     static inline constexpr const char *const DATA_PEERS_HEADER = "data/peersTable";
     static inline constexpr const char *const DATA_TRACKERS_HEADER = "data/trackersTable";
     static inline constexpr const char *const DATA_FILES_HEADER = "data/filesTable";
+
+    static inline constexpr const char *const ADVANCED_TORRENT_REMOVE_MODE = "advanced/torrentRmMode";
+    static inline constexpr const char *const ADVANCED_LOOP_DURATION = "advanced/loopDuration";
 };
 
 struct SettingsValues
@@ -77,6 +80,11 @@ struct SettingsValues
     static inline constexpr bool PRIVACY_DHT_ENABLED_DEFAULT     = true;
     static inline constexpr bool PRIVACY_PEEREX_ENABLED_DEFAULT  = true;
     static inline constexpr bool PRIVACY_LOCAL_PEER_DESC_DEFAULT = true;
+
+    static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_DELETE = 0;
+    static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_TRASH = 1;
+
+    static inline constexpr int ADVANCED_LOOP_DURATION = 1000;
 };
 
 #endif // SETTINGSVALUES_H

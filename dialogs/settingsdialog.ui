@@ -31,6 +31,11 @@
        <string>Connection</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Advanced</string>
+      </property>
+     </item>
     </widget>
    </item>
    <item row="0" column="1">

@@ -2,6 +2,7 @@
 #define UTILS_H
 #include <QString>
 #include <span>
+#include <QDir>
 
 namespace utils
 {
@@ -27,6 +28,8 @@ QString bytesToHigherPerSec(const std::uint64_t bytes);
 QString secsToFormattedTime(std::int64_t secs);
 
 QString toHex(std::span<const char> data, bool to_upper = false);
+
+// bool moveToTrash(QDir& path);
 
 } // namespace utils
 
