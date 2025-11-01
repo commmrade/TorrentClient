@@ -5,7 +5,9 @@
 #include "applicationsettings.h"
 #include "connectionsettings.h"
 #include "torrentsettings.h"
+#include "advancedsettings.h"
 #include <QPointer>
+
 namespace Ui
 {
 class SettingsDialog;
@@ -15,7 +17,8 @@ enum SettingsTabs
 {
     APPLICATION,
     TORRENT,
-    CONNECTION
+    CONNECTION,
+    ADVANCED
 };
 
 class SettingsDialog : public QDialog
@@ -45,6 +48,7 @@ class SettingsDialog : public QDialog
     QPointer<ApplicationSettings> appSettings;
     QPointer<TorrentSettings>     torSettings;
     QPointer<ConnectionSettings>  connSettings;
+    QPointer<AdvancedSettings> advSettings;
 };
 
 #endif // SETTINGSDIALOG_H
