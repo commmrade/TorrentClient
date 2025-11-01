@@ -18,13 +18,10 @@ class AdvancedSettings : public BaseSettings
     void apply() override;
 
   private slots:
-    void on_torrentRmModeBox_currentIndexChanged(int index);
-
     void on_loopDurBox_valueChanged(int arg1);
 
   private:
     Ui::AdvancedSettings *ui;
-    bool m_torrentRmModeChanged{false};
     bool m_loopDurChanged{false};
 };
 

@@ -841,9 +841,9 @@ bool SessionManager::removeTorrent(const uint32_t id, bool removeWithContents)
     }
 
     auto &torrentHandle = m_torrentHandles[id];
+
     m_session->remove_torrent(torrentHandle.handle(), removeWithContents ? lt::session::delete_files
                                                                          : lt::remove_flags_t{});
-
     // Delete .fastresume and .torrent
     auto basePath     = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto torrentsPath = basePath + QDir::separator() + Dirs::TORRENTS;
