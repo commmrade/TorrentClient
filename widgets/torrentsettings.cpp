@@ -164,19 +164,19 @@ void TorrentSettings::on_savePathButton_clicked()
     }
 }
 
-void TorrentSettings::on_dhtCheck_clicked(bool checked)
+void TorrentSettings::on_dhtCheck_clicked([[maybe_unused]] bool checked)
 {
     m_dhtChanged = true;
     emit optionChanged();
 }
 
-void TorrentSettings::on_peerExCheck_clicked(bool checked)
+void TorrentSettings::on_peerExCheck_clicked([[maybe_unused]] bool checked)
 {
     m_peerExChanged = true;
     emit optionChanged();
 }
 
-void TorrentSettings::on_localPeerDiscCheck_clicked(bool checked)
+void TorrentSettings::on_localPeerDiscCheck_clicked([[maybe_unused]] bool checked)
 {
     m_localPeerDiscChanged = true;
     emit optionChanged();

@@ -117,21 +117,21 @@ void ConnectionSettings::on_peerConnProtocolBox_currentIndexChanged([[maybe_unus
     emit optionChanged();
 }
 
-void ConnectionSettings::on_mNumOfConBox_valueChanged(int arg1)
+void ConnectionSettings::on_mNumOfConBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mNumOfConChanged = true;
     emit optionChanged();
 }
 
-void ConnectionSettings::on_mNumOfConPTBox_valueChanged(int arg1)
+void ConnectionSettings::on_mNumOfConPTBox_valueChanged([[maybe_unused]] int arg1)
 {
     m_mNumOfConPTChanged = true;
     emit optionChanged();
 }
 
-void ConnectionSettings::on_mNumOfUplBox_valueChanged(int arg1) {}
+void ConnectionSettings::on_mNumOfUplBox_valueChanged([[maybe_unused]] int arg1) {}
 
-void ConnectionSettings::on_mNumOfUplBox_2_valueChanged(int arg1) {}
+void ConnectionSettings::on_mNumOfUplBox_2_valueChanged([[maybe_unused]] int arg1) {}
 
 void ConnectionSettings::on_managePeersButton_clicked()
 {

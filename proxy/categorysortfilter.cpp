@@ -6,7 +6,7 @@ CategorySortFilter::CategorySortFilter(QObject *parent)
 {
 }
 
-bool CategorySortFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+bool CategorySortFilter::filterAcceptsRow(int sourceRow, [[maybe_unused]] const QModelIndex &sourceParent) const
 {
     auto categoryIndex = sourceModel()->index(sourceRow, 1); // 1 is category, 0 is id
     auto categoryStr   = sourceModel()->data(categoryIndex, Qt::UserRole).toString();
