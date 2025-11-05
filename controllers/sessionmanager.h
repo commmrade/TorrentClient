@@ -80,6 +80,7 @@ class SessionManager : public QObject
     void setMaxNumberOfConnections(int value);
     void setDht(bool value);
     void setLsd(bool value);
+    void setUpnp(bool value);
 
     // Files
     void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl

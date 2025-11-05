@@ -703,6 +703,16 @@ void SessionManager::setLsd(bool value)
     }
 }
 
+void SessionManager::setUpnp(bool value)
+{
+    lt::settings_pack newSettings = m_session->get_settings();
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_upnp); oldVal != value) {
+        newSettings.set_bool(lt::settings_pack::enable_upnp, value);
+        newSettings.set_bool(lt::settings_pack::enable_natpmp, value);
+        m_session->apply_settings(newSettings);
+    }
+}
+
 void SessionManager::changeFilePriority(std::uint32_t id, int fileIndex, int priority)
 {
     auto &handle = m_torrentHandles[id];

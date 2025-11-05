@@ -44,6 +44,8 @@ struct SettingsNames
 
     static inline constexpr const char *const ADVANCED_TORRENT_REMOVE_MODE = "advanced/torrentRmMode";
     static inline constexpr const char *const ADVANCED_LOOP_DURATION = "advanced/loopDuration";
+
+    static inline constexpr const char *const LISTENING_UPNP = "listening/upnp";
 };
 
 struct SettingsValues
@@ -85,6 +87,8 @@ struct SettingsValues
     static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_TRASH = 1;
 
     static inline constexpr int ADVANCED_LOOP_DURATION = 1000;
+
+    static inline constexpr bool LISTENING_UPNP_DEFAULT = true;
 };
 
 #endif // SETTINGSVALUES_H

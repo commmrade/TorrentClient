@@ -34,6 +34,8 @@ class ConnectionSettings : public BaseSettings
 
     void on_managePeersButton_clicked();
 
+    void on_natBox_clicked();
+
   private:
     Ui::ConnectionSettings *ui;
 
@@ -41,6 +43,7 @@ class ConnectionSettings : public BaseSettings
     bool m_protocolChanged{false};
     bool m_mNumOfConChanged{false};
     bool m_mNumOfConPTChanged{false};
+    bool m_upnpChanged{false};
 };
 
 #endif // CONNECTIONSETTINGS_H

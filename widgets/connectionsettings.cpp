@@ -44,6 +44,12 @@ ConnectionSettings::ConnectionSettings(QWidget *parent)
         QSignalBlocker blocker{ui->mNumOfConPTBox};
         ui->mNumOfConPTBox->setValue(maxNumOfConPT);
     }
+
+    {
+        bool upnpEnabled = settings.value(SettingsNames::LISTENING_UPNP, SettingsValues::LISTENING_UPNP_DEFAULT).toBool();
+        QSignalBlocker blocker{ui->natBox};
+        ui->natBox->setChecked(upnpEnabled);
+    }
 }
 
 ConnectionSettings::~ConnectionSettings() { delete ui; }
@@ -83,6 +89,13 @@ void ConnectionSettings::apply()
         settings.setValue(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT, value);
 
         m_mNumOfConPTChanged = false;
+    }
+    if (m_upnpChanged) {
+        bool value = ui->natBox->isChecked();
+        settings.setValue(SettingsNames::LISTENING_UPNP, value);
+        sessionManager.setUpnp(value);
+
+        m_upnpChanged = false;
     }
 }
 
@@ -138,3 +151,9 @@ void ConnectionSettings::on_managePeersButton_clicked()
         qWarning() << "Could not parse all addresses in ManagePeersDialog";
     }
 }
+
+void ConnectionSettings::on_natBox_clicked()
+{
+    m_upnpChanged = true;
+}
+
