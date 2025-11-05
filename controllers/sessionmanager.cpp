@@ -708,7 +708,7 @@ void SessionManager::setUpnp(bool value)
     lt::settings_pack newSettings = m_session->get_settings();
     if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_upnp); oldVal != value) {
         newSettings.set_bool(lt::settings_pack::enable_upnp, value);
-        newSettings.set_bool(lt::settings_pack::enable_natpmp, value);
+        newSettings.set_bool(lt::settings_pack::enable_natpmp, value); // Enable this as well, since this is kinda the same thing in terms of functionality
         m_session->apply_settings(newSettings);
     }
 }
