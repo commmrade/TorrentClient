@@ -163,9 +163,6 @@ void SessionManager::saveResumes()
 
 void SessionManager::eventLoop()
 {
-    // QElapsedTimer timer;
-    // timer.start();
-
     std::vector<lt::alert *> alerts;
     m_session->pop_alerts(&alerts);
     for (auto *alert : alerts)
@@ -191,8 +188,7 @@ void SessionManager::eventLoop()
             handleAddTorrentAlert(addTorrentAlert);
         }
         else if (auto *stateAlert = lt::alert_cast<lt::session_stats_alert>(alert))
-        { // TODO: Depends on the fact that 1 cycle is 1 sec, but if i were to change it, it would
-          // become fucked up, so fix this
+        {
             handleSessionStatsAlert(stateAlert);
         }
         else if (auto *torrentErrorAlert = lt::alert_cast<lt::torrent_error_alert>(alert))
@@ -213,9 +209,6 @@ void SessionManager::eventLoop()
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
 
-    // qDebug() << "Listen interface:" <<
-    // m_session->get_settings().get_str(lt::settings_pack::listen_interfaces); qDebug() << "Loop
-    // elapsed:" << timer.elapsed() << "Msecs";
 }
 
 void SessionManager::setLoopDuration(int ms)
@@ -337,8 +330,6 @@ void SessionManager::updateUrlProp(TorrentHandle &handle)
 void SessionManager::updateTorrent(TorrentHandle                    &torrentHandle,
                                    const libtorrent::torrent_status &status)
 {
-    // TODO: FIlter information in status, torrentHandle.status() is expensive, so I can get rid of
-    // expensive information there if not needed
     bool   isPaused = torrentHandle.isPaused();
     double progress = std::ceil((static_cast<double>(status.total_wanted_done) /
                                  static_cast<double>(status.total_wanted) * 100.0) *
@@ -485,8 +476,6 @@ void SessionManager::handleStatusUpdate(const lt::torrent_status         &status
     auto &torrentHandle = m_torrentHandles[handle.id()];
     if (!torrentHandle.isValid())
         return;
-    // bool IsPaused = (status.flags & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ?
-    // true : false;
     updateTorrent(torrentHandle, status);
 }
 
