@@ -1,0 +1,43 @@
+#ifndef FILELISTWIDGET_H
+#define FILELISTWIDGET_H
+
+#include <QWidget>
+#include "core/models/filetreemodel.h"
+#include "core/delegates/fileitemdelegate.h"
+#include "core/delegates/filestatusdelegate.h"
+#include "core/delegates/fileprioritydelegate.h"
+
+namespace Ui
+{
+class FileListWidget;
+}
+
+class FileListWidget : public QWidget
+{
+    Q_OBJECT
+
+  public:
+    explicit FileListWidget(QWidget *parent = nullptr);
+    ~FileListWidget();
+
+    void setFiles(const QList<File> &files);
+    void clearFiles();
+
+  private:
+    void contextMenuRequested(const QPoint &pos);
+
+    Ui::FileListWidget *ui;
+
+    // FileTableModel m_fileModel;
+    FileTreeModel m_fileModel;
+    void          setupTableView();
+
+    FileStatusDelegate   m_statusDelegate;
+    FileItemDelegate     m_itemDelegate;
+    FilePriorityDelegate m_priorityDelegate;
+
+    void setupHeader();
+    void headerMenuRequested(const QPoint& pos);
+};
+
+#endif // FILELISTWIDGET_H
