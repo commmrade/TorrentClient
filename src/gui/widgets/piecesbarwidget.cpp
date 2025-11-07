@@ -57,8 +57,9 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
     constexpr QColor backgroundColor  = QColor{199, 199, 199};
     constexpr QColor finishedColor    = QColor{50, 50, 255};
     constexpr QColor downloadingColor = QColor{50, 255, 50};
-    if (piecesPerPixel)
-    { // if pieces per pixel >= 1
+
+    if (piecesPerPixel) // That means if pieces > width available
+    {
         int const chunks = m_pieces.size() / piecesPerPixel;
 
         for (int i = 0; i < chunks; ++i)
@@ -66,7 +67,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             int  finishedPieces = 0;
             bool isDownloading  = false;
 
-            // Iterate until where
             int pidxUntil = piecesPerPixel * i + piecesPerPixel;
             if (curPos >= endX - 1)
             {                                // if its the last iteration
@@ -119,7 +119,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             }
             painter.fillRect(piece, QBrush{color});
             ++curPos;
-            // qDebug() << "finished Pieces" << finishedPieces << piecesPerPixel;
             if (pidxUntil == m_pieces.size())
             { // finished
                 break;
