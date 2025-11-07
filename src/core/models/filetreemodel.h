@@ -5,8 +5,6 @@
 #include <QAbstractTableModel>
 #include "core/utils/file.h"
 #include <libtorrent/download_priority.hpp>
-#include "core/utils/priority.h"
-#include "core/utils/utils.h"
 #include <QDir>
 
 class BaseItem
@@ -83,8 +81,11 @@ class FileTreeModel : public QAbstractItemModel
     QString getFirstLeafPath() const;
 
   public:
-    explicit FileTreeModel(QObject *parent = nullptr);
+    enum FileTreeRoles {
+        IdRole = Qt::UserRole + 1
+    };
 
+    explicit FileTreeModel(QObject *parent = nullptr);
     ~FileTreeModel() { delete m_rootItem; }
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const override;
@@ -108,12 +109,7 @@ class FileTreeModel : public QAbstractItemModel
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void clearFiles()
-    {
-        beginResetModel();
-        resetRoot();
-        endResetModel();
-    }
+
 
     void traverseRecursively(QString curDir, BaseItem *root, const QList<File> &hFiles,
                              const QModelIndex &parentIndex);
@@ -121,6 +117,7 @@ class FileTreeModel : public QAbstractItemModel
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void setFiles(const QList<File> &files);
+    void clearFiles();
   signals:
     void statusChanged(int index, bool value);
     void priorityChanged(int index, int priority);

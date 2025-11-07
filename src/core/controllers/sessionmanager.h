@@ -83,7 +83,7 @@ class SessionManager : public QObject
     void setUpnp(bool value);
 
     // Files
-    void changeFilePriority(std::uint32_t id, int fileIndex, int priority); // TODO: Impl
+    void changeFilePriority(std::uint32_t id, int fileIndex, int priority);
     void renameFile(std::uint32_t id, int fileIndex, const QString &newName);
 
     // Peer

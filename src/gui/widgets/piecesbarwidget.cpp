@@ -45,15 +45,14 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
         return;
     }
 
-    // int barWidthPx = BAR_WIDTH_PX;
-    int       barWidthPx = width() - startX;
+    // int       barWidthPx = width() - startX;
+    int barWidthPx = endX - startX;
     int const piecesPerPixel =
         m_pieces.size() / barWidthPx; // How many pieces will be considered in 1 pixel
 
     QSet<int> hashedDownloadingPieces; // idx bool
 
-    int startPos = startX;
-    int endPos   = startX + barWidthPx; // Dimensions of the bar on a widget
+    int curPos = startX;
 
     constexpr QColor backgroundColor  = QColor{199, 199, 199};
     constexpr QColor finishedColor    = QColor{50, 50, 255};
@@ -69,7 +68,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
             // Iterate until where
             int pidxUntil = piecesPerPixel * i + piecesPerPixel;
-            if (startPos >= endPos - 1)
+            if (curPos >= endX - 1)
             {                                // if its the last iteration
                 pidxUntil = m_pieces.size(); // fix the end to the end of pieces, so we wont go over
             }
@@ -99,7 +98,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 }
             }
 
-            QRect  piece{startPos, startY, 1, barHeight};
+            QRect  piece{curPos, startY, 1, barHeight};
             QColor color; /* isDownloaded ? QColor::fromRgb(50, 50, 255) : QColor::fromRgb(199, 199,
                              199);*/
 
@@ -119,7 +118,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 color = downloadingColor;
             }
             painter.fillRect(piece, QBrush{color});
-            ++startPos;
+            ++curPos;
             // qDebug() << "finished Pieces" << finishedPieces << piecesPerPixel;
             if (pidxUntil == m_pieces.size())
             { // finished
@@ -137,7 +136,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
             bool isDownloading = false;
 
             // Edge case, we are getting close to the end
-            if (startPos >= endPos - pixelsInPiece)
+            if (curPos >= endX - pixelsInPiece)
             {
                 for (; i < m_pieces.size(); ++i)
                 {
@@ -164,7 +163,6 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 }
                 QColor color;
 
-                // TODO: Убраь это дебильное дублирование кода
                 if (!isDownloaded && !isDownloading)
                 {
                     // color = QColor::fromRgb(199, 199, 199);
@@ -181,7 +179,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                     color = downloadingColor;
                 } // Cant be both isDownloaded and isDownloading (hope so)
 
-                QRect rect{startPos, startY, pixelsInPiece, barHeight};
+                QRect rect{curPos, startY, pixelsInPiece, barHeight};
                 painter.fillRect(rect, QBrush{color});
                 break;
             }
@@ -203,7 +201,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
                 }
             }
 
-            QRect  rect{startPos, startY, pixelsInPiece, barHeight};
+            QRect  rect{curPos, startY, pixelsInPiece, barHeight};
             QColor color;
             if (!isDownloaded && !isDownloading)
             {
@@ -223,7 +221,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
 
             painter.fillRect(rect, QBrush{color});
 
-            startPos += pixelsInPiece;
+            curPos += pixelsInPiece;
         }
     }
 }

@@ -1,6 +1,6 @@
 #include "core/delegates/fileprioritydelegate.h"
 #include <QComboBox>
-#include <libtorrent/download_priority.hpp> // TODO: Avoid using this
+#include <libtorrent/download_priority.hpp>
 #include "core/utils/priority.h"
 #include "core/models/filetreemodel.h"
 

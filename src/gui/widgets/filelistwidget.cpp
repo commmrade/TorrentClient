@@ -50,8 +50,6 @@ void FileListWidget::clearFiles() { m_fileModel.clearFiles(); }
 
 void FileListWidget::contextMenuRequested(const QPoint &pos)
 {
-    // TODO: Rename, change priority
-    // auto index = ui->torrentsView->indexAt(pos);
     auto index = ui->treeView->indexAt(pos);
     if (!index.isValid())
     {

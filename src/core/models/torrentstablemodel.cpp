@@ -6,12 +6,14 @@ TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(pa
 
 QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::DisplayRole */) const
 {
+    if (!index.isValid()) {
+        return {};
+    }
+
     if (role < Qt::UserRole)
     {
         if (role == Qt::DisplayRole)
         {
-            // if (std::abs(index.row()) >= m_torrents.size()) return {}; // TODO: what is this for
-            // return {};
             auto &torrent = m_torrents[index.row()];
 
             auto id = index.column() + 2;

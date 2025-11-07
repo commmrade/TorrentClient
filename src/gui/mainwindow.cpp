@@ -192,7 +192,6 @@ void MainWindow::setupTray()
                 if (magnetDialog.exec() == QDialog::Accepted)
                 {
                     QList<QString> magnets = magnetDialog.getMagnets();
-                    // TODO: Open all save torrent dialogs at once somehow
                     for (const auto &magnet : std::as_const(magnets))
                     {
                         addTorrentByMagnet(magnet);

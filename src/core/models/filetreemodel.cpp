@@ -186,18 +186,17 @@ QModelIndex FileTreeModel::parent(const QModelIndex &child) const
 
 QVariant FileTreeModel::data(const QModelIndex &index, int role) const
 {
-
     if (!index.isValid() || (role != Qt::DisplayRole && role <= Qt::UserRole))
     {
-
         return QVariant{};
     }
 
     BaseItem *obj = static_cast<BaseItem *>(index.internalPointer());
-    if (role == Qt::UserRole + 1)
-    { // TODO: Get rid of magic this
+    if (role == FileTreeRoles::IdRole)
+    {
         return {obj->getValue(role)};
     }
+
     return {obj->getValue(index.column())};
 }
 
@@ -212,8 +211,7 @@ bool FileTreeModel::setData(const QModelIndex &index, const QVariant &value, int
         auto      data    = fileObj->getData();
 
         switch (static_cast<FileFields>(index.column()))
-        { // TODO: Может сделать коннект с fileObj на statusChanged и priorityChanged и передавать в
-          // this::statusChanged, на данный момент это костыль
+        {
         case FileFields::STATUS:
         {
             emit statusChanged(data.id, value.toBool());
@@ -259,12 +257,13 @@ QVariant FileTreeModel::headerData(int section, Qt::Orientation orientation, int
     }
 }
 
+
 void FileTreeModel::traverseRecursively(QString curDir, BaseItem *root, const QList<File> &hFiles,
                                         const QModelIndex &parentIndex)
 {
     if (root != m_rootItem)
-    { // root item has dirName set, but it must not be used
-        curDir += root->getPath() + QDir::separator(); // get dir name
+    {
+        curDir += root->getPath() + QDir::separator();
     }
 
     auto fileChildren     = root->children();
@@ -282,22 +281,9 @@ void FileTreeModel::traverseRecursively(QString curDir, BaseItem *root, const QL
             auto    fileRelativePath = fileChild->getPath();
             QString fullFilePath     = curDir + fileRelativePath;
 
-            // auto hFilesIter = hFiles.find(fullFilePath);
             auto hFilesIter =
                 std::find_if(hFiles.begin(), hFiles.end(), [&fullFilePath](const File &file)
                              { return file.filename == fullFilePath; });
-            if (hFilesIter == hFiles.end())
-            { // The problem is that it throws when the current torrent is changed, therefore new
-              // set of files is passed, which does not contain old files
-                // To fix it, i need to prematurily check if newly passed set of files is different
-                // from what is in the tree. To do this, i might recursively collect all files in a
-                // tree but that is some zoomer level logic
-                //
-                // clearFiles();
-                // setFiles(hFiles);
-                // return; // FIXME TODO: Fix this shit
-                throw std::runtime_error("What the fuck happened in file tree model");
-            }
 
             static_cast<FileItem *>(fileChild)->setData(*hFilesIter); // Updage file data
             fileChild->setPath(fileRelativePath); // We need to set it to relative path again, since
@@ -311,6 +297,8 @@ void FileTreeModel::traverseRecursively(QString curDir, BaseItem *root, const QL
         }
     }
 }
+
+
 
 Qt::ItemFlags FileTreeModel::flags(const QModelIndex &index) const
 {
@@ -338,8 +326,8 @@ QString FileTreeModel::getFirstLeafPath() const
 }
 
 void FileTreeModel::setFiles(const QList<File> &files)
-{ // Инвариант в том, что новые файлы не добавляются и не удаляются, обновляются только статусы и
-  // приоритеты у файлов, если торрент не изменен
+{
+    qDebug() << "Set files";
     bool bRootVirgin = isRootVirgin();
 
     QString path        = getFirstLeafPath();
@@ -410,5 +398,13 @@ void FileTreeModel::setFiles(const QList<File> &files)
     delete m_rootItem;
     m_rootItem = rootItem;
 
+    endResetModel();
+}
+
+void FileTreeModel::clearFiles()
+{
+    qDebug() << "Clear files";
+    beginResetModel();
+    resetRoot();
     endResetModel();
 }

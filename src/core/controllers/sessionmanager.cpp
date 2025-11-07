@@ -881,7 +881,6 @@ void SessionManager::setTorrentUploadLimit(const uint32_t id, int newLimit)
 
 void SessionManager::setTorrentSavePath(const std::uint32_t id, const QString &newPath)
 {
-    // TODO: Might wanna handle failed/success alrts
     m_torrentHandles[id].moveStorage(newPath);
 }
 

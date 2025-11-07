@@ -20,7 +20,7 @@ enum class FileFields
     DOWNLOADED,
     FILESIZE,
     PRIORITY,
-    ID = Qt::UserRole + 1
+    ID = Qt::UserRole + 1,
 };
 // [^] Fuck.txt 50% 100 MB 190 MB High
 

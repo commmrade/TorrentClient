@@ -4,6 +4,9 @@ TrackerTableModel::TrackerTableModel(QObject *parent) : QAbstractTableModel(pare
 
 QVariant TrackerTableModel::data(const QModelIndex &index, int role) const
 {
+    if (!index.isValid()) {
+        return {};
+    }
     if (role < Qt::UserRole)
     {
         if (role == Qt::DisplayRole)

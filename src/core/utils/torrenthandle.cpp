@@ -37,8 +37,6 @@ void TorrentHandle::setFilePriority(libtorrent::file_index_t        index,
 
 void TorrentHandle::renameFile(libtorrent::file_index_t index, const QString &newName)
 {
-    // File is renamed asynchronously, so should probably get an alert
-    // TODO: Handle alerts or not?
     m_handle.rename_file(index, newName.toStdString());
 }
 

@@ -76,19 +76,15 @@ void SaveTorrentDialog::setupTableView()
     ui->fileView->hideColumn(2);
     ui->fileView->hideColumn(3);
 
-    // TODO: connect signals from file model to updatge status and priority for files
     connect(&m_fileModel, &FileTreeModel::statusChanged, this,
             [this](int index, bool value)
             {
                 m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
-
-                // Recalc total size TODO:
             });
     connect(&m_fileModel, &FileTreeModel::priorityChanged, this,
             [this](int index, int priority)
             {
                 m_filePriorities[index] = priority;
-                // Recalc total size TODO:
             });
 }
 

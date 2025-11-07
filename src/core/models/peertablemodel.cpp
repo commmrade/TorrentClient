@@ -25,6 +25,10 @@ inline double ceilTwoAfterComa(double number) { return std::ceil(number * 100.0)
 
 QVariant PeerTableModel::data(const QModelIndex &index, int role) const
 {
+    if (!index.isValid()) {
+        return {};
+    }
+
     if (role < Qt::UserRole)
     {
         if (role == Qt::DisplayRole)
@@ -196,7 +200,6 @@ QString PeerTableModel::countryFromIp(QByteArrayView ip)
 
 void PeerTableModel::setPeers(const std::vector<libtorrent::peer_info> &peers)
 {
-    // TODO: Maybe some optimizations like cache country names from ips
     auto conToStr = [](lt::connection_type_t t) -> QString
     {
         switch (t)
