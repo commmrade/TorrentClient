@@ -56,8 +56,6 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
     QString    curDatetime      = QDateTime::currentDateTime().toString();
     QByteArray curDatePrintable = curDatetime.toLocal8Bit();
 
-    fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-
     QString logsPath =
         settings
             .value(SettingsNames::LOGS_PATH,
@@ -82,7 +80,8 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
     static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
     if (!f)
     {
-        return; // how to handl this?
+        qInstallMessageHandler(originalHandler);
+        return;
     }
 
     long         seekPos = ftell(f.get());
@@ -96,6 +95,7 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
         f.reset(newFile);
         if (!f)
         {
+            qInstallMessageHandler(originalHandler);
             return;
         }
     }
@@ -118,6 +118,9 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
         fprintf(f.get(), "Fatal [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
         break;
     }
+
+    fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
+
 }
 
 void initDirsAndFiles()
@@ -149,9 +152,11 @@ int main(int argc, char *argv[])
         throw std::runtime_error("An instance of this application is already running");
     }
 
-    initDirsAndFiles();
     QApplication a(argc, argv);
+
+    initDirsAndFiles();
     originalHandler = qInstallMessageHandler(myMessageHandler);
+
     QSettings settings;
     auto      basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     // Set theme
