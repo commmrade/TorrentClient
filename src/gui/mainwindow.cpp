@@ -26,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    closeAllTabs();
+    ui->stackedWidget->setEnabled(false);
+    ui->stackedWidget->setVisible(false);
 
     setupTableView();
     setupTray();
@@ -412,36 +413,23 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::on_togglePropertiesBtn_clicked()
 {
-    if (!ui->stackedWidget->isEnabled())
-    {
-        ui->stackedWidget->setEnabled(true);
-        ui->stackedWidget->setVisible(true);
-        ui->stackedWidget->setCurrentIndex(0);
-    }
-    else
-    {
-        closeAllTabs();
-    }
+    switchTab(0);
 }
 
 void MainWindow::on_toggleGraphsButton_clicked()
 {
-    if (!ui->stackedWidget->isEnabled())
-    {
-        ui->stackedWidget->setEnabled(true);
-        ui->stackedWidget->setVisible(true);
-        ui->stackedWidget->setCurrentIndex(1);
-    }
-    else
-    {
-        closeAllTabs();
-    }
+    switchTab(1);
 }
 
-void MainWindow::closeAllTabs()
-{
-    ui->stackedWidget->setVisible(false);
-    ui->stackedWidget->setEnabled(false);
+void MainWindow::switchTab(int index) {
+    if (ui->stackedWidget->currentIndex() == index) {
+        ui->stackedWidget->setEnabled(!ui->stackedWidget->isEnabled());
+        ui->stackedWidget->setVisible(!ui->stackedWidget->isVisible());
+    } else {
+        ui->stackedWidget->setCurrentIndex(index);
+        ui->stackedWidget->setEnabled(true);
+        ui->stackedWidget->setVisible(true);
+    }
 }
 
 void MainWindow::on_categoriesList_currentTextChanged(const QString &currentText)

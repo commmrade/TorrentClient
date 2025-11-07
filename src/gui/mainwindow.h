@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
 
     void on_toggleGraphsButton_clicked();
 
-    void closeAllTabs();
+
 
     void on_categoriesList_currentTextChanged(const QString &currentText);
     void torrentClicked(const QModelIndex &index);
@@ -68,6 +68,8 @@ class MainWindow : public QMainWindow
     void setupTray();
     void setupSession();
     void setupTorrentHeader();
+
+    void switchTab(int index);
 
     void addTorrentByMagnet(const QString &magnetUri);
     void addTorrentByFile(const QString &filepath);
