@@ -162,7 +162,7 @@ void MainWindow::setupTray()
 
     m_trayIcon = new QSystemTrayIcon{this};
 
-    m_trayIcon->setIcon(QIcon{"icon.png"});
+    m_trayIcon->setIcon(QIcon{":/icon.png"});
     QMenu *trayMenu = new QMenu(this);
     toggleAction    = new QAction(tr("Hide"), this);
     connect(toggleAction, &QAction::triggered, this,

@@ -73,6 +73,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/gui/widgets/basesettings.h
         src/resources/themes.qrc
         src/gui/widgets/advancedsettings.h src/gui/widgets/advancedsettings.cpp src/gui/widgets/advancedsettings.ui
+        src/resources/icons.qrc
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

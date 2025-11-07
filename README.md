@@ -179,3 +179,8 @@ Code review checklist:
 See the `LICENSE` file at the project root for licensing details.
 
 ---
+
+## Honorable mentions
+
+- [qBitTorrent](https://www.qbittorrent.org/)
+- [Icons](https://www.flaticon.com)
