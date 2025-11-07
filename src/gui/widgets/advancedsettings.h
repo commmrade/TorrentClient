@@ -22,7 +22,7 @@ class AdvancedSettings : public BaseSettings
 
   private:
     Ui::AdvancedSettings *ui;
-    bool m_loopDurChanged{false};
+    bool                  m_loopDurChanged{false};
 };
 
 #endif // ADVANCEDSETTINGS_H

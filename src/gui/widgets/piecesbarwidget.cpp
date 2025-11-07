@@ -46,7 +46,7 @@ void PiecesBarWidget::paintEvent(QPaintEvent *event)
     }
 
     // int       barWidthPx = width() - startX;
-    int barWidthPx = endX - startX;
+    int       barWidthPx = endX - startX;
     int const piecesPerPixel =
         m_pieces.size() / barWidthPx; // How many pieces will be considered in 1 pixel
 

@@ -6,7 +6,8 @@ TorrentsTableModel::TorrentsTableModel(QObject *parent) : QAbstractTableModel(pa
 
 QVariant TorrentsTableModel::data(const QModelIndex &index, int role /* = Qt::DisplayRole */) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         return {};
     }
 
@@ -275,7 +276,8 @@ bool TorrentsTableModel::updateTorrent(const Torrent &torrent)
     return true;
 }
 
-bool TorrentsTableModel::finishTorrent([[maybe_unused]] const std::uint32_t id, [[maybe_unused]] const lt::torrent_status &status)
+bool TorrentsTableModel::finishTorrent([[maybe_unused]] const std::uint32_t       id,
+                                       [[maybe_unused]] const lt::torrent_status &status)
 {
     auto torrentIterator = std::find_if(m_torrents.begin(), m_torrents.end(),
                                         [id](const auto &torrent) { return torrent.id == id; });

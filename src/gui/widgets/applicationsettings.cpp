@@ -277,7 +277,6 @@ void ApplicationSettings::on_maxLogFileSpinBox_valueChanged([[maybe_unused]] int
     emit optionChanged();
 }
 
-
 void ApplicationSettings::on_showTrayBox_clicked()
 {
     m_showTrayChanged = true;
@@ -291,4 +290,3 @@ void ApplicationSettings::on_showTrayBox_clicked()
         on_exitBehBtn_currentIndexChanged(SettingsValues::DESKTOP_EXIT_BEH_CLOSE);
     }
 }
-

@@ -11,6 +11,7 @@ class TorrentHandle
     lt::torrent_handle m_handle;
 
     QString m_category{Categories::RUNNING};
+
   public:
     void resetCategory();
     explicit TorrentHandle(lt::torrent_handle handle);

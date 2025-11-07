@@ -38,11 +38,12 @@ struct SettingsNames
     static inline constexpr const char *const PRIVACY_LOCAL_PEER_DESC = "privacy/localDiscovery";
 
     static inline constexpr const char *const DATA_TORRENTS_HEADER = "data/torrentsTable";
-    static inline constexpr const char *const DATA_PEERS_HEADER = "data/peersTable";
+    static inline constexpr const char *const DATA_PEERS_HEADER    = "data/peersTable";
     static inline constexpr const char *const DATA_TRACKERS_HEADER = "data/trackersTable";
-    static inline constexpr const char *const DATA_FILES_HEADER = "data/filesTable";
+    static inline constexpr const char *const DATA_FILES_HEADER    = "data/filesTable";
 
-    static inline constexpr const char *const ADVANCED_TORRENT_REMOVE_MODE = "advanced/torrentRmMode";
+    static inline constexpr const char *const ADVANCED_TORRENT_REMOVE_MODE =
+        "advanced/torrentRmMode";
     static inline constexpr const char *const ADVANCED_LOOP_DURATION = "advanced/loopDuration";
 
     static inline constexpr const char *const LISTENING_UPNP = "listening/upnp";
@@ -84,7 +85,7 @@ struct SettingsValues
     static inline constexpr bool PRIVACY_LOCAL_PEER_DESC_DEFAULT = true;
 
     static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_DELETE = 0;
-    static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_TRASH = 1;
+    static inline constexpr int ADVANCED_TORRENT_REMOVE_MODE_TRASH  = 1;
 
     static inline constexpr int ADVANCED_LOOP_DURATION = 1000;
 

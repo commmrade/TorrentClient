@@ -48,7 +48,7 @@ class SettingsDialog : public QDialog
     QPointer<ApplicationSettings> appSettings;
     QPointer<TorrentSettings>     torSettings;
     QPointer<ConnectionSettings>  connSettings;
-    QPointer<AdvancedSettings> advSettings;
+    QPointer<AdvancedSettings>    advSettings;
 };
 
 #endif // SETTINGSDIALOG_H

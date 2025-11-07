@@ -65,9 +65,7 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
                        QDir::separator() + Dirs::LOGS + QDir::separator())
             .toString() +
         QDir::separator() + "torrentclient.log";
-    static QLockFile lock{
-        logsPath +
-        ".lock"};
+    static QLockFile lock{logsPath + ".lock"};
     if (!isLogLocked)
     {
         if (!lock.tryLock())

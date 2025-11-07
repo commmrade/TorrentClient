@@ -81,7 +81,8 @@ class FileTreeModel : public QAbstractItemModel
     QString getFirstLeafPath() const;
 
   public:
-    enum FileTreeRoles {
+    enum FileTreeRoles
+    {
         IdRole = Qt::UserRole + 1
     };
 
@@ -108,8 +109,6 @@ class FileTreeModel : public QAbstractItemModel
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-
 
     void traverseRecursively(QString curDir, BaseItem *root, const QList<File> &hFiles,
                              const QModelIndex &parentIndex);

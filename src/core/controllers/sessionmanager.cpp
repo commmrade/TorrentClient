@@ -17,10 +17,12 @@ SessionManager::SessionManager(QObject *parent) : QObject{parent}
     auto sessParams = loadSessionParams();
     m_session       = std::make_unique<lt::session>(std::move(sessParams));
 
-
     connect(&m_alertTimer, &QTimer::timeout, this, &SessionManager::eventLoop);
     QSettings settings;
-    int loopDur = settings.value(SettingsNames::ADVANCED_LOOP_DURATION, SettingsValues::ADVANCED_LOOP_DURATION).toInt();
+    int       loopDur =
+        settings
+            .value(SettingsNames::ADVANCED_LOOP_DURATION, SettingsValues::ADVANCED_LOOP_DURATION)
+            .toInt();
     m_alertTimer.start(loopDur);
 
     connect(&m_resumeDataTimer, &QTimer::timeout, this, &SessionManager::saveResumes);
@@ -208,7 +210,6 @@ void SessionManager::eventLoop()
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
-
 }
 
 void SessionManager::setLoopDuration(int ms)
@@ -370,8 +371,8 @@ void SessionManager::updateTorrent(TorrentHandle                    &torrentHand
 void SessionManager::handleFinishedAlert(libtorrent::torrent_finished_alert *alert)
 {
     auto handles = m_torrentHandles.values();
-    auto pos     = std::find_if(handles.begin(), handles.end(),
-                                [alert](const auto &handle) { return handle.id() == alert->handle.id(); });
+    auto pos     = std::find_if(handles.begin(), handles.end(), [alert](const auto &handle)
+                                { return handle.id() == alert->handle.id(); });
 
     pos->saveResumeData(); // Without it it does weird stuff
     pos->setCategory(Categories::SEEDING);
@@ -502,20 +503,18 @@ void SessionManager::handleAddTorrentAlert(libtorrent::add_torrent_alert *alert)
                               // paused
 
     // No point setting status fields, since they are zeroed and will be filled on status alert
-    Torrent torrent = {
-                       .id = torrent_handle.id(),
-                       .category = QString{},
-                       .name = QString::fromStdString(torrent_handle.status().name),
-                       .size = 0,
-                       .progress = 0.0,
-                       .status =torrentStateToString(torrent_handle.status().state),
-                       .seeds =0,
-                       .peers = 0,
+    Torrent torrent = {.id        = torrent_handle.id(),
+                       .category  = QString{},
+                       .name      = QString::fromStdString(torrent_handle.status().name),
+                       .size      = 0,
+                       .progress  = 0.0,
+                       .status    = torrentStateToString(torrent_handle.status().state),
+                       .seeds     = 0,
+                       .peers     = 0,
                        .downSpeed = 0,
-                       .upSpeed = 0,
-                       .ratio = 0,
-                       .eta = 0
-                    };
+                       .upSpeed   = 0,
+                       .ratio     = 0,
+                       .eta       = 0};
 
     emit torrentAdded(torrent);
 }
@@ -524,18 +523,21 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
 {
     static auto last = std::chrono::high_resolution_clock::now();
 
-    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last).count();
-    double multiplier = static_cast<double>(std::chrono::milliseconds(1000).count()) / (diff == 0 ? std::chrono::milliseconds(1000).count() : diff);
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::high_resolution_clock::now() - last)
+                    .count();
+    double multiplier = static_cast<double>(std::chrono::milliseconds(1000).count()) /
+                        (diff == 0 ? std::chrono::milliseconds(1000).count() : diff);
 
     const auto &counters         = alert->counters();
     auto        recvPayloadBytes = counters[lt::counters::recv_payload_bytes];
     auto        newRecv          = recvPayloadBytes - lastSessionRecvPayloadBytes;
-    newRecv = newRecv * multiplier;
+    newRecv                      = newRecv * multiplier;
     lastSessionRecvPayloadBytes  = recvPayloadBytes;
 
     auto uploadPayloadBytes       = counters[lt::counters::sent_bytes];
     auto newUpload                = uploadPayloadBytes - lastSessionUploadPayloadBytes;
-    newUpload = newUpload * multiplier;
+    newUpload                     = newUpload * multiplier;
     lastSessionUploadPayloadBytes = uploadPayloadBytes;
 
     emit chartPoint(newRecv, newUpload);
@@ -695,9 +697,12 @@ void SessionManager::setLsd(bool value)
 void SessionManager::setUpnp(bool value)
 {
     lt::settings_pack newSettings = m_session->get_settings();
-    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_upnp); oldVal != value) {
+    if (bool oldVal = newSettings.get_bool(lt::settings_pack::enable_upnp); oldVal != value)
+    {
         newSettings.set_bool(lt::settings_pack::enable_upnp, value);
-        newSettings.set_bool(lt::settings_pack::enable_natpmp, value); // Enable this as well, since this is kinda the same thing in terms of functionality
+        newSettings.set_bool(lt::settings_pack::enable_natpmp,
+                             value); // Enable this as well, since this is kinda the same thing in
+                                     // terms of functionality
         m_session->apply_settings(newSettings);
     }
 }

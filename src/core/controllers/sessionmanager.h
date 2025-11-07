@@ -40,6 +40,7 @@ class SessionManager : public QObject
     bool shouldResetParams{false};
 
     explicit SessionManager(QObject *parent = nullptr);
+
   public:
     ~SessionManager();
 

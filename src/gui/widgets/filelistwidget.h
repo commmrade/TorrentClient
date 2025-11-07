@@ -37,7 +37,7 @@ class FileListWidget : public QWidget
     FilePriorityDelegate m_priorityDelegate;
 
     void setupHeader();
-    void headerMenuRequested(const QPoint& pos);
+    void headerMenuRequested(const QPoint &pos);
 };
 
 #endif // FILELISTWIDGET_H

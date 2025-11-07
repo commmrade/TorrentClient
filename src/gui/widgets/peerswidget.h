@@ -21,8 +21,6 @@ class PeersWidget : public QWidget
     void setPeers(const std::uint32_t id, const std::vector<lt::peer_info> &peers);
     void clearPeers();
 
-
-
   private:
     Ui::PeersWidget *ui;
     PeerTableModel   m_peerModel;

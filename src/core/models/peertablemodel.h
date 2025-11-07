@@ -14,7 +14,10 @@ class PeerTableModel : public QAbstractTableModel
     explicit PeerTableModel(QObject *parent = nullptr);
     ~PeerTableModel();
 
-    int rowCount([[maybe_unused]] const QModelIndex &index = QModelIndex{}) const override { return m_peers.size(); }
+    int rowCount([[maybe_unused]] const QModelIndex &index = QModelIndex{}) const override
+    {
+        return m_peers.size();
+    }
     int columnCount([[maybe_unused]] const QModelIndex &index = QModelIndex{}) const override
     {
         return PEER_FIELD_COUNT;

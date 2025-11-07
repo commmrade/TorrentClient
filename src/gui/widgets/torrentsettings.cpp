@@ -97,7 +97,8 @@ void TorrentSettings::apply()
         settings.setValue(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION, defaultSavePath);
         m_savePathChanged = false;
     }
-    if (m_resetChanged) {
+    if (m_resetChanged)
+    {
         resetApp();
         m_resetChanged = false;
     }
@@ -184,7 +185,7 @@ void TorrentSettings::on_localPeerDiscCheck_clicked([[maybe_unused]] bool checke
 
 void TorrentSettings::resetApp()
 {
-    auto& sessionManager = SessionManager::instance();
+    auto     &sessionManager = SessionManager::instance();
     QSettings settings;
     sessionManager.resetSessionParams();
     settings.clear();
@@ -197,13 +198,12 @@ void TorrentSettings::resetApp()
     // QDir themes{basePath + QDir::separator() + Dirs::THEMES};
     QDir torrents{basePath + QDir::separator() + Dirs::TORRENTS};
 
-    int result = logs.removeRecursively() +
-                metadata.removeRecursively() +
-                state.removeRecursively() +
-                // themes.removeRecursively() +
+    int result = logs.removeRecursively() + metadata.removeRecursively() +
+                 state.removeRecursively() +
+                 // themes.removeRecursively() +
                  torrents.removeRecursively();
-    if (result < 5) {
+    if (result < 5)
+    {
         qFatal() << "Failed to remove application's files, it may be broken now in some ways";
     }
 }
-

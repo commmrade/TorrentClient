@@ -76,16 +76,10 @@ void SaveTorrentDialog::setupTableView()
     ui->fileView->hideColumn(2);
     ui->fileView->hideColumn(3);
 
-    connect(&m_fileModel, &FileTreeModel::statusChanged, this,
-            [this](int index, bool value)
-            {
-                m_filePriorities[index] = value ? lt::default_priority : lt::dont_download;
-            });
+    connect(&m_fileModel, &FileTreeModel::statusChanged, this, [this](int index, bool value)
+            { m_filePriorities[index] = value ? lt::default_priority : lt::dont_download; });
     connect(&m_fileModel, &FileTreeModel::priorityChanged, this,
-            [this](int index, int priority)
-            {
-                m_filePriorities[index] = priority;
-            });
+            [this](int index, int priority) { m_filePriorities[index] = priority; });
 }
 
 void SaveTorrentDialog::init() { setupTableView(); }

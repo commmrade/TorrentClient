@@ -46,7 +46,9 @@ ConnectionSettings::ConnectionSettings(QWidget *parent)
     }
 
     {
-        bool upnpEnabled = settings.value(SettingsNames::LISTENING_UPNP, SettingsValues::LISTENING_UPNP_DEFAULT).toBool();
+        bool upnpEnabled =
+            settings.value(SettingsNames::LISTENING_UPNP, SettingsValues::LISTENING_UPNP_DEFAULT)
+                .toBool();
         QSignalBlocker blocker{ui->natBox};
         ui->natBox->setChecked(upnpEnabled);
     }
@@ -90,7 +92,8 @@ void ConnectionSettings::apply()
 
         m_mNumOfConPTChanged = false;
     }
-    if (m_upnpChanged) {
+    if (m_upnpChanged)
+    {
         bool value = ui->natBox->isChecked();
         settings.setValue(SettingsNames::LISTENING_UPNP, value);
         sessionManager.setUpnp(value);
@@ -152,8 +155,4 @@ void ConnectionSettings::on_managePeersButton_clicked()
     }
 }
 
-void ConnectionSettings::on_natBox_clicked()
-{
-    m_upnpChanged = true;
-}
-
+void ConnectionSettings::on_natBox_clicked() { m_upnpChanged = true; }

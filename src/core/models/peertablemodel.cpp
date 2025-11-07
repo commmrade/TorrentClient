@@ -25,7 +25,8 @@ inline double ceilTwoAfterComa(double number) { return std::ceil(number * 100.0)
 
 QVariant PeerTableModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         return {};
     }
 

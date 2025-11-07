@@ -257,7 +257,6 @@ QVariant FileTreeModel::headerData(int section, Qt::Orientation orientation, int
     }
 }
 
-
 void FileTreeModel::traverseRecursively(QString curDir, BaseItem *root, const QList<File> &hFiles,
                                         const QModelIndex &parentIndex)
 {
@@ -297,8 +296,6 @@ void FileTreeModel::traverseRecursively(QString curDir, BaseItem *root, const QL
         }
     }
 }
-
-
 
 Qt::ItemFlags FileTreeModel::flags(const QModelIndex &index) const
 {
