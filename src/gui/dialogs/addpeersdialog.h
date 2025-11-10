@@ -9,7 +9,7 @@ namespace Ui
 class AddPeersDialog;
 }
 
-class AddPeersDialog : public QDialog
+class AddPeersDialog final : public QDialog
 {
     Q_OBJECT
 

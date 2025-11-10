@@ -9,7 +9,7 @@ namespace Ui
 class TorrentSettingsDialog;
 }
 
-class TorrentSettingsDialog : public QDialog
+class TorrentSettingsDialog final : public QDialog
 {
     Q_OBJECT
 

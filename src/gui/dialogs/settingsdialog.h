@@ -21,7 +21,7 @@ enum SettingsTabs
     ADVANCED
 };
 
-class SettingsDialog : public QDialog
+class SettingsDialog final : public QDialog
 {
     Q_OBJECT
   public:

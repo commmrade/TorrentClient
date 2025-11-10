@@ -12,7 +12,7 @@ namespace Ui
 class FileListWidget;
 }
 
-class FileListWidget : public QWidget
+class FileListWidget final : public QWidget
 {
     Q_OBJECT
 

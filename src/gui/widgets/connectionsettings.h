@@ -8,7 +8,7 @@ namespace Ui
 class ConnectionSettings;
 }
 
-class ConnectionSettings : public BaseSettings
+class ConnectionSettings final : public BaseSettings
 {
     Q_OBJECT
 

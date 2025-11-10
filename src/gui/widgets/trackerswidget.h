@@ -11,7 +11,7 @@ class TrackersWidget;
 
 struct Tracker;
 
-class TrackersWidget : public QWidget
+class TrackersWidget final : public QWidget
 {
     Q_OBJECT
   public:

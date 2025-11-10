@@ -8,22 +8,7 @@ namespace Ui
 class PiecesBarWidget;
 }
 
-inline std::vector<bool> makeMockPieces(int numPieces = 2000)
-{
-    std::vector<bool> pieces;
-    pieces.resize(numPieces);
-
-    std::srand(std::time(nullptr));
-
-    for (int i = 0; i < numPieces; ++i)
-    {
-        pieces[i] = (std::rand() % 100) < 20;
-    }
-
-    return pieces;
-}
-
-class PiecesBarWidget : public QWidget
+class PiecesBarWidget final : public QWidget
 {
     Q_OBJECT
 

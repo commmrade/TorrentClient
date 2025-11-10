@@ -21,7 +21,7 @@ struct magnet_tag
 {
 };
 
-class SaveTorrentDialog : public QDialog
+class SaveTorrentDialog final : public QDialog
 {
     Q_OBJECT
 

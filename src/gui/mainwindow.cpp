@@ -330,7 +330,7 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
 
         connect(
             saveDialog, &SaveTorrentDialog::accepted, this,
-            [=, this]()
+            [saveDialog, magnetUri, this]()
             {
                 auto torrentInfo    = saveDialog->getTorrentInfo();
                 auto filePriorities = saveDialog->getFilePriorities();

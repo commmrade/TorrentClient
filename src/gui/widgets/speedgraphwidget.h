@@ -13,7 +13,7 @@ namespace Ui
 class SpeedGraphWidget;
 }
 
-class SpeedGraphWidget : public QWidget
+class SpeedGraphWidget final : public QWidget
 {
     Q_OBJECT
   public:

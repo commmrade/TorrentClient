@@ -8,7 +8,7 @@ namespace Ui
 class ApplicationSettings;
 }
 
-class ApplicationSettings : public BaseSettings
+class ApplicationSettings final : public BaseSettings
 {
     Q_OBJECT
   public:

@@ -8,7 +8,7 @@ namespace Ui
 class DeleteTorrentDialog;
 }
 
-class DeleteTorrentDialog : public QDialog
+class DeleteTorrentDialog final : public QDialog
 {
     Q_OBJECT
 

@@ -9,7 +9,7 @@ namespace Ui
 class LoadMagnetDialog;
 }
 
-class LoadMagnetDialog : public QDialog
+class LoadMagnetDialog final : public QDialog
 {
     Q_OBJECT
 

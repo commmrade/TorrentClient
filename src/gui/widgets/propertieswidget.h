@@ -11,7 +11,7 @@ namespace Ui
 class PropertiesWidget;
 }
 struct Tracker;
-class PropertiesWidget : public QWidget
+class PropertiesWidget final : public QWidget
 {
     Q_OBJECT
 

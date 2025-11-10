@@ -10,7 +10,7 @@ namespace Ui
 class PeersWidget;
 }
 
-class PeersWidget : public QWidget
+class PeersWidget final : public QWidget
 {
     Q_OBJECT
 

@@ -10,7 +10,7 @@ namespace Ui
 class GeneralInfoWidget;
 }
 
-class GeneralInfoWidget : public QWidget
+class GeneralInfoWidget final : public QWidget
 {
     Q_OBJECT
 

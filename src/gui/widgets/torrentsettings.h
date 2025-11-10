@@ -8,7 +8,7 @@ namespace Ui
 class TorrentSettings;
 }
 
-class TorrentSettings : public BaseSettings
+class TorrentSettings final : public BaseSettings
 {
     Q_OBJECT
 
