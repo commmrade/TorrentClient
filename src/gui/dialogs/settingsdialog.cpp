@@ -1,16 +1,12 @@
 #include "gui/dialogs/settingsdialog.h"
 #include "ui_settingsdialog.h"
 #include <QSettings>
-#include "core/controllers/sessionmanager.h"
-#include "core/utils/settingsvalues.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QDesktopServices>
-#include "core/utils/dirs.h"
-#include "gui/dialogs/managepeersdialog.h"
 #include <QSignalBlocker>
 #include "gui/widgets/applicationsettings.h"
 #include "gui/widgets/torrentsettings.h"
@@ -29,10 +25,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->setupUi(this);
     ui->applyButton->setEnabled(false);
 
-    ui->stackedWidget->addWidget(appSettings.get());
-    ui->stackedWidget->addWidget(torSettings.get());
-    ui->stackedWidget->addWidget(connSettings.get());
-    ui->stackedWidget->addWidget(advSettings.get());
+    ui->stackedWidget->addWidget(appSettings.data());
+    ui->stackedWidget->addWidget(torSettings.data());
+    ui->stackedWidget->addWidget(connSettings.data());
+    ui->stackedWidget->addWidget(advSettings.data());
 
     connect(appSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);
     connect(torSettings, &BaseSettings::restartRequired, this, &SettingsDialog::onRestartRequired);

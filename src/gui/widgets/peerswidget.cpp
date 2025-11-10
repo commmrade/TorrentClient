@@ -94,7 +94,7 @@ void PeersWidget::contextMenuRequested(const QPoint &pos)
                                      .data(m_peerModel.index(modelIndex.row(),
                                                              static_cast<int>(PeerFields::IP)))
                                      .toString();
-                    auto addr = boost::asio::ip::make_address(ipStr.toStdString());
+                    auto addr = boost::asio::ip::make_address(ipStr.toStdString()); // should not fail, since ip is always correct in peers list
                     banPeers.append(std::move(addr));
                 }
 

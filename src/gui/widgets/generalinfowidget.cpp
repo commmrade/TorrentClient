@@ -15,21 +15,8 @@ GeneralInfoWidget::~GeneralInfoWidget() { delete ui; }
 
 void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetInfo &iInfo)
 {
-    {
-        // auto    hrs  = iInfo.activeTime / 3600;
-        // auto    mins = iInfo.activeTime % 3600 / 60;
-        // auto    secs = iInfo.activeTime % 60;
-        // QString timeStr;
-        // if (iInfo.activeTime == -1)
-        // {
-        //     timeStr = tr("infinity");
-        // }
-        // else
-        // {
-        //     timeStr = QString("%1:%2:%3").arg(hrs).arg(mins, 2, 10, '0').arg(secs, 2, 10, '0');
-        auto timeStr = utils::secsToFormattedTime(iInfo.activeTime);
-        ui->timeActValue->setText(timeStr);
-    }
+    auto timeStr = utils::secsToFormattedTime(iInfo.activeTime);
+    ui->timeActValue->setText(timeStr);
 
     auto downloaded = utils::bytesToHigher(iInfo.downloaded);
     ui->downloadedValue->setText(downloaded);
@@ -40,10 +27,8 @@ void GeneralInfoWidget::setGeneralInfo(const TorrentInfo &tInfo, const InternetI
     ui->downloadLimValue->setText(
         iInfo.downLimit == -1 ? tr("Unlimited") : utils::bytesToHigherPerSec(iInfo.downLimit));
 
-    {
-        auto etaStr = utils::secsToFormattedTime(iInfo.eta);
-        ui->etaValue->setText(etaStr);
-    }
+    auto etaStr = utils::secsToFormattedTime(iInfo.eta);
+    ui->etaValue->setText(etaStr);
 
     auto uploaded = utils::bytesToHigher(iInfo.uploaded);
     ui->uploadedValue->setText(uploaded);
