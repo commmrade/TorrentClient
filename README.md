@@ -149,28 +149,7 @@ Naming & design conventions:
 
 ## Contributing
 
-Guidelines:
-- Open an issue describing feature requests or bugs before major PRs.
-- Use small focused PRs; write descriptive commit messages.
-- Maintain API stability for public-facing controllers/models where possible.
-- Run formatting and static checks before submitting review.
-- Add tests for new features and bug fixes where reasonable.
-
-Code review checklist:
-- Is the change limited in scope?
-- Are new public APIs documented?
-- Are edge cases handled (I/O errors, missing metadata, network failures)?
-- Are UI changes accessible and localizable?
-
----
-
-## Known issues & TODO
-
-- Packaging/installer scripts are not provided yet.
-- No automated tests are included yet.
-- Some libtorrent interactions may require additional hardening around disk allocation and resume data handling
-- Add more robust reconnection/peer management policies and improved tracker failure handling.
-- Improve error reporting and user-facing messages for common failure modes (permission errors, missing dependencies).
+- Translations are welcome
 
 ---
 
@@ -184,3 +163,4 @@ See the `LICENSE` file at the project root for licensing details.
 
 - [qBitTorrent](https://www.qbittorrent.org/)
 - [Icons](https://www.flaticon.com)
+- [GTest](https://www.github.com/google/googletest)
