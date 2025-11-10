@@ -14,8 +14,8 @@ include_directories(src src/core src/gui)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBTORRENT REQUIRED libtorrent-rasterbar)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Charts)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Charts)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Charts Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Charts Core)
 
 find_library(MAXMINDDB_LIBRARY maxminddb)
 
@@ -76,8 +76,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/resources/icons.qrc
     )
     # Define target properties for Android with Qt 6 as:
-    #    set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # set_property(TARGET torrent-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    # ${CMAKE_CURRENT_SOURCE_DIR}/android)
     # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
@@ -85,7 +85,7 @@ else()
             ${PROJECT_SOURCES}
         )
         # Define properties for Android with Qt 5 after find_package() calls as:
-        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+        # set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(torrent-client
             ${PROJECT_SOURCES}
@@ -129,3 +129,37 @@ install(TARGETS torrent-client
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(torrent-client)
 endif()
+
+# GoogleTest setup
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+# Test executable
+add_executable(tests
+    tests/test_utils.cpp
+    src/core/utils/utils.cpp  # Include necessary source files for testing
+)
+
+target_link_libraries(tests
+    GTest::gtest_main
+    Qt${QT_VERSION_MAJOR}::Core
+)
+
+target_include_directories(tests PRIVATE src src/core)
+
+if (MSVC)
+    target_compile_options(tests PRIVATE /W4)
+else ()
+    target_compile_options(tests PRIVATE -Wall -Wextra)
+endif ()
+
+include(GoogleTest)
+gtest_discover_tests(tests)
