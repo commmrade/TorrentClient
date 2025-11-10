@@ -207,10 +207,6 @@ void SessionManager::eventLoop()
         }
     }
 
-    qDebug() << "Fuck";
-    qWarning() << "Fuck";
-    qCritical() << "Fuck";
-
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();

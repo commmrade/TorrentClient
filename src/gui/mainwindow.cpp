@@ -57,19 +57,17 @@ void MainWindow::customContextMenu(const QPoint &pos)
     QMenu menu(this);
     if (isPaused)
     {
-        QAction *resumeAction = new QAction(tr("Resume"), this);
+        QAction *resumeAction = menu.addAction(tr("Resume"));
         connect(resumeAction, &QAction::triggered, this,
                 [this, torrentId] { m_sessionManager.resumeTorrent(torrentId); });
-        menu.addAction(resumeAction);
     }
     else
     {
-        QAction *pauseAction = new QAction(tr("Pause"), this);
+        QAction *pauseAction = menu.addAction(tr("Pause"));
         connect(pauseAction, &QAction::triggered, this,
                 [this, torrentId] { m_sessionManager.pauseTorrent(torrentId); });
-        menu.addAction(pauseAction);
     }
-    QAction *deleteAction = new QAction(tr("Delete"), this);
+    QAction *deleteAction = menu.addAction(tr("Delete"));
     connect(deleteAction, &QAction::triggered, this,
             [this, torrentId]
             {
@@ -103,8 +101,7 @@ void MainWindow::customContextMenu(const QPoint &pos)
                     deleteTorrent(torrentId, true);
                 }
             });
-    menu.addAction(deleteAction);
-    QAction *settingsAction = new QAction(tr("Settings"), this);
+    QAction *settingsAction = menu.addAction(tr("Settings"));
     connect(settingsAction, &QAction::triggered, this,
             [this, torrentId]
             {
@@ -135,7 +132,6 @@ void MainWindow::customContextMenu(const QPoint &pos)
                         { m_sessionManager.setTorrentLsd(torrentId, !disabled); });
                 settingsDialog.exec();
             });
-    menu.addAction(settingsAction);
     menu.exec(ui->torrentsView->viewport()->mapToGlobal(pos));
 }
 
@@ -164,7 +160,7 @@ void MainWindow::setupTray()
 
     m_trayIcon->setIcon(QIcon{":/icon.png"});
     QMenu *trayMenu = new QMenu(this);
-    toggleAction    = new QAction(tr("Hide"), this);
+    toggleAction    = trayMenu->addAction(tr("Hide"));
     connect(toggleAction, &QAction::triggered, this,
             [this]
             {
@@ -179,13 +175,11 @@ void MainWindow::setupTray()
                     toggleAction->setText(tr("Show"));
                 }
             });
-    trayMenu->addAction(toggleAction);
 
-    QAction *addTorrentFilename = new QAction(tr("Add torrent file"), this);
+    QAction *addTorrentFilename = trayMenu->addAction(tr("Add torrent file"));
     connect(addTorrentFilename, &QAction::triggered, this, [this] { on_pushButton_2_clicked(); });
-    trayMenu->addAction(addTorrentFilename);
 
-    QAction *addTorrentMagnet = new QAction(tr("Add torrent link"), this);
+    QAction *addTorrentMagnet = trayMenu->addAction(tr("Add torrent link"));
     connect(addTorrentMagnet, &QAction::triggered, this,
             [this]
             {
@@ -199,11 +193,9 @@ void MainWindow::setupTray()
                     }
                 }
             });
-    trayMenu->addAction(addTorrentMagnet);
 
-    QAction *exit = new QAction(tr("Exit"), this);
+    QAction *exit = trayMenu->addAction(tr("Exit"));
     connect(exit, &QAction::triggered, this, [] { QApplication::exit(); });
-    trayMenu->addAction(exit);
     m_trayIcon->setContextMenu(trayMenu);
     m_trayIcon->show();
 }
@@ -257,7 +249,6 @@ void MainWindow::headerContextMenu(const QPoint &pos)
                     header->setSectionHidden(i, !isHidden);
                     isChanged = true;
                 });
-        menu.addAction(action);
     }
 
     menu.exec(table->mapToGlobal(pos));
@@ -391,7 +382,7 @@ void MainWindow::on_pushButton_clicked()
     LoadMagnetDialog magnetDialog{this};
     if (magnetDialog.exec() == QDialog::Accepted)
     {
-        QList<QString> magnets = magnetDialog.getMagnets();
+        QStringList magnets = magnetDialog.getMagnets();
         for (const auto &magnet : std::as_const(magnets))
         {
             addTorrentByMagnet(magnet);

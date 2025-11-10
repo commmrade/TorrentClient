@@ -61,7 +61,7 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
     auto     fileId         = index.data(Qt::UserRole + 1).toInt();
     auto    &sessionManager = SessionManager::instance();
     QMenu    mainMenu(this);
-    QAction *renameAction = new QAction(tr("Rename"), this);
+    QAction *renameAction = mainMenu.addAction(tr("Rename"));
     connect(renameAction, &QAction::triggered, this,
             [this, &sessionManager, fileId]
             {
@@ -77,10 +77,9 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
                     }
                 }
             });
-    mainMenu.addAction(renameAction);
 
     QMenu   *priorityMenu         = mainMenu.addMenu(tr("Priority"));
-    QAction *dontDownloadPriority = new QAction(Priorities::DONT_DOWNLOAD, this);
+    QAction *dontDownloadPriority = priorityMenu->addAction(Priorities::DONT_DOWNLOAD);
     connect(dontDownloadPriority, &QAction::triggered, this,
             [this, &sessionManager, fileId]
             {
@@ -91,9 +90,8 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
                                                       lt::dont_download);
                 }
             });
-    priorityMenu->addAction(dontDownloadPriority);
 
-    QAction *defaultPriority = new QAction(Priorities::DEFAULT, this);
+    QAction *defaultPriority = priorityMenu->addAction(Priorities::DEFAULT);
     connect(defaultPriority, &QAction::triggered, this,
             [this, &sessionManager, fileId]
             {
@@ -104,9 +102,8 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
                                                       lt::default_priority);
                 }
             });
-    priorityMenu->addAction(defaultPriority);
 
-    QAction *lowPriority = new QAction(Priorities::LOW, this);
+    QAction *lowPriority = priorityMenu->addAction(Priorities::LOW);
     connect(lowPriority, &QAction::triggered, this,
             [this, &sessionManager, fileId]
             {
@@ -117,9 +114,8 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
                                                       lt::low_priority);
                 }
             });
-    priorityMenu->addAction(lowPriority);
 
-    QAction *topPriority = new QAction(Priorities::HIGH, this);
+    QAction *topPriority = priorityMenu->addAction(Priorities::HIGH);
     connect(topPriority, &QAction::triggered, this,
             [this, &sessionManager, fileId]
             {
@@ -130,7 +126,6 @@ void FileListWidget::contextMenuRequested(const QPoint &pos)
                                                       lt::top_priority);
                 }
             });
-    priorityMenu->addAction(topPriority);
 
     mainMenu.exec(ui->treeView->viewport()->mapToGlobal(pos));
 }
