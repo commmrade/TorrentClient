@@ -2,6 +2,8 @@
 
 A lightweight desktop BitTorrent client written in modern C++ with a Qt-based GUI. This project uses C++20, Qt Widgets + Qt Charts and `libtorrent-rasterbar` as the torrent backend. The codebase is organized to separate core torrent/session logic from GUI code (models, delegates, widgets, dialogs), making it easier to extend and maintain.
 
+<img width="1300" height="777" alt="image" src="https://github.com/user-attachments/assets/8bf078bc-f87d-4b26-8df2-bc2a59d12f40" />
+
 This README provides:
 - Project overview and goals
 - Key features
