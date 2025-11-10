@@ -140,23 +140,7 @@ void initDirsAndFiles()
     QDir().mkdir(basePath + QDir::separator() + Dirs::LOGS);
 }
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication::setOrganizationName(ORG_NAME);
-    QCoreApplication::setOrganizationDomain(ORG_DOM);
-    QCoreApplication::setApplicationName(APP_NAME);
-
-    QLockFile lockfile(QDir::temp().absoluteFilePath("torrent-client.lock"));
-    if (!lockfile.tryLock())
-    {
-        throw std::runtime_error("An instance of this application is already running");
-    }
-
-    QApplication a(argc, argv);
-
-    initDirsAndFiles();
-    originalHandler = qInstallMessageHandler(myMessageHandler);
-
+void loadTheme(QApplication& a) {
     QSettings settings;
     auto      basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     // Set theme
@@ -206,6 +190,27 @@ int main(int argc, char *argv[])
             fallToDefaultTheme(a, settings);
         }
     }
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication::setOrganizationName(ORG_NAME);
+    QCoreApplication::setOrganizationDomain(ORG_DOM);
+    QCoreApplication::setApplicationName(APP_NAME);
+
+    QLockFile lockfile(QDir::temp().absoluteFilePath("torrent-client.lock"));
+    if (!lockfile.tryLock())
+    {
+        throw std::runtime_error("An instance of this application is already running");
+    }
+
+    QApplication a(argc, argv);
+
+    initDirsAndFiles();
+    originalHandler = qInstallMessageHandler(myMessageHandler);
+
+    loadTheme(a);
+
     MainWindow w;
     w.show();
     return a.exec();
