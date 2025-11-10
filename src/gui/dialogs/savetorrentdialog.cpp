@@ -127,6 +127,7 @@ void SaveTorrentDialog::startFetchingMetadata(const lt::add_torrent_params &para
     // When fetching has been done, quit the thread and delete it and destroy the fetcher
     connect(fetcher, &MetadataFetcher::finished, fetcher, &QObject::deleteLater);
     connect(fetcher, &MetadataFetcher::finished, m_fetcherThread, &QThread::quit);
+
     connect(m_fetcherThread, &QThread::finished, m_fetcherThread, &QObject::deleteLater);
 
     // In case dialog is closed prematurily stop the fetcher, so the thread can exit

@@ -31,8 +31,6 @@ class MetadataFetcher final : public QObject
     void run();
   signals:
     void metadataFetched(std::shared_ptr<const lt::torrent_info> md);
-
-    void error();
     void finished();
 
   private:

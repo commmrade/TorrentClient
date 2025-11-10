@@ -41,7 +41,6 @@ void MetadataFetcher::sessionLoop()
                 qWarning() << "Could not fetch metadata for magnet, because"
                            << metadataFailedAlert->message();
                 m_isRunning = false;
-                emit error();
                 break;
             }
         }
