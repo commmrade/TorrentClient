@@ -12,10 +12,9 @@ static constexpr int FILES_TAB_INDEX    = 4;
 PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent), ui(new Ui::PropertiesWidget)
 {
     ui->setupUi(this);
+    ui->sourcesList->clear();
 
     setupPropertiesTabs();
-
-    ui->sourcesList->clear();
 
     auto &sessionManager = SessionManager::instance();
     connect(&sessionManager, &SessionManager::peerInfo, this, &PropertiesWidget::setPeers);

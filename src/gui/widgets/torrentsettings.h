@@ -17,6 +17,7 @@ class TorrentSettings final : public BaseSettings
     ~TorrentSettings();
 
     void apply() override;
+    void setupFields() override;
   private slots:
     void on_downloadLimitSpin_valueChanged(int arg1);
 

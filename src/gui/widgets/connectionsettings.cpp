@@ -10,48 +10,7 @@ ConnectionSettings::ConnectionSettings(QWidget *parent)
     : BaseSettings(parent), ui(new Ui::ConnectionSettings)
 {
     ui->setupUi(this);
-
-    QSettings settings;
-    {
-        int port =
-            settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT)
-                .toInt();
-        QSignalBlocker blocker{ui->portBox};
-        ui->portBox->setValue(port);
-    }
-    {
-        int protocolType = settings
-                               .value(SettingsNames::LISTENING_PROTOCOL,
-                                      SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP)
-                               .toInt();
-        QSignalBlocker blocker{ui->peerConnProtocolBox};
-        ui->peerConnProtocolBox->setCurrentIndex(protocolType);
-    }
-    {
-        int maxNumOfCon = settings
-                              .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS,
-                                     SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT)
-                              .toInt();
-        QSignalBlocker blocker{ui->mNumOfConBox};
-        ui->mNumOfConBox->setValue(maxNumOfCon);
-    }
-
-    {
-        int maxNumOfConPT = settings
-                                .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT,
-                                       SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT)
-                                .toInt();
-        QSignalBlocker blocker{ui->mNumOfConPTBox};
-        ui->mNumOfConPTBox->setValue(maxNumOfConPT);
-    }
-
-    {
-        bool upnpEnabled =
-            settings.value(SettingsNames::LISTENING_UPNP, SettingsValues::LISTENING_UPNP_DEFAULT)
-                .toBool();
-        QSignalBlocker blocker{ui->natBox};
-        ui->natBox->setChecked(upnpEnabled);
-    }
+    setupFields();
 }
 
 ConnectionSettings::~ConnectionSettings() { delete ui; }
@@ -99,6 +58,51 @@ void ConnectionSettings::apply()
         sessionManager.setUpnp(value);
 
         m_upnpChanged = false;
+    }
+}
+
+void ConnectionSettings::setupFields()
+{
+    QSettings settings;
+    {
+        int port =
+            settings.value(SettingsNames::LISTENING_PORT, SettingsValues::LISTENING_PORT_DEFAULT)
+                .toInt();
+        QSignalBlocker blocker{ui->portBox};
+        ui->portBox->setValue(port);
+    }
+    {
+        int protocolType = settings
+                               .value(SettingsNames::LISTENING_PROTOCOL,
+                                      SettingsValues::LISTENING_PROTOCOL_TCP_AND_UTP)
+                               .toInt();
+        QSignalBlocker blocker{ui->peerConnProtocolBox};
+        ui->peerConnProtocolBox->setCurrentIndex(protocolType);
+    }
+    {
+        int maxNumOfCon = settings
+                              .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS,
+                                     SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_DEFAULT)
+                              .toInt();
+        QSignalBlocker blocker{ui->mNumOfConBox};
+        ui->mNumOfConBox->setValue(maxNumOfCon);
+    }
+
+    {
+        int maxNumOfConPT = settings
+                                .value(SettingsNames::LIMITS_MAX_NUM_OF_CONNECTIONS_PT,
+                                       SettingsValues::LIMITS_MAX_NUM_OF_CONNECTIONS_PT_DEFAULT)
+                                .toInt();
+        QSignalBlocker blocker{ui->mNumOfConPTBox};
+        ui->mNumOfConPTBox->setValue(maxNumOfConPT);
+    }
+
+    {
+        bool upnpEnabled =
+            settings.value(SettingsNames::LISTENING_UPNP, SettingsValues::LISTENING_UPNP_DEFAULT)
+                .toBool();
+        QSignalBlocker blocker{ui->natBox};
+        ui->natBox->setChecked(upnpEnabled);
     }
 }
 

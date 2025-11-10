@@ -16,7 +16,7 @@ class AdvancedSettings final : public BaseSettings
     ~AdvancedSettings();
 
     void apply() override;
-
+    void setupFields() override;
   private slots:
     void on_loopDurBox_valueChanged(int arg1);
 

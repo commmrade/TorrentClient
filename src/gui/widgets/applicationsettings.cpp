@@ -15,95 +15,7 @@ ApplicationSettings::ApplicationSettings(QWidget *parent)
     ui->chooseThemeBtn->setVisible(false);
     ui->customThemeEdit->setVisible(false);
 
-    QSettings settings;
-    {
-        int language =
-            settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH)
-                .toInt();
-        QSignalBlocker blocker{ui->languageBox};
-        ui->languageBox->setCurrentIndex(language);
-    }
-
-    {
-        QSignalBlocker blocker{ui->themeBox};
-        int            theme =
-            settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
-        ui->themeBox->setCurrentIndex(theme);
-        if (theme == SettingsValues::GUI_THEME_CUSTOM)
-        { // if theme is custom set custom theme edit, if empty set to dark (default)
-            QString customTheme = settings.value(SettingsNames::GUI_CUSTOM_THEME).toString();
-            if (!customTheme.isEmpty())
-            {
-                ui->customThemeEdit->blockSignals(true);
-                ui->customThemeEdit->setText(customTheme);
-                ui->customThemeEdit->blockSignals(false);
-            }
-            else
-            {
-                ui->themeBox->setCurrentIndex(SettingsValues::GUI_THEME_DARK);
-            }
-        }
-    }
-
-    {
-        bool confirmDeletion = settings
-                                   .value(SettingsNames::TRANSFER_CONFIRM_DELETION,
-                                          SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT)
-                                   .toBool();
-        QSignalBlocker blocker{ui->confirmDelBox};
-        ui->confirmDelBox->setChecked(confirmDeletion);
-    }
-
-    {
-        bool showTray =
-            settings
-                .value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
-                .toBool();
-        QSignalBlocker blocker{ui->showTrayBox};
-        ui->showTrayBox->setChecked(showTray);
-    }
-
-    {
-        bool showNotifs = settings
-                              .value(SettingsNames::DESKTOP_SHOW_NOTIFS,
-                                     SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
-                              .toBool();
-        QSignalBlocker blocker{ui->enaleNotifBox};
-        ui->enaleNotifBox->setChecked(showNotifs);
-    }
-
-    {
-        int exitBeh =
-            settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE)
-                .toInt();
-        QSignalBlocker blocker{ui->exitBehBtn};
-        ui->exitBehBtn->setCurrentIndex(exitBeh);
-    }
-
-    {
-        bool logsEnabled =
-            settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT)
-                .toBool();
-        QSignalBlocker blocker{ui->logsBox};
-        ui->logsBox->setChecked(logsEnabled);
-    }
-    {
-        QString logsPath =
-            settings
-                .value(SettingsNames::LOGS_PATH,
-                       QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                           QDir::separator() + Dirs::LOGS + QDir::separator())
-                .toString();
-        QSignalBlocker blocker{ui->logsPathEdit};
-        ui->logsPathEdit->setText(logsPath);
-    }
-    {
-        unsigned int logsMax =
-            settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT)
-                .toUInt();
-        QSignalBlocker blocker{ui->maxLogFileSpinBox};
-        ui->maxLogFileSpinBox->setValue(logsMax / 1024);
-    }
+    setupFields();
 }
 
 ApplicationSettings::~ApplicationSettings() { delete ui; }
@@ -192,6 +104,99 @@ void ApplicationSettings::apply()
         QString logsPath = ui->logsPathEdit->text();
         settings.setValue(SettingsNames::LOGS_PATH, logsPath);
         m_logsPathChanged = false;
+    }
+}
+
+void ApplicationSettings::setupFields()
+{
+    QSettings settings;
+    {
+        int language =
+            settings.value(SettingsNames::GUI_LANGUAGE, SettingsValues::GUI_LANGUAGE_ENGLISH)
+                .toInt();
+        QSignalBlocker blocker{ui->languageBox};
+        ui->languageBox->setCurrentIndex(language);
+    }
+
+    {
+        QSignalBlocker blocker{ui->themeBox};
+        int            theme =
+            settings.value(SettingsNames::GUI_THEME, SettingsValues::GUI_THEME_DARK).toInt();
+        ui->themeBox->setCurrentIndex(theme);
+        if (theme == SettingsValues::GUI_THEME_CUSTOM)
+        { // if theme is custom set custom theme edit, if empty set to dark (default)
+            QString customTheme = settings.value(SettingsNames::GUI_CUSTOM_THEME).toString();
+            if (!customTheme.isEmpty())
+            {
+                ui->customThemeEdit->blockSignals(true);
+                ui->customThemeEdit->setText(customTheme);
+                ui->customThemeEdit->blockSignals(false);
+            }
+            else
+            {
+                ui->themeBox->setCurrentIndex(SettingsValues::GUI_THEME_DARK);
+            }
+        }
+    }
+
+    {
+        bool confirmDeletion = settings
+                                   .value(SettingsNames::TRANSFER_CONFIRM_DELETION,
+                                          SettingsValues::TRANSFER_CONFIRM_DELETION_DEFAULT)
+                                   .toBool();
+        QSignalBlocker blocker{ui->confirmDelBox};
+        ui->confirmDelBox->setChecked(confirmDeletion);
+    }
+
+    {
+        bool showTray =
+            settings
+                .value(SettingsNames::DESKTOP_SHOW_TRAY, SettingsValues::DESKTOP_SHOW_TRAY_DEFAULT)
+                .toBool();
+        QSignalBlocker blocker{ui->showTrayBox};
+        ui->showTrayBox->setChecked(showTray);
+    }
+
+    {
+        bool showNotifs = settings
+                              .value(SettingsNames::DESKTOP_SHOW_NOTIFS,
+                                     SettingsValues::DESKTOP_SHOW_NOTIFS_DEFAULT)
+                              .toBool();
+        QSignalBlocker blocker{ui->enaleNotifBox};
+        ui->enaleNotifBox->setChecked(showNotifs);
+    }
+
+    {
+        int exitBeh =
+            settings.value(SettingsNames::DESKTOP_EXIT_BEH, SettingsValues::DESKTOP_EXIT_BEH_CLOSE)
+                .toInt();
+        QSignalBlocker blocker{ui->exitBehBtn};
+        ui->exitBehBtn->setCurrentIndex(exitBeh);
+    }
+
+    {
+        bool logsEnabled =
+            settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT)
+                .toBool();
+        QSignalBlocker blocker{ui->logsBox};
+        ui->logsBox->setChecked(logsEnabled);
+    }
+    {
+        QString logsPath =
+            settings
+                .value(SettingsNames::LOGS_PATH,
+                       QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                           QDir::separator() + Dirs::LOGS + QDir::separator())
+                .toString();
+        QSignalBlocker blocker{ui->logsPathEdit};
+        ui->logsPathEdit->setText(logsPath);
+    }
+    {
+        unsigned int logsMax =
+            settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT)
+                .toUInt();
+        QSignalBlocker blocker{ui->maxLogFileSpinBox};
+        ui->maxLogFileSpinBox->setValue(logsMax / 1024);
     }
 }
 

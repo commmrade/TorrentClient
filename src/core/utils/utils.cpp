@@ -97,7 +97,7 @@ QString toHex(std::span<const char> data, bool to_upper /* = false */)
         to_upper ? 55 : 87; // (65 ('A') - 10 ('hex letters')) and  (97 ('a) - 10 ('hex letters'))
 
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(data.data());
-    for (auto i = 0; i < data.size(); ++i)
+    for (std::size_t i = 0; i < data.size(); ++i)
     {
         uint8_t byte_first  = (bytes[i] >> 4);
         uint8_t byte_second = (0x0F) & bytes[i];
@@ -108,31 +108,5 @@ QString toHex(std::span<const char> data, bool to_upper /* = false */)
     }
     return result;
 }
-
-// bool moveToTrash(QDir &path)
-// {
-// #ifdef __linux__
-//     /*
-// [Trash Info]
-// Path=/home/klewy/myFiles/Code/c%2B%2B/geoip-practice/build
-// DeletionDate=2025-08-22T16:05:18
-//     */
-
-//     // Case is when it is done by a regular user in a regular place (not some random mountpoitn
-//     and shit QDir trashDir = QDir::homePath() + "/.local/share/Trash"; if (!trashDir.exists()) {
-//         return false;
-//     }
-
-//     QString trashInfo = QString{"[Trash
-//     Info]\nPath=%1\nDeletionDate=%2"}.arg(path.absolutePath()).arg(QDateTime::currentDateTime().toString(Qt::ISODate));
-//     qDebug() << "Trash info" << trashInfo;
-
-//     QString filename = path.dirName();
-
-// #elif _WIN32
-
-// #endif
-//     return true;
-// }
 
 } // namespace utils

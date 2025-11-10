@@ -19,7 +19,6 @@ SaveTorrentDialog::SaveTorrentDialog(torrent_file_tag, const QString &torrentPat
     : QDialog(parent), ui(new Ui::SaveTorrentDialog)
 {
     ui->setupUi(this);
-    // Setup table
     init();
 
     auto info     = std::make_shared<lt::torrent_info>(torrentPath.toStdString());
@@ -66,7 +65,6 @@ void SaveTorrentDialog::setupTableView()
     ui->fileView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->fileView->header()->setSectionResizeMode(ui->fileView->header()->count() - 1,
                                                  QHeaderView::Stretch);
-    ui->fileView->setAnimated(true);
 
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::STATUS), &m_statusDelegate);
     ui->fileView->setItemDelegateForColumn(static_cast<int>(FileFields::PROGRESS), &m_itemDelegate);

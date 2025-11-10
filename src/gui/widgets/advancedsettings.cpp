@@ -8,15 +8,7 @@ AdvancedSettings::AdvancedSettings(QWidget *parent)
     : BaseSettings(parent), ui(new Ui::AdvancedSettings)
 {
     ui->setupUi(this);
-
-    QSettings settings;
-
-    int loopDur =
-        settings
-            .value(SettingsNames::ADVANCED_LOOP_DURATION, SettingsValues::ADVANCED_LOOP_DURATION)
-            .toInt();
-    QSignalBlocker loopB{ui->loopDurBox};
-    ui->loopDurBox->setValue(loopDur);
+    setupFields();
 }
 
 AdvancedSettings::~AdvancedSettings() { delete ui; }
@@ -32,6 +24,18 @@ void AdvancedSettings::apply()
         sessionManager.setLoopDuration(value);
         m_loopDurChanged = false;
     }
+}
+
+void AdvancedSettings::setupFields()
+{
+    QSettings settings;
+
+    int loopDur =
+        settings
+            .value(SettingsNames::ADVANCED_LOOP_DURATION, SettingsValues::ADVANCED_LOOP_DURATION)
+            .toInt();
+    QSignalBlocker loopB{ui->loopDurBox};
+    ui->loopDurBox->setValue(loopDur);
 }
 
 void AdvancedSettings::on_loopDurBox_valueChanged([[maybe_unused]] int arg1)

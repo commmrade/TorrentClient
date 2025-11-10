@@ -16,6 +16,7 @@ class ApplicationSettings final : public BaseSettings
     ~ApplicationSettings();
 
     void apply() override;
+    void setupFields() override;
   private slots:
     void on_languageBox_currentIndexChanged(int index);
 

@@ -188,4 +188,5 @@ void TrackerTableModel::clearTrackers()
 {
     beginResetModel();
     m_trackers.clear();
+    endResetModel();
 }

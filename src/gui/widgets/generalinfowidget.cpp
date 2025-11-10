@@ -7,7 +7,6 @@ GeneralInfoWidget::GeneralInfoWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::GeneralInfoWidget)
 {
     ui->setupUi(this);
-
     clearGeneralInfo();
 }
 

@@ -38,7 +38,7 @@ SessionManager::~SessionManager()
     {
         if (!QFile::remove(sessionFilePath))
         {
-            qWarning() << "Failed to delete .session";
+            qCritical() << "Failed to delete .session";
         }
     }
     else
@@ -545,7 +545,7 @@ void SessionManager::handleSessionStatsAlert(libtorrent::session_stats_alert *al
 
 void SessionManager::handleTorrentErrorAlert(libtorrent::torrent_error_alert *alert)
 {
-    qDebug() << "Torrent Error Alert:" << alert->message();
+    qCritical() << "Torrent Error Alert:" << alert->message();
     auto  id            = alert->handle.id();
     auto &torrentHandle = m_torrentHandles[id];
     torrentHandle.setCategory(Categories::FAILED);
@@ -580,15 +580,6 @@ void SessionManager::loadResumes()
         {
             auto buffer = file.readAll();
             auto params = lt::read_resume_data(buffer);
-            // bool isPaused =
-            //     (m_handle.flags() & (lt::torrent_flags::paused)) == lt::torrent_flags::paused ?
-            //     true
-            //                                                                                   :
-            //                                                                                   false;
-            // if (isPaused)
-            // {
-            //     params.flags &= ~lt::torrent_flags::auto_managed;
-            // }
             m_session->async_add_torrent(std::move(params));
         }
     }

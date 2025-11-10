@@ -11,62 +11,7 @@ TorrentSettings::TorrentSettings(QWidget *parent)
     : BaseSettings(parent), ui(new Ui::TorrentSettings)
 {
     ui->setupUi(this);
-
-    QSettings settings;
-    {
-        int downloadSpeedLimit = settings
-                                     .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
-                                            SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
-                                     .toInt() /
-                                 1024;
-        QSignalBlocker blocker{ui->downloadLimitSpin};
-        ui->downloadLimitSpin->setValue(downloadSpeedLimit);
-    }
-
-    {
-        int uploadSpeedLimit = settings
-                                   .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
-                                          SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
-                                   .toInt() /
-                               1024;
-        QSignalBlocker blocker{ui->uploadLimitSpin};
-        ui->uploadLimitSpin->setValue(uploadSpeedLimit);
-    }
-    {
-        QString defaultSavePath =
-            settings
-                .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
-                       QVariant{QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)})
-                .toString();
-        QSignalBlocker blocker{ui->savePathLineEdit};
-        ui->savePathLineEdit->setText(defaultSavePath);
-    }
-    {
-        bool dhtEnabled = settings
-                              .value(SettingsNames::PRIVACY_DHT_ENABLED,
-                                     SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT)
-                              .toBool();
-        QSignalBlocker blocker{ui->dhtCheck};
-        ui->dhtCheck->setChecked(dhtEnabled);
-    }
-
-    {
-        bool peerExEnabled = settings
-                                 .value(SettingsNames::PRIVACY_PEEREX_ENABLED,
-                                        SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT)
-                                 .toBool();
-        QSignalBlocker blocker{ui->peerExCheck};
-        ui->peerExCheck->setChecked(peerExEnabled);
-    }
-
-    {
-        bool localDiscEnabled = settings
-                                    .value(SettingsNames::PRIVACY_LOCAL_PEER_DESC,
-                                           SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT)
-                                    .toBool();
-        QSignalBlocker blocker{ui->localPeerDiscCheck};
-        ui->localPeerDiscCheck->setChecked(localDiscEnabled);
-    }
+    setupFields();
 }
 
 TorrentSettings::~TorrentSettings() { delete ui; }
@@ -124,6 +69,65 @@ void TorrentSettings::apply()
         sessionManager.setLsd(val);
 
         m_localPeerDiscChanged = false;
+    }
+}
+
+void TorrentSettings::setupFields()
+{
+    QSettings settings;
+    {
+        int downloadSpeedLimit = settings
+                                     .value(SettingsNames::SESSION_DOWNLOAD_SPEED_LIMIT,
+                                            SettingsValues::SESSION_DOWNLOAD_SPEED_LIMIT)
+                                     .toInt() /
+                                 1024;
+        QSignalBlocker blocker{ui->downloadLimitSpin};
+        ui->downloadLimitSpin->setValue(downloadSpeedLimit);
+    }
+
+    {
+        int uploadSpeedLimit = settings
+                                   .value(SettingsNames::SESSION_UPLOAD_SPEED_LIMIT,
+                                          SettingsValues::SESSION_UPLOAD_SPEED_LIMIT)
+                                   .toInt() /
+                               1024;
+        QSignalBlocker blocker{ui->uploadLimitSpin};
+        ui->uploadLimitSpin->setValue(uploadSpeedLimit);
+    }
+    {
+        QString defaultSavePath =
+            settings
+                .value(SettingsNames::SESSION_DEFAULT_SAVE_LOCATION,
+                       QVariant{QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)})
+                .toString();
+        QSignalBlocker blocker{ui->savePathLineEdit};
+        ui->savePathLineEdit->setText(defaultSavePath);
+    }
+    {
+        bool dhtEnabled = settings
+                              .value(SettingsNames::PRIVACY_DHT_ENABLED,
+                                     SettingsValues::PRIVACY_DHT_ENABLED_DEFAULT)
+                              .toBool();
+        QSignalBlocker blocker{ui->dhtCheck};
+        ui->dhtCheck->setChecked(dhtEnabled);
+    }
+
+    {
+        bool peerExEnabled = settings
+                                 .value(SettingsNames::PRIVACY_PEEREX_ENABLED,
+                                        SettingsValues::PRIVACY_PEEREX_ENABLED_DEFAULT)
+                                 .toBool();
+        QSignalBlocker blocker{ui->peerExCheck};
+        ui->peerExCheck->setChecked(peerExEnabled);
+    }
+
+    {
+        bool localDiscEnabled = settings
+                                    .value(SettingsNames::PRIVACY_LOCAL_PEER_DESC,
+                                           SettingsValues::PRIVACY_LOCAL_PEER_DESC_DEFAULT)
+                                    .toBool();
+        QSignalBlocker blocker{ui->localPeerDiscCheck};
+        ui->localPeerDiscCheck->setChecked(localDiscEnabled);
     }
 }
 

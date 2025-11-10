@@ -324,7 +324,6 @@ QString FileTreeModel::getFirstLeafPath() const
 
 void FileTreeModel::setFiles(const QList<File> &files)
 {
-    qDebug() << "Set files";
     bool bRootVirgin = isRootVirgin();
 
     QString path        = getFirstLeafPath();
@@ -400,7 +399,6 @@ void FileTreeModel::setFiles(const QList<File> &files)
 
 void FileTreeModel::clearFiles()
 {
-    qDebug() << "Clear files";
     beginResetModel();
     resetRoot();
     endResetModel();

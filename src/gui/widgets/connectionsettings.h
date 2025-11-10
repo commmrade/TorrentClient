@@ -17,6 +17,7 @@ class ConnectionSettings final : public BaseSettings
     ~ConnectionSettings();
 
     void apply() override;
+    void setupFields() override;
   private slots:
     void on_portBox_valueChanged(int arg1);
 
