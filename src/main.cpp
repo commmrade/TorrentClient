@@ -50,7 +50,7 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
     QByteArray curDatePrintable = curDatetime.toLocal8Bit();
 
     QSettings settings;
-    QString logsPath =
+    QString   logsPath =
         settings
             .value(SettingsNames::LOGS_PATH,
                    QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
@@ -59,14 +59,15 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
         QDir::separator() + "torrentclient.log";
 
     static QFile f{logsPath};
-    if (!f.isOpen()) {
-        if (!f.open(QFile::WriteOnly)) {
+    if (!f.isOpen())
+    {
+        if (!f.open(QFile::WriteOnly))
+        {
             qInstallMessageHandler(originalHandler);
             qCritical() << "Could not open a log file";
             return;
         }
     }
-
 
     long         seekPos = f.pos();
     unsigned int logMaxSize =
@@ -77,7 +78,8 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
         f.flush();
         f.close();
 
-        if (!f.open(QFile::WriteOnly | QFile::Truncate)) {
+        if (!f.open(QFile::WriteOnly | QFile::Truncate))
+        {
             qInstallMessageHandler(originalHandler);
             qCritical() << "Could not reopen a log file";
             return;
@@ -87,26 +89,32 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
     QString msg;
     switch (t)
     {
-        case QtDebugMsg: {
-            msg = QString{"Debug [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
-            break;
-        }
-        case QtInfoMsg: {
-            msg = QString{"Info [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
-            break;
-        }
-        case QtWarningMsg: {
-            msg = QString{"Warning [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
-            break;
-        }
-        case QtCriticalMsg: {
-            msg = QString{"Critical [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
-            break;
-        }
-        case QtFatalMsg: {
-            msg = QString{"Fatal [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
-            break;
-        }
+    case QtDebugMsg:
+    {
+        msg = QString{"Debug [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+        break;
+    }
+    case QtInfoMsg:
+    {
+        msg = QString{"Info [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+        break;
+    }
+    case QtWarningMsg:
+    {
+        msg = QString{"Warning [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+        break;
+    }
+    case QtCriticalMsg:
+    {
+        msg =
+            QString{"Critical [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+        break;
+    }
+    case QtFatalMsg:
+    {
+        msg = QString{"Fatal [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+        break;
+    }
     }
     f.write(msg.toUtf8());
     std::cerr << msg.toStdString();
@@ -129,7 +137,8 @@ void initDirsAndFiles()
     QDir().mkdir(basePath + QDir::separator() + Dirs::LOGS);
 }
 
-void loadTheme(QApplication& a) {
+void loadTheme(QApplication &a)
+{
     QSettings settings;
     auto      basePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     // Set theme
@@ -199,9 +208,10 @@ int main(int argc, char *argv[])
 
     // if lockfile is locked we're the only one writing to torrent client
     QSettings settings;
-    bool logsEnabled =
+    bool      logsEnabled =
         settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
-    if (logsEnabled) {
+    if (logsEnabled)
+    {
         originalHandler = qInstallMessageHandler(myMessageHandler);
     }
 

@@ -35,7 +35,7 @@ class MetadataFetcher final : public QObject
 
   private:
     lt::add_torrent_params       m_params;
-    std::atomic<bool>                         m_isRunning{true};
+    std::atomic<bool>            m_isRunning{true};
     std::unique_ptr<lt::session> m_session;
 
     void sessionLoop();

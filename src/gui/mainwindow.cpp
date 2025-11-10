@@ -317,7 +317,9 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
 {
     try
     {
-        QSharedPointer<SaveTorrentDialog> saveDialog{new SaveTorrentDialog{magnet_tag{}, magnetUri}};
+        QSharedPointer<SaveTorrentDialog> saveDialog{
+            new SaveTorrentDialog{magnet_tag{}, magnetUri}
+        };
         connect(
             saveDialog.data(), &SaveTorrentDialog::accepted, this,
             [saveDialog, magnetUri, this]()
@@ -399,21 +401,19 @@ void MainWindow::on_pushButton_2_clicked()
     addTorrentByFile(filename);
 }
 
-void MainWindow::on_togglePropertiesBtn_clicked()
-{
-    switchTab(0);
-}
+void MainWindow::on_togglePropertiesBtn_clicked() { switchTab(0); }
 
-void MainWindow::on_toggleGraphsButton_clicked()
-{
-    switchTab(1);
-}
+void MainWindow::on_toggleGraphsButton_clicked() { switchTab(1); }
 
-void MainWindow::switchTab(int index) {
-    if (ui->stackedWidget->currentIndex() == index) {
+void MainWindow::switchTab(int index)
+{
+    if (ui->stackedWidget->currentIndex() == index)
+    {
         ui->stackedWidget->setEnabled(!ui->stackedWidget->isEnabled());
         ui->stackedWidget->setVisible(!ui->stackedWidget->isVisible());
-    } else {
+    }
+    else
+    {
         ui->stackedWidget->setCurrentIndex(index);
         ui->stackedWidget->setEnabled(true);
         ui->stackedWidget->setVisible(true);

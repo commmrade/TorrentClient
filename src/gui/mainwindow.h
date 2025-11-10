@@ -38,8 +38,6 @@ class MainWindow : public QMainWindow
 
     void on_toggleGraphsButton_clicked();
 
-
-
     void on_categoriesList_currentTextChanged(const QString &currentText);
     void torrentClicked(const QModelIndex &index);
 
