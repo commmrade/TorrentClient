@@ -3,7 +3,7 @@
 
 #include <QStyledItemDelegate>
 
-class FileItemDelegate : public QStyledItemDelegate
+class FileItemDelegate final : public QStyledItemDelegate
 {
     Q_OBJECT
   public:

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QStyledItemDelegate>
 
-class FilePriorityDelegate : public QStyledItemDelegate
+class FilePriorityDelegate final : public QStyledItemDelegate
 {
     Q_OBJECT
   public:

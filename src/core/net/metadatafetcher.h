@@ -17,7 +17,7 @@ struct TorrentMetadata
     QString      comment;
 };
 
-class MetadataFetcher : public QObject
+class MetadataFetcher final : public QObject
 {
     Q_OBJECT
   public:

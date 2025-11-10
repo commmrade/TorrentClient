@@ -5,7 +5,7 @@
 #include <QAbstractItemModel>
 #include "core/utils/tracker.h"
 
-class TrackerTableModel : public QAbstractTableModel
+class TrackerTableModel final : public QAbstractTableModel
 {
     Q_OBJECT
   public:

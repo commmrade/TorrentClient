@@ -7,7 +7,7 @@
 #include <libtorrent/peer_info.hpp>
 #include <maxminddb.h>
 
-class PeerTableModel : public QAbstractTableModel
+class PeerTableModel final : public QAbstractTableModel
 {
     Q_OBJECT
   public:

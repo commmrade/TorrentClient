@@ -20,7 +20,7 @@ struct TorrentInfo;
 struct InternetInfo;
 // struct Tracker;
 
-class SessionManager : public QObject
+class SessionManager final : public QObject
 {
     Q_OBJECT
 

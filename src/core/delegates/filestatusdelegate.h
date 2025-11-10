@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QStyledItemDelegate>
 
-class FileStatusDelegate : public QStyledItemDelegate
+class FileStatusDelegate final : public QStyledItemDelegate
 {
     Q_OBJECT
   public:

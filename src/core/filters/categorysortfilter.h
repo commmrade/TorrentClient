@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSortFilterProxyModel>
 
-class CategorySortFilter : public QSortFilterProxyModel
+class CategorySortFilter final : public QSortFilterProxyModel
 {
     Q_OBJECT
     QString m_category{};

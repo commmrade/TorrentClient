@@ -7,7 +7,7 @@ constexpr inline int getIdIndex() { return TORRENT_FIELD_COUNT + 1488; }
 
 constexpr inline int getStatusIndex() { return STATUS; }
 
-class TorrentsTableModel : public QAbstractTableModel
+class TorrentsTableModel final : public QAbstractTableModel
 {
     Q_OBJECT
   public:

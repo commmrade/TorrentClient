@@ -32,7 +32,7 @@ class BaseItem
     QList<BaseItem *> m_children;
 };
 
-class FileItem : public BaseItem
+class FileItem final : public BaseItem
 {
     File m_fileData;
 
@@ -52,7 +52,7 @@ class FileItem : public BaseItem
     bool setValue(int column, const QVariant &value) override;
 };
 
-class DirItem : public BaseItem
+class DirItem final : public BaseItem
 {
   private:
     QString m_path;

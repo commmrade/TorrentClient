@@ -2,7 +2,7 @@
 #define TORRENTITEMDELEGATE_H
 #include <QStyledItemDelegate>
 
-class TorrentItemDelegate : public QStyledItemDelegate
+class TorrentItemDelegate final : public QStyledItemDelegate
 {
     Q_OBJECT
   public:
