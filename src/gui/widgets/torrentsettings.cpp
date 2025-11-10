@@ -204,6 +204,6 @@ void TorrentSettings::resetApp()
                  torrents.removeRecursively();
     if (result < 5)
     {
-        qFatal() << "Failed to remove application's files, it may be broken now in some ways";
+        qCritical() << "Failed to remove application's files, it may be broken now in some ways";
     }
 }

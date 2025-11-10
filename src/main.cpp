@@ -9,6 +9,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QLockFile>
+#include <iostream>
 
 static constexpr const char *ORG_NAME = "klewy";
 static constexpr const char *ORG_DOM  = "klewy.com";
@@ -43,19 +44,12 @@ QtMessageHandler originalHandler;
 bool             isLogLocked = false;
 void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, const QString &text)
 {
-    QSettings settings;
-    bool      logsEnabled =
-        settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
-    if (!logsEnabled)
-    {
-        originalHandler(t, ctx, text);
-        return;
-    }
 
     QByteArray localMsg         = text.toLocal8Bit();
     QString    curDatetime      = QDateTime::currentDateTime().toString();
     QByteArray curDatePrintable = curDatetime.toLocal8Bit();
 
+    QSettings settings;
     QString logsPath =
         settings
             .value(SettingsNames::LOGS_PATH,
@@ -63,64 +57,59 @@ void             myMessageHandler(QtMsgType t, const QMessageLogContext &ctx, co
                        QDir::separator() + Dirs::LOGS + QDir::separator())
             .toString() +
         QDir::separator() + "torrentclient.log";
-    static QLockFile lock{logsPath + ".lock"};
-    if (!isLogLocked)
-    {
-        if (!lock.tryLock())
-        {
-            fprintf(stderr, "Can't lock log file yet\n");
+
+    static QFile f{logsPath};
+    if (!f.isOpen()) {
+        if (!f.open(QFile::WriteOnly)) {
+            qInstallMessageHandler(originalHandler);
+            qCritical() << "Could not open a log file";
             return;
         }
-        else
-        {
-            isLogLocked = true;
-        }
     }
 
-    static std::unique_ptr<std::FILE, f_deleter> f{std::fopen(qPrintable(logsPath), "a")};
-    if (!f)
-    {
-        qInstallMessageHandler(originalHandler);
-        return;
-    }
 
-    long         seekPos = ftell(f.get());
+    long         seekPos = f.pos();
     unsigned int logMaxSize =
         settings.value(SettingsNames::LOGS_MAX_SIZE, SettingsValues::LOGS_MAX_SIZE_DEFAULT)
             .toUInt();
     if (seekPos > logMaxSize)
     {
-        std::FILE *oldFile = f.release();
-        std::FILE *newFile = std::freopen(NULL, "w", oldFile); // oldFile closed here
-        f.reset(newFile);
-        if (!f)
-        {
+        f.flush();
+        f.close();
+
+        if (!f.open(QFile::WriteOnly | QFile::Truncate)) {
             qInstallMessageHandler(originalHandler);
+            qCritical() << "Could not reopen a log file";
             return;
         }
     }
 
+    QString msg;
     switch (t)
     {
-    case QtDebugMsg:
-        fprintf(f.get(), "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-        break;
-    case QtInfoMsg:
-        fprintf(f.get(), "Info [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-        break;
-    case QtWarningMsg:
-        fprintf(f.get(), "Warning [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-        break;
-    case QtCriticalMsg:
-        fprintf(f.get(), "Critical [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-        break;
-    case QtFatalMsg:
-        fprintf(f.get(), "Fatal [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-        break;
+        case QtDebugMsg: {
+            msg = QString{"Debug [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+            break;
+        }
+        case QtInfoMsg: {
+            msg = QString{"Info [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+            break;
+        }
+        case QtWarningMsg: {
+            msg = QString{"Warning [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+            break;
+        }
+        case QtCriticalMsg: {
+            msg = QString{"Critical [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+            break;
+        }
+        case QtFatalMsg: {
+            msg = QString{"Fatal [%1]: %2\n"}.arg(curDatePrintable.constData(), localMsg.constData());
+            break;
+        }
     }
-
-    fprintf(stderr, "Debug [%s]: %s\n", curDatePrintable.constData(), localMsg.constData());
-
+    f.write(msg.toUtf8());
+    std::cerr << msg.toStdString();
 }
 
 void initDirsAndFiles()
@@ -207,7 +196,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     initDirsAndFiles();
-    originalHandler = qInstallMessageHandler(myMessageHandler);
+
+    // if lockfile is locked we're the only one writing to torrent client
+    QSettings settings;
+    bool logsEnabled =
+        settings.value(SettingsNames::LOGS_ENABLED, SettingsValues::LOGS_ENABLED_DEFAULT).toBool();
+    if (logsEnabled) {
+        originalHandler = qInstallMessageHandler(myMessageHandler);
+    }
 
     loadTheme(a);
 

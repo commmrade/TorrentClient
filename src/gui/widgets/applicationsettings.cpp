@@ -255,6 +255,7 @@ void ApplicationSettings::on_logsBox_clicked([[maybe_unused]] bool checked)
 {
     m_logsEnabledChanged = true;
     emit optionChanged();
+    emit restartRequired();
 }
 
 void ApplicationSettings::on_logsPathBtn_clicked()

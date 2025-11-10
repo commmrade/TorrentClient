@@ -207,6 +207,10 @@ void SessionManager::eventLoop()
         }
     }
 
+    qDebug() << "Fuck";
+    qWarning() << "Fuck";
+    qCritical() << "Fuck";
+
     m_session->post_torrent_updates();
     m_session->post_session_stats(); // Needed for graphs
     updateProperties();
@@ -219,7 +223,6 @@ void SessionManager::setLoopDuration(int ms)
     m_alertTimer.start(ms);
 }
 
-// HERE: Separate function for each emit thingy
 void SessionManager::updateProperties()
 {
     if (m_currentTorrentId.has_value())
