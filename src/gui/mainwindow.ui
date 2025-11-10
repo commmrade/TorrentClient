@@ -154,8 +154,6 @@
     <property name="title">
      <string>test</string>
     </property>
-    <addaction name="actiontest1"/>
-    <addaction name="action"/>
    </widget>
    <widget class="QMenu" name="menuApp">
     <property name="title">
@@ -167,16 +165,6 @@
    <addaction name="menutest"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actiontest1">
-   <property name="text">
-    <string>test1</string>
-   </property>
-  </action>
-  <action name="action">
-   <property name="text">
-    <string>test2</string>
-   </property>
-  </action>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
