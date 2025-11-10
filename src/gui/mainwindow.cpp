@@ -284,7 +284,7 @@ void MainWindow::setupSession()
             [this](const std::uint32_t id, const lt::torrent_status &status)
             {
                 m_tableModel.finishTorrent(id, status);
-                showMessage(QString{tr("Torrent '%1' has been finished")}.arg(status.name));
+                showMessage(QString{tr("Torrent '%1' has been finished")}.arg(status.name.c_str()));
             });
     connect(&m_sessionManager, &SessionManager::torrentDeleted, this,
             [this](const std::uint32_t id) { m_tableModel.removeTorrent(id); });

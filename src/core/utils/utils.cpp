@@ -76,15 +76,17 @@ QString secsToFormattedTime(std::int64_t secs)
     }
     secs -= days * SECONDS_IN_DAY;
 
-    auto hrs = secs / SECONDS_IN_HOUR;
+    std::uint64_t hrs = secs / SECONDS_IN_HOUR;
     secs -= hrs * SECONDS_IN_HOUR;
 
-    auto mins = secs / SECONDS_IN_MINUTE;
+    std::uint64_t mins = secs / SECONDS_IN_MINUTE;
     secs -= mins * SECONDS_IN_MINUTE;
 
-    auto seconds = secs;
-    etaStr +=
-        QString("%1:%2:%3").arg(hrs, 2, 10, '0').arg(mins, 2, 10, '0').arg(seconds, 2, 10, '0');
+    std::uint64_t seconds = secs;
+    etaStr += QString("%1:%2:%3")
+                  .arg(static_cast<qulonglong>(hrs), 2, 10, QChar('0'))
+                  .arg(static_cast<qulonglong>(mins), 2, 10, QChar('0'))
+                  .arg(static_cast<qulonglong>(seconds), 2, 10, QChar('0'));
     return etaStr;
 }
 

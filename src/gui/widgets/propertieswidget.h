@@ -5,6 +5,7 @@
 #include <libtorrent/peer_info.hpp>
 #include "core/utils/torrentinfo.h"
 #include "core/utils/file.h"
+#include <set>
 
 namespace Ui
 {

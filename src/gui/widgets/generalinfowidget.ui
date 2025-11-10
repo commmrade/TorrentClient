@@ -689,7 +689,7 @@
   <customwidget>
    <class>PiecesBarWidget</class>
    <extends>QWidget</extends>
-   <header location="global">piecesbarwidget.h</header>
+   <header location="global">gui/widgets/piecesbarwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

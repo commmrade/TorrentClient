@@ -92,25 +92,25 @@
   <customwidget>
    <class>PeersWidget</class>
    <extends>QWidget</extends>
-   <header location="global">peerswidget.h</header>
+   <header location="global">gui/widgets/peerswidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>GeneralInfoWidget</class>
    <extends>QWidget</extends>
-   <header location="global">generalinfowidget.h</header>
+   <header location="global">gui/widgets/generalinfowidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>TrackersWidget</class>
    <extends>QWidget</extends>
-   <header location="global">trackerswidget.h</header>
+   <header location="global">gui/widgets/trackerswidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>FileListWidget</class>
    <extends>QWidget</extends>
-   <header location="global">filelistwidget.h</header>
+   <header location="global">gui/widgets/filelistwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
