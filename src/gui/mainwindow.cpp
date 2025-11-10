@@ -317,10 +317,9 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
 {
     try
     {
-        SaveTorrentDialog *saveDialog = new SaveTorrentDialog{magnet_tag{}, magnetUri};
-
+        QSharedPointer<SaveTorrentDialog> saveDialog{new SaveTorrentDialog{magnet_tag{}, magnetUri}};
         connect(
-            saveDialog, &SaveTorrentDialog::accepted, this,
+            saveDialog.data(), &SaveTorrentDialog::accepted, this,
             [saveDialog, magnetUri, this]()
             {
                 auto torrentInfo    = saveDialog->getTorrentInfo();
@@ -343,8 +342,6 @@ void MainWindow::addTorrentByMagnet(const QString &magnetUri)
                     }
                 }
             });
-        connect(saveDialog, &SaveTorrentDialog::finished, saveDialog,
-                &SaveTorrentDialog::deleteLater);
         saveDialog->open();
     }
     catch (const std::exception &ex)
